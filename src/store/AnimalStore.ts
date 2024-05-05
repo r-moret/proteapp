@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { sleep } from '@/utils'
 import type { Animal } from '@/types'
@@ -18,10 +18,9 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading.value = false
   }
 
-  const getAnimal = (id: string): Animal | undefined => {
-    const results = animalList.value.filter((animal) => animal.id == id)
-    return results[0]
-  }
+  const getAnimal = computed(() => (id: string): Animal | undefined => {
+    return animalList.value.find((animal) => animal.id == id)
+  })
 
   return {
     animalList,
