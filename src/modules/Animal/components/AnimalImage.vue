@@ -17,6 +17,6 @@ const setPlaceholder = () => (validSource.value = PLACEHOLDER_IMAGE)
     :src="validSource"
     alt="Image of the animal"
     @error="setPlaceholder"
-    :class="{ 'bg-base-300 p-3': validSource == PLACEHOLDER_IMAGE }"
+    :class="['object-cover', { 'bg-base-300 object-scale-down': validSource == PLACEHOLDER_IMAGE }]"
   />
 </template>

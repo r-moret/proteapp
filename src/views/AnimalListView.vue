@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import AppHeader from '@/skeleton/AppHeader.vue'
 import MultiselectorMenu from '@/components/MultiselectorMenu.vue'
-import AnimalCard from '@/modules/Animal/components/AnimalCard.vue'
-import SkeletonAnimalCard from '@/modules/Animal/components/SkeletonAnimalCard.vue'
+import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
 import { ref, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAnimalStore } from '@/store/AnimalStore'
+import { useRouter } from 'vue-router'
 import { useFilters } from '@/composable/useFilters'
 import type { ContentFilter, TextFilter } from '@/types'
 
-const { animalList, yardList, isLoading } = storeToRefs(useAnimalStore())
+const router = useRouter()
+const { animalList, yardList } = storeToRefs(useAnimalStore())
 
 const filters = ref<{
   yard: ContentFilter
@@ -21,14 +22,18 @@ const filters = ref<{
 
 const filteredAnimals = useFilters(animalList, filters)
 
+const yardAnimals = (yard: string) => filteredAnimals.value.filter((animal) => animal.yard == yard)
+
+const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
+
 watchEffect(() => (filters.value.yard.item = yardList.value))
 </script>
 
 <template>
   <main class="flex flex-col">
     <AppHeader left="profile" title="Animales" />
-    <div class="scroll-stable h-0 flex-auto overflow-y-scroll">
-      <div class="join w-full px-4 py-2">
+    <div class="overflow-y-scroll">
+      <div class="join mb-2 w-full px-4 py-2">
         <input
           class="input join-item input-bordered flex-1 focus:outline-none"
           placeholder="Buscar animal"
@@ -51,19 +56,20 @@ watchEffect(() => (filters.value.yard.item = yardList.value))
           </div>
         </div>
       </div>
-      <div class="px-6">
-        <template v-if="isLoading">
-          <div v-for="n in 10" :key="n">
-            <SkeletonAnimalCard />
-            <div class="divider my-1"></div>
+      <div class="flex flex-col gap-1 px-0">
+        <div v-for="(yard, yardNumber) in yardList" :key="yard" class="flex flex-col px-6">
+          <h2 class="text-xl font-semibold">{{ yard }}</h2>
+          <div class="carousel w-full gap-4 py-4">
+            <VerticalAnimalCard
+              v-for="animal in yardAnimals(yard)"
+              :key="animal.id"
+              :animal="animal"
+              class="carousel-item rounded-lg shadow-lg"
+              @click="navigateAnimal(animal.id)"
+            />
           </div>
-        </template>
-        <template v-else>
-          <div v-for="animal in filteredAnimals" :key="animal.name">
-            <AnimalCard class="mx-0 my-0" :animal="animal" />
-            <div class="divider my-1"></div>
-          </div>
-        </template>
+          <div v-if="yardNumber != yardList.length - 1" class="divider m-1" />
+        </div>
       </div>
     </div>
   </main>

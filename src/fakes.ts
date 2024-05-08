@@ -36,7 +36,7 @@ export const fakeAnimals: Animal[] = [
     entryDate: new Date('2023-01-10'),
     isCastrated: true,
     isAnimalCompatible: false,
-    yard: 'Patio 3',
+    yard: 'Patio 1',
     hasTreatment: true
   },
   {
