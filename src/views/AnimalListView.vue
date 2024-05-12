@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import AppHeader from '@/skeleton/AppHeader.vue'
-import MultiselectorMenu from '@/components/MultiselectorMenu.vue'
 import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
-import BottomDrawer from '@/components/BottomDrawer.vue'
+import AnimalFiltersMenu from '@/modules/Animal/components/AnimalFiltersMenu.vue'
 import { ref, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAnimalStore } from '@/store/AnimalStore'
@@ -70,20 +69,7 @@ watchEffect(() => (filters.value.yard.item = yardList.value))
         </div>
       </div>
       <div class="z-10 col-start-1 row-start-1 mb-4 place-self-end justify-self-center">
-        <BottomDrawer class="bg-base-200">
-          <template #button="{ open }">
-            <button
-              class="btn btn-secondary rounded-3xl px-8 text-base drop-shadow-2xl"
-              @click="open"
-            >
-              <span class="i-mingcute-filter-2-fill text-lg" />
-              Filtrar
-            </button>
-          </template>
-          <template #drawer>
-            <MultiselectorMenu :options="yardList" v-model:checked="filters.yard.item" />
-          </template>
-        </BottomDrawer>
+        <AnimalFiltersMenu :yard-options="yardList" v-model:filters="filters" />
       </div>
     </div>
   </main>
