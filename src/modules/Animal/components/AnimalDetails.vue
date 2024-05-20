@@ -6,6 +6,7 @@ const props = defineProps<{
   isCastrated: boolean
   isCompatible: boolean
   birthDate: Date
+  location: string
 }>()
 
 const details = computed(() => ({
@@ -16,6 +17,10 @@ const details = computed(() => ({
   compatibility: {
     icon: props.isCompatible ? 'i-mingcute-paw-fill' : 'i-mingcute-paw-line',
     label: props.isCompatible ? 'Compatible con animales' : 'No compatible con animales'
+  },
+  location: {
+    icon: 'i-mingcute-location-2-fill',
+    label: props.location
   },
   birth: {
     icon: 'i-mingcute-birthday-2-fill',
