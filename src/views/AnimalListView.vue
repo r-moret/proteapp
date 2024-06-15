@@ -1,34 +1,45 @@
 <script setup lang="ts">
-import AppHeader from '@/skeleton/AppHeader.vue'
-import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
-import AnimalFiltersMenu from '@/modules/Animal/components/AnimalFiltersMenu.vue'
 import { ref, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useAnimalStore } from '@/store/AnimalStore'
 import { useRouter } from 'vue-router'
-import { useFilters } from '@/composable/useFilters'
-import type { ContentFilter, TextFilter } from '@/types'
+import { omit } from 'lodash'
+
+import AppHeader from '@/skeleton/AppHeader.vue'
+import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
+import AnimalFiltersMenuButton from '@/modules/Animal/components/AnimalFiltersMenuButton.vue'
+import { useAnimalStore } from '@/store/AnimalStore'
+import type { AnimalFilters } from '@/types'
+import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 
 const router = useRouter()
 const { animalList, yardList } = storeToRefs(useAnimalStore())
 
-const filters = ref<{
-  yard: ContentFilter
-  name: TextFilter
-}>({
-  yard: { type: 'content', item: [...yardList.value] },
-  name: { type: 'text', item: '' }
-})
-
 const searchInput = ref<HTMLElement | null>(null)
 
-const filteredAnimals = useFilters(animalList, filters)
+const filters = ref<AnimalFilters>({
+  name: '',
+  yards: yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {})
+})
+
+const filteredAnimals = useAnimalFilters(animalList, filters)
 
 const yardAnimals = (yard: string) => filteredAnimals.value.filter((animal) => animal.yard == yard)
 
 const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
 
-watchEffect(() => (filters.value.yard.item = yardList.value))
+const updateFilters = (newFilters: AnimalFilters) => {
+  filters.value = newFilters
+}
+
+watchEffect(() => {
+  filters.value.yards = {
+    ...filters.value.yards,
+    ...omit(
+      yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
+      Object.keys(filters.value.yards)
+    )
+  }
+})
 </script>
 
 <template>
@@ -49,7 +60,7 @@ watchEffect(() => (filters.value.yard.item = yardList.value))
             placeholder="Buscar animal"
             ref="searchInput"
             autocomplete="off"
-            v-model="filters.name.item"
+            v-model="filters.name"
           />
         </div>
         <div class="flex flex-col gap-1 px-0">
@@ -69,7 +80,7 @@ watchEffect(() => (filters.value.yard.item = yardList.value))
         </div>
       </div>
       <div class="z-10 col-start-1 row-start-1 mb-4 place-self-end justify-self-center">
-        <AnimalFiltersMenu :yard-options="yardList" v-model:filters="filters" />
+        <AnimalFiltersMenuButton :model-value="filters" @update:model-value="updateFilters" />
       </div>
     </div>
   </main>

@@ -49,3 +49,8 @@ export type User = {
   isVeteran: boolean
   avatar?: string
 }
+
+export type AnimalFilters = {
+  name: string
+  yards: { [yard: string]: boolean }
+}
