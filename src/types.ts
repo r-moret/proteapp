@@ -15,6 +15,14 @@ export type IconItemConfig = {
   }
 }
 
+export type Treatment = {
+  id: string
+  animalId: string
+  name: string
+  zone: string
+  freq: number
+}
+
 export type Animal = {
   id: string
   name: string
@@ -26,6 +34,7 @@ export type Animal = {
   yard: string
   isAnimalCompatible: boolean
   isCastrated: boolean
+  treatmentList?: string[]
   hasTreatment?: boolean
   image?: string
 }

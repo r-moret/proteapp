@@ -1,4 +1,4 @@
-import type { User, Animal } from '@/types'
+import type { User, Animal, Treatment } from '@/types'
 export const fakeUser: User = {
   name: 'Alberto',
   surnames: 'Martínez',
@@ -7,6 +7,51 @@ export const fakeUser: User = {
 }
 
 export const fakeYards = ['Patio 1', 'Patio 2', 'Patio 3', 'Patio inmuno', 'Patio 4']
+
+export const fakeTreatments: Treatment[] = [
+  {
+    id: '1',
+    name: 'Paracetamol',
+    zone: 'Cabeza',
+    freq: 3,
+    animalId: 'f6b681ac-2b60-4b7d-a017-f490e8a8c10e'
+  },
+  {
+    id: '2',
+    name: 'Ibuprofeno',
+    zone: 'Cuello',
+    freq: 5,
+    animalId: 'f6b681ac-2b60-4b7d-a017-f490e8a8c10e'
+  },
+  {
+    id: '3',
+    name: 'Aspirina',
+    zone: 'Pata',
+    freq: 5,
+    animalId: 'f6b681ac-2b60-4b7d-a017-f490e8a8c10e'
+  },
+  {
+    id: '4',
+    name: 'Betadine',
+    zone: 'Cabeza',
+    freq: 7,
+    animalId: 'f6b681ac-2b60-4b7d-a017-f490e8a8c10e'
+  },
+  {
+    id: '5',
+    name: 'Pipeta',
+    zone: 'Escapulas',
+    freq: 10,
+    animalId: 'f6b681ac-2b60-4b7d-a017-f490e8a8c10e'
+  },
+  {
+    id: '6',
+    name: 'Clhorexidina',
+    zone: 'Pata derecha',
+    freq: 25,
+    animalId: 'f6b681ac-2b60-4b7d-a017-f490e8a8c10e'
+  }
+]
 
 export const fakeAnimals: Animal[] = [
   {
@@ -22,7 +67,8 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: true,
     yard: 'Patio 1',
-    hasTreatment: true
+    hasTreatment: true,
+    treatmentList: ['2', '3', '1']
   },
   {
     id: '51ccd7f1-65db-4dcd-86b3-2387b95d6900',

@@ -4,12 +4,18 @@ import { onBeforeMount } from 'vue'
 import { RouterView } from 'vue-router'
 import { useAnimalStore } from './store/AnimalStore'
 import { useUserStore } from './store/UserStore'
+import { useTreatmentStore } from './store/TreatmentStore'
 
 const animalStore = useAnimalStore()
 const userStore = useUserStore()
+const treatmentStore = useTreatmentStore()
 
 onBeforeMount(async () => {
-  Promise.allSettled([animalStore.fetchAnimals(), userStore.fetchUser()])
+  Promise.allSettled([
+    animalStore.fetchAnimals(),
+    userStore.fetchUser(),
+    treatmentStore.fetchTreatments()
+  ])
 })
 </script>
 
