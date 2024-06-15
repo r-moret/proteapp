@@ -13,6 +13,7 @@ const router = useRouter()
 const route = useRoute()
 
 const navigateBack = () => router.back()
+const navigateTreatments = () => router.push('/treatments')
 
 const animal = computed(() => getAnimal(route.params.id as string))
 const age = computed(() => {
@@ -38,6 +39,7 @@ const age = computed(() => {
         <span class="i-mingcute-left-line text-4xl text-white" />
       </div>
       <div
+        @click="navigateTreatments"
         :class="[
           'indicator absolute right-0 top-0 mx-3 mt-4 flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 text-white backdrop-blur-lg'
         ]"
