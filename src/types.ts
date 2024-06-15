@@ -53,4 +53,11 @@ export type User = {
 export type AnimalFilters = {
   name: string
   yards: { [yard: string]: boolean }
+  sex: { [sex: string]: boolean }
+  age: {
+    min: number
+    max: number
+  }
+  castration: { [castration: string]: boolean }
+  compatible: { [compatible: string]: boolean }
 }

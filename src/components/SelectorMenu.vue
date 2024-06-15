@@ -9,6 +9,7 @@ enum OPTIONS {
 const props = defineProps<{
   modelValue: Record<string, boolean>
   includeAllControl: boolean
+  modelLabels?: Record<string, string>
 }>()
 
 const emit = defineEmits<{
@@ -57,7 +58,9 @@ const updateCheckbox = (option: string, event: Event) => {
         :checked="isChecked"
         @change="(event) => updateCheckbox(option, event)"
       />
-      <span class="label-text w-full text-start font-semibold capitalize">{{ option }}</span>
+      <span class="label-text w-full text-start font-semibold first-letter:uppercase">
+        {{ props.modelLabels?.[option] ?? option }}
+      </span>
     </label>
   </div>
 </template>

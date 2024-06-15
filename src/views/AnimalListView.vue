@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import { omit } from 'lodash'
+import { omit, max } from 'lodash'
+import { diffYears } from '@formkit/tempo'
 
 import AppHeader from '@/skeleton/AppHeader.vue'
 import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
@@ -18,7 +19,23 @@ const searchInput = ref<HTMLElement | null>(null)
 
 const filters = ref<AnimalFilters>({
   name: '',
-  yards: yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {})
+  yards: yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
+  sex: {
+    female: true,
+    male: true
+  },
+  age: {
+    min: 0,
+    max: max(animalList.value.map((animal) => diffYears(new Date(), animal.birthDate))) ?? 0
+  },
+  castration: {
+    true: true,
+    false: true
+  },
+  compatible: {
+    true: true,
+    false: true
+  }
 })
 
 const filteredAnimals = useAnimalFilters(animalList, filters)
@@ -31,13 +48,26 @@ const updateFilters = (newFilters: AnimalFilters) => {
   filters.value = newFilters
 }
 
-watchEffect(() => {
+watch(yardList, () => {
   filters.value.yards = {
     ...filters.value.yards,
     ...omit(
       yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
       Object.keys(filters.value.yards)
     )
+  }
+})
+
+watch(animalList, () => {
+  const animalListMaxAge = max(
+    animalList.value.map((animal) => diffYears(new Date(), animal.birthDate))
+  )
+
+  if (animalListMaxAge) {
+    filters.value.age = {
+      ...filters.value.age,
+      max: animalListMaxAge
+    }
   }
 })
 </script>
