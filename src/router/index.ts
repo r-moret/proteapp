@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import('../views/AnimalView.vue')
     },
     {
+      path: '/animals/:id/treatments',
+      name: 'animal.treatments',
+      component: () => import('../views/AnimalTreatmentsView.vue')
+    },
+    {
       path: '/shift',
       name: 'shift',
       component: () => import('../views/ShiftView.vue')
@@ -33,11 +38,6 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: () => import('../views/ProfileView.vue')
-    },
-    {
-      path: '/treatments',
-      name: 'treatments',
-      component: () => import('../views/AnimalTreatmentsView.vue')
     }
   ]
 })
