@@ -1,21 +1,31 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useTreatmentStore } from '@/store/TreatmentStore'
+import { useAnimalStore } from '@/store/AnimalStore'
+import { storeToRefs } from 'pinia'
 
-const treatments = ref([
-  { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
-  { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
-  { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' },
-  { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
-  { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
-  { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' }
-])
+const { getAnimal } = useAnimalStore()
+const { treatmentList } = storeToRefs(useTreatmentStore())
+
+const route = useRoute()
+
+const animal = computed(() => {
+  const foundAnimal = getAnimal(route.params.id as string)
+  if (!foundAnimal) {
+    throw Error('Animal not found')
+  }
+  return foundAnimal
+})
 
 const modalOpen = ref(false)
+
 const newTreatment = ref({
   name: '',
   zone: '',
-  freq: ''
+  freq: 0
 })
 
 const openModal = () => {
@@ -27,18 +37,20 @@ const closeModal = () => {
 }
 
 const saveTratamiento = () => {
-  treatments.value.push({
+  treatmentList.value.push({
+    id: crypto.randomUUID(),
+    animalId: animal.value.id,
     name: newTreatment.value.name,
     zone: newTreatment.value.zone,
     freq: newTreatment.value.freq
   })
   closeModal()
   // Limpiar el formulario después de guardar
-  newTreatment.value = { name: '', zone: '', freq: '' }
+  newTreatment.value = { name: '', zone: '', freq: 0 }
 }
 
 const removeTratamiento = (index: number) => {
-  treatments.value.splice(index, 1)
+  treatmentList.value.splice(index, 1)
 }
 </script>
 
@@ -69,7 +81,7 @@ const removeTratamiento = (index: number) => {
       <div class="mx-5 mt-4 flex-1 overflow-y-auto">
         <ul class="space-y-2">
           <li
-            v-for="(treatment, index) in treatments"
+            v-for="(treatment, index) in treatmentList"
             :key="index"
             class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
           >
