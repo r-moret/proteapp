@@ -35,7 +35,7 @@ const handleCloseSlide = () => {
         v-bind="$attrs"
         @animationend="handleCloseSlide"
         :class="[
-          'col-start-1 row-start-1 flex h-3/4 w-full flex-col place-self-end rounded-t-3xl p-4',
+          'col-start-1 row-start-1 flex h-3/4 w-full flex-col place-self-end rounded-t-3xl px-5 pt-4',
           isClosing ? 'slide-out' : 'slide-in'
         ]"
       >
@@ -46,7 +46,7 @@ const handleCloseSlide = () => {
         >
           <span class="i-mingcute-close-line text-2xl" />
         </button>
-        <div class="flex-1">
+        <div class="flex-1 overflow-y-scroll pb-4">
           <slot name="drawer" :close="() => (isClosing = true)" />
         </div>
       </div>

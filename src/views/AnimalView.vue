@@ -13,7 +13,8 @@ const router = useRouter()
 const route = useRoute()
 
 const navigateBack = () => router.back()
-const navigateTreatments = () => router.push('/treatments')
+const navigateTreatments = () =>
+  router.push({ name: 'animal.treatments', params: { id: route.params.id } })
 
 const animal = computed(() => getAnimal(route.params.id as string))
 const age = computed(() => {

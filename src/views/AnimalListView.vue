@@ -1,34 +1,75 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { omit, max } from 'lodash'
+import { diffYears } from '@formkit/tempo'
+
 import AppHeader from '@/skeleton/AppHeader.vue'
 import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
-import AnimalFiltersMenu from '@/modules/Animal/components/AnimalFiltersMenu.vue'
-import { ref, watchEffect } from 'vue'
-import { storeToRefs } from 'pinia'
+import AnimalFiltersMenuButton from '@/modules/Animal/components/AnimalFiltersMenuButton.vue'
 import { useAnimalStore } from '@/store/AnimalStore'
-import { useRouter } from 'vue-router'
-import { useFilters } from '@/composable/useFilters'
-import type { ContentFilter, TextFilter } from '@/types'
+import type { AnimalFilters } from '@/types'
+import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 
 const router = useRouter()
 const { animalList, yardList } = storeToRefs(useAnimalStore())
 
-const filters = ref<{
-  yard: ContentFilter
-  name: TextFilter
-}>({
-  yard: { type: 'content', item: [...yardList.value] },
-  name: { type: 'text', item: '' }
-})
-
 const searchInput = ref<HTMLElement | null>(null)
 
-const filteredAnimals = useFilters(animalList, filters)
+const filters = ref<AnimalFilters>({
+  name: '',
+  yards: yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
+  sex: {
+    female: true,
+    male: true
+  },
+  age: {
+    min: 0,
+    max: max(animalList.value.map((animal) => diffYears(new Date(), animal.birthDate))) ?? 0
+  },
+  castration: {
+    true: true,
+    false: true
+  },
+  compatible: {
+    true: true,
+    false: true
+  }
+})
+
+const filteredAnimals = useAnimalFilters(animalList, filters)
 
 const yardAnimals = (yard: string) => filteredAnimals.value.filter((animal) => animal.yard == yard)
 
 const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
 
-watchEffect(() => (filters.value.yard.item = yardList.value))
+const updateFilters = (newFilters: AnimalFilters) => {
+  filters.value = newFilters
+}
+
+watch(yardList, () => {
+  filters.value.yards = {
+    ...filters.value.yards,
+    ...omit(
+      yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
+      Object.keys(filters.value.yards)
+    )
+  }
+})
+
+watch(animalList, () => {
+  const animalListMaxAge = max(
+    animalList.value.map((animal) => diffYears(new Date(), animal.birthDate))
+  )
+
+  if (animalListMaxAge) {
+    filters.value.age = {
+      ...filters.value.age,
+      max: animalListMaxAge
+    }
+  }
+})
 </script>
 
 <template>
@@ -49,7 +90,7 @@ watchEffect(() => (filters.value.yard.item = yardList.value))
             placeholder="Buscar animal"
             ref="searchInput"
             autocomplete="off"
-            v-model="filters.name.item"
+            v-model="filters.name"
           />
         </div>
         <div class="flex flex-col gap-1 px-0">
@@ -69,7 +110,7 @@ watchEffect(() => (filters.value.yard.item = yardList.value))
         </div>
       </div>
       <div class="z-10 col-start-1 row-start-1 mb-4 place-self-end justify-self-center">
-        <AnimalFiltersMenu :yard-options="yardList" v-model:filters="filters" />
+        <AnimalFiltersMenuButton :model-value="filters" @update:model-value="updateFilters" />
       </div>
     </div>
   </main>
