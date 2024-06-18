@@ -3,12 +3,16 @@ import { ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { format } from '@formkit/tempo'
 import { useTreatmentStore } from '@/store/TreatmentStore'
 import { useAnimalStore } from '@/store/AnimalStore'
-import { storeToRefs } from 'pinia'
+import type { Treatment } from '@/types'
+import type { MedicalAppointment } from '@/types'
+import { useAppointmentStore } from '@/store/AppointmentStore'
 
 const { getAnimal } = useAnimalStore()
-const { treatmentList } = storeToRefs(useTreatmentStore())
+const { getTreatment } = useTreatmentStore()
+const { getAppointment } = useAppointmentStore()
 
 const route = useRoute()
 
@@ -18,6 +22,40 @@ const animal = computed(() => {
     throw Error('Animal not found')
   }
   return foundAnimal
+})
+
+const treatmentList = ref(
+  animal.value.treatmentList.reduce((accum, id) => {
+    const treatment = getTreatment(id)
+    return treatment ? [...accum, treatment] : accum
+  }, [] as Treatment[])
+)
+
+const appointmentList = ref(
+  animal.value.appointmentList.reduce((accum, id) => {
+    const appointment = getAppointment(id)
+    console.log(appointment)
+    return appointment ? [...accum, appointment] : accum
+  }, [] as MedicalAppointment[])
+)
+
+const mostRecentAppointment = computed(() =>
+  appointmentList.value
+    .slice(1, -1)
+    .reduce(
+      (mostRecent, current) => (current.date > mostRecent.date ? current : mostRecent),
+      appointmentList.value[0]
+    )
+)
+
+const mostRecentAppointmentDate = computed(() => {
+  return mostRecentAppointment.value
+    ? format(mostRecentAppointment.value.date, 'dddd, MMMM D, YYYY h:mm a', 'es')
+    : 'No tiene citas médicas'
+})
+
+const mostRecentAppointmentReason = computed(() => {
+  return mostRecentAppointment.value ? 'Motivo: ' + mostRecentAppointment.value.reason : ''
 })
 
 const modalOpen = ref(false)
@@ -69,10 +107,10 @@ const removeTratamiento = (index: number) => {
                 class="mb-5 flex items-center justify-center gap-4 rounded-2xl bg-blue-500 px-6 py-4 text-white shadow-lg"
               >
                 <span class="i-mingcute-calendar-2-fill text-5xl"></span>
-                <p class="text-2xl">2 de septiembre 15:00</p>
+                <p class="text-2xl">{{ mostRecentAppointmentDate }}</p>
               </div>
             </div>
-            <p class="text-center text-lg text-gray-600">Motivo: vacuna</p>
+            <p class="text-center text-lg text-gray-600">{{ mostRecentAppointmentReason }}</p>
           </div>
         </div>
 
@@ -83,6 +121,13 @@ const removeTratamiento = (index: number) => {
           <div class="mx-5 mt-4 flex-1 overflow-y-auto">
             <ul class="space-y-2">
               <li
+                v-if="!treatmentList.length"
+                class="flex items-center justify-center text-gray-500"
+              >
+                No hay tratamientos
+              </li>
+              <li
+                v-else
                 v-for="(treatment, index) in treatmentList"
                 :key="index"
                 class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"

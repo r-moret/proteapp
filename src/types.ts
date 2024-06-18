@@ -23,6 +23,12 @@ export type Treatment = {
   freq: number
 }
 
+export type MedicalAppointment = {
+  id: string
+  date: Date
+  reason: string
+}
+
 export type Animal = {
   id: string
   name: string
@@ -34,7 +40,8 @@ export type Animal = {
   yard: string
   isAnimalCompatible: boolean
   isCastrated: boolean
-  treatmentList?: string[]
+  treatmentList: string[]
+  appointmentList: string[]
   hasTreatment?: boolean
   image?: string
 }

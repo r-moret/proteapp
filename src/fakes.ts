@@ -1,4 +1,4 @@
-import type { User, Animal, Treatment } from '@/types'
+import type { User, Animal, Treatment, MedicalAppointment } from '@/types'
 export const fakeUser: User = {
   name: 'Alberto',
   surnames: 'Martínez',
@@ -7,6 +7,12 @@ export const fakeUser: User = {
 }
 
 export const fakeYards = ['Patio 1', 'Patio 2', 'Patio 3', 'Patio inmuno', 'Patio 4']
+
+export const fakeAppointments: MedicalAppointment[] = [
+  { id: '1', date: new Date('2011-10-10T15:00:00'), reason: 'vacuna' },
+  { id: '2', date: new Date('2020-12-10T16:00:00'), reason: 'cura' },
+  { id: '3', date: new Date('2024-10-10T22:00:00'), reason: 'castracion' }
+]
 
 export const fakeTreatments: Treatment[] = [
   {
@@ -68,7 +74,8 @@ export const fakeAnimals: Animal[] = [
     isAnimalCompatible: true,
     yard: 'Patio 1',
     hasTreatment: true,
-    treatmentList: ['2', '3', '1']
+    treatmentList: ['2', '3', '1'],
+    appointmentList: ['1', '2', '3']
   },
   {
     id: '51ccd7f1-65db-4dcd-86b3-2387b95d6900',
@@ -83,7 +90,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: false,
     yard: 'Patio 1',
-    hasTreatment: true
+    hasTreatment: true,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: '400bedd5-d77f-41af-86b7-82ee6d6fa8bf',
@@ -98,7 +107,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: false,
     isAnimalCompatible: true,
     yard: 'Patio 2',
-    hasTreatment: false
+    hasTreatment: false,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: 'b7051f60-bff7-4cb9-b2a1-f559fd1abf6b',
@@ -113,7 +124,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: false,
     isAnimalCompatible: false,
     yard: 'Patio inmuno',
-    hasTreatment: false
+    hasTreatment: false,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: '52f35395-0206-44c8-a456-44f0728b2b1c',
@@ -128,7 +141,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: false,
     yard: 'Patio 4',
-    hasTreatment: true
+    hasTreatment: true,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: 'f61f8574-ceaa-41a4-a3c3-d3d1ee9b175e',
@@ -143,7 +158,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: false,
     isAnimalCompatible: true,
     yard: 'Patio 1',
-    hasTreatment: true
+    hasTreatment: true,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: 'a2e167a6-f666-474c-b6c4-db7fb50417d8',
@@ -158,7 +175,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: false,
     yard: 'Patio 2',
-    hasTreatment: false
+    hasTreatment: false,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: 'cc0876bb-c981-4ff6-89f3-4e404b06b256',
@@ -173,7 +192,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: false,
     yard: 'Patio inmuno',
-    hasTreatment: true
+    hasTreatment: true,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: '736b744f-b4f9-47ea-aa05-e4869f381395',
@@ -188,7 +209,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: true,
     yard: 'Patio 3',
-    hasTreatment: false
+    hasTreatment: false,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: '40fe9f90-0987-4bf1-9b3e-3f012286bc54',
@@ -203,7 +226,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: false,
     yard: 'Patio 4',
-    hasTreatment: false
+    hasTreatment: false,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: 'bd92bf83-af55-4361-8d39-8aee67ec2ac6',
@@ -218,7 +243,9 @@ export const fakeAnimals: Animal[] = [
     isCastrated: false,
     isAnimalCompatible: false,
     yard: 'Patio 1',
-    hasTreatment: true
+    hasTreatment: true,
+    treatmentList: [],
+    appointmentList: []
   },
   {
     id: '021392fe-d8bf-41fb-bc05-a0d6e476a8f0',
@@ -233,6 +260,8 @@ export const fakeAnimals: Animal[] = [
     isCastrated: true,
     isAnimalCompatible: false,
     yard: 'Patio inmuno',
-    hasTreatment: false
+    hasTreatment: false,
+    treatmentList: [],
+    appointmentList: []
   }
 ]
