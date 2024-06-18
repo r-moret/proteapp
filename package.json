@@ -15,6 +15,7 @@
   "dependencies": {
     "@formkit/tempo": "^0.1.1",
     "@types/humanize-duration": "^3.27.4",
+    "@vuepic/vue-datepicker": "^8.8.0",
     "humanize-duration": "^3.32.0",
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",
