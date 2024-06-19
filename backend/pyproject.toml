@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "proteapp"
+version = "0.1.0"
+description = "Mobile-first web application backend for the management of the 'Protectora de Animales y Plantas de Málaga'"
+authors = ["Rafael Moret <rafaelmoretgalan@gmail.com>", "Cristina Espejo <cristinaespejoroque@outlook.es>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
