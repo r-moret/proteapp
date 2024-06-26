@@ -25,6 +25,9 @@ class PublicTreatmentWithAnimal(PublicTreatment):
     animal: "PublicAnimal"
 
 
+class CreateTreatment(BaseTreatmentWithRelationshipIds): ...
+
+
 from proteapp.models.animals import PublicAnimal, Animal  # noqa: E402
 
 PublicTreatmentWithAnimal.model_rebuild()

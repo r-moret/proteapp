@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from proteapp.api.routes.animals import router as animals_router
+from proteapp.api.routes.treatments import router as treatments_router
 from proteapp.api.deps import get_session
 from proteapp.models.animals import Animal, Sex
 from proteapp.models.treatments import Treatment
@@ -25,3 +26,4 @@ main()
 app = FastAPI()
 
 app.include_router(animals_router)
+app.include_router(treatments_router)
