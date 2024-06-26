@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import date
 from enum import StrEnum
 
@@ -29,6 +29,17 @@ class UpdateAnimal(BaseAnimal): ...
 class Animal(BaseAnimal, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
+    treatments: list["Treatment"] = Relationship(back_populates="animal")
+
 
 class PublicAnimal(BaseAnimal):
     id: int
+
+
+class PublicAnimalWithTreatments(PublicAnimal):
+    treatments: list["PublicTreatment"] = []
+
+
+from proteapp.models.treatments import PublicTreatment, Treatment  # noqa: E402
+
+PublicAnimalWithTreatments.model_rebuild()
