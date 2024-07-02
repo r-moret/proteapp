@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from proteapp.api.routes.animals import router as animals_router
-from proteapp.api.routes.treatments import router as treatments_router
-from proteapp.database.mocks import init_database_data
+from proteapp.api.animals.routes import router as animals_router
+from proteapp.api.treatments.routes import router as treatments_router
+from proteapp.database_init import init_database_data
 
 init_database_data()
 

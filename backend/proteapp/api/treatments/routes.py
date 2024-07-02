@@ -1,24 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 from proteapp.api.deps import get_session
 from proteapp.models.animals import Animal
-from proteapp.models.treatments import (
-    CreateTreatment,
-    PublicTreatment,
-    PublicTreatmentWithAnimal,
-    Treatment,
-)
+from proteapp.api.treatments.schemas import CreateTreatment, PublicTreatment
+from proteapp.models.treatments import Treatment
 from sqlmodel import Session, select
 
 router = APIRouter(prefix="/treatment", tags=["treatment"])
 
 
 @router.get("/search", response_model=list[PublicTreatment])
-def get_treatments(animal_id: int, session: Session = Depends(get_session)):
-    treatments = session.exec(select(Treatment).where(Treatment.animal_id == animal_id)).all()
-    return treatments
+def get_treatments(session: Session = Depends(get_session)):
+    return session.exec(select(Treatment)).all()
 
 
-@router.post("/", response_model=PublicTreatmentWithAnimal, status_code=201)
+@router.post("/", response_model=PublicTreatment, status_code=201)
 def post_treatment(treatment: CreateTreatment, session: Session = Depends(get_session)):
     treatment_db = Treatment.model_validate(treatment)
 

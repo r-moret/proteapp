@@ -1,18 +1,18 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import Session, select
-from proteapp.models.animals import (
+from proteapp.api.animals.schemas import (
+    PublicAnimalWithRelationships,
     PublicAnimal,
-    Animal,
     CreateAnimal,
     UpdateAnimal,
-    PublicAnimalWithTreatments,
 )
+from proteapp.models.animals import Animal
 from proteapp.api.deps import get_session
 
 router = APIRouter(prefix="/animal", tags=["animal"])
 
 
-@router.get("/search", response_model=list[PublicAnimal])
+@router.get("/search", response_model=list[PublicAnimalWithRelationships])
 def get_animals(session: Session = Depends(get_session)):
     animals = session.exec(select(Animal)).all()
     return animals
@@ -29,7 +29,7 @@ def post_animal(animal: CreateAnimal, session: Session = Depends(get_session)):
     return animal_db
 
 
-@router.get("/{id}", response_model=PublicAnimalWithTreatments)
+@router.get("/{id}", response_model=PublicAnimalWithRelationships)
 def get_animal(id: int, session: Session = Depends(get_session)):
     animal_db = session.get(Animal, id)
 
