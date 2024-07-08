@@ -15,6 +15,7 @@ class Sex(StrEnum):
 class BaseAnimal(SQLModel):
     name: str
     sex: Sex
+    yard: str | None = Field(default=None)
     personality: str | None = Field(default=None)
     description: str | None = Field(default=None)
     birth_date: date | None = Field(default=None)
