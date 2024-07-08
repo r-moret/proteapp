@@ -29,7 +29,7 @@ animals = [
         ],
         appointments=[
             Appointment(
-                date = datetime.datetime(2024, 5, 17, 18, 30),
+                date = datetime(2024, 5, 17, 18, 30),
                 description="Vacuna calcivirus"
             )
         ]
@@ -73,7 +73,7 @@ animals = [
         is_animal_compatible=False,
         appointments=[
             Appointment(
-                date = datetime.datetime(2024, 6, 17, 18, 00),
+                date = datetime(2024, 6, 17, 18, 00),
                 description="Revisión patita"
             )
         ]

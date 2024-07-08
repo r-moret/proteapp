@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 from datetime import datetime
 
 if TYPE_CHECKING:
@@ -16,4 +16,4 @@ class BaseAppointment(SQLModel):
 class Appointment(BaseAppointment, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    animal: "Animal" = Relationship(back_populates="appointment")
+    animal: "Animal" = Relationship(back_populates="appointments")
