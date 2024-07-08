@@ -3,11 +3,17 @@ from proteapp.models.animals import Animal, Sex
 from datetime import datetime
 
 from proteapp.models.treatments import Treatment
+from proteapp.models.yards import Yard
+
+yards = [
+    Yard(name="Patio 1"),
+    Yard(name="Patio 2"),
+    Yard(name="Patio inmunodeficiencia"),
+]
 
 animals = [
     Animal(
         name="Carolina",
-        yard="Patio 1",
         description="Carolina es una hermosa gata con un pelaje suave y lujoso. Disfruta tomando el sol y acurrucándose con sus compañeros humanos. A pesar de su apariencia regia, Carolina es increíblemente amigable y le encanta conocer gente nueva y otros animales.",
         personality="Amistosa y curiosa",
         sex=Sex.female,
@@ -16,6 +22,7 @@ animals = [
         is_castrated=True,
         is_animal_compatible=True,
         image="https://cdn2.thecatapi.com/images/9vh.jpg",
+        yard=yards[0],
         treatments=[
             Treatment(
                 name="Cicaplast",
@@ -30,7 +37,6 @@ animals = [
     ),
     Animal(
         name="Tiger",
-        yard="Patio 1",
         description="Tiger es un gato aventurero y valiente. Le encanta explorar los alrededores y nunca dice que no a una nueva aventura. Su coraje y espíritu intrépido lo hacen destacar entre los demás.",
         personality="Aventurero y valiente",
         sex=Sex.male,
@@ -39,10 +45,10 @@ animals = [
         is_castrated=False,
         is_animal_compatible=False,
         image="https://cdn2.thecatapi.com/images/27r.jpg",
+        yard=yards[0],
     ),
     Animal(
         name="Simón",
-        yard="Patio 2",
         description="Simón es un gato juguetón y enérgico. Le encanta correr por toda la casa persiguiendo juguetes y explorando cada rincón. Siempre está listo para una sesión de juego con su familia humana.",
         personality="Juguetón y enérgico",
         sex=Sex.male,
@@ -51,6 +57,7 @@ animals = [
         is_castrated=False,
         is_animal_compatible=True,
         image="https://cdn2.thecatapi.com/images/abc.jpg",
+        yard=yards[1],
         treatments=[
             Treatment(
                 name="Paracetamol",
@@ -60,7 +67,6 @@ animals = [
     ),
     Animal(
         name="Lola",
-        yard="Patio inmunodeficiencia",
         description="Lola es una gatita traviesa y juguetona. Siempre está buscando nuevas formas de divertirse y mantener entretenida a su familia humana. Su energía contagiosa ilumina cualquier habitación.",
         personality="Traviesa y juguetona",
         sex=Sex.female,
@@ -68,6 +74,7 @@ animals = [
         entry_date=datetime(2023, 11, 11),
         is_castrated=True,
         is_animal_compatible=False,
+        yard=yards[2],
     ),
 ]
 
