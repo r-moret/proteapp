@@ -3,6 +3,7 @@ from proteapp.models.animals import Animal, Sex
 from datetime import datetime
 
 from proteapp.models.treatments import Treatment
+from proteapp.models.appointments import Appointment
 
 animals = [
     Animal(
@@ -26,6 +27,12 @@ animals = [
                 frequency=360,
             ),
         ],
+        appointments=[
+            Appointment(
+                date = datetime.datetime(2024, 5, 17, 18, 30),
+                description="Vacuna calcivirus"
+            )
+        ]
     ),
     Animal(
         name="Tiger",
@@ -64,6 +71,12 @@ animals = [
         entry_date=datetime(2023, 11, 11),
         is_castrated=True,
         is_animal_compatible=False,
+        appointments=[
+            Appointment(
+                date = datetime.datetime(2024, 6, 17, 18, 00),
+                description="Revisión patita"
+            )
+        ]
     ),
 ]
 
