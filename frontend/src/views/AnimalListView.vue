@@ -40,7 +40,8 @@ const filters = ref<AnimalFilters>({
 
 const filteredAnimals = useAnimalFilters(animalList, filters)
 
-const yardAnimals = (yard: string) => filteredAnimals.value.filter((animal) => animal.yard == yard)
+const yardAnimals = (yard: string) =>
+  filteredAnimals.value.filter((animal) => animal.yard.name == yard)
 
 const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
 

@@ -15,7 +15,7 @@ export const useAnimalFilters = (animals: Ref<Animal[]>, filters: Ref<AnimalFilt
           filtered = filtered.filter((animal) => animal.name.includes(filters.value.name))
           break
         case 'yards':
-          filtered = filtered.filter((animal) => filters.value.yards[animal.yard])
+          filtered = filtered.filter((animal) => filters.value.yards[animal.yard.name])
           break
         case 'sex':
           filtered = filtered.filter((animal) => filters.value.sex[animal.sex])

@@ -76,7 +76,7 @@ const age = computed(() => {
         :birth-date="animal.birthDate"
         :is-castrated="animal.isCastrated"
         :is-compatible="animal.isAnimalCompatible"
-        :location="animal.yard"
+        :location="animal.yard.name"
         class="my-3 bg-base-300"
       />
       <div class="flex items-center gap-2">

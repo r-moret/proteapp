@@ -23,11 +23,16 @@ export type Animal = {
   sex: 'male' | 'female'
   birthDate: Date
   entryDate: Date
-  yard: string
+  yard: Yard
   isAnimalCompatible: boolean
   isCastrated: boolean
   hasTreatment?: boolean
   image?: string
+}
+
+export type Yard = {
+  id: number
+  name: string
 }
 
 export type TextFilter = {

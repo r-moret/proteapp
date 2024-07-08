@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { Animal } from '@/types'
-import { listAnimal as listAnimalApi } from '@/modules/Animal/api'
+import type { Animal, Yard } from '@/types'
+import { listAnimal as listAnimalApi, listYards as listYardApi } from '@/modules/Animal/api'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<Animal[]>([])
@@ -15,9 +15,9 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       .then((res) => res.json())
       .then((json) => (animalList.value = json))
 
-    yardList.value = animalList.value.reduce((acc, animal) => {
-      return acc.includes(animal.yard) ? acc : [...acc, animal.yard]
-    }, [] as string[])
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
+      .then((res) => res.json())
+      .then((json: Yard[]) => (yardList.value = json.map((yard) => yard.name)))
 
     isLoading.value = false
   }
