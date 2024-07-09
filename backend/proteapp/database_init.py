@@ -3,6 +3,7 @@ from proteapp.models.animals import Animal, Sex
 from datetime import datetime
 
 from proteapp.models.treatments import Treatment
+from proteapp.models.appointments import Appointment
 from proteapp.models.yards import Yard
 
 yards = [
@@ -33,6 +34,9 @@ animals = [
                 name="Malta",
                 frequency=360,
             ),
+        ],
+        appointments=[
+            Appointment(date=datetime(2024, 5, 17, 18, 30), description="Vacuna calcivirus")
         ],
     ),
     Animal(
@@ -74,6 +78,9 @@ animals = [
         entry_date=datetime(2023, 11, 11),
         is_castrated=True,
         is_animal_compatible=False,
+        appointments=[
+            Appointment(date=datetime(2024, 6, 17, 18, 00), description="Revisión patita")
+        ],
         yard=yards[2],
     ),
 ]
