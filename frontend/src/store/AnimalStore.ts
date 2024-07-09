@@ -6,7 +6,7 @@ import { AnimalAdapter } from '@/modules/Animal/adapters'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<Animal[]>([])
-  const yardList = ref<string[]>([])
+  const yardList = ref<Yard[]>([])
   const isLoading = ref(false)
 
   async function fetchAnimals() {
@@ -19,7 +19,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
 
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
       .then((res) => res.json())
-      .then((json: Yard[]) => (yardList.value = json.map((yard) => yard.name)))
+      .then((json: Yard[]) => (yardList.value = json))
 
     isLoading.value = false
   }

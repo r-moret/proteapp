@@ -3,28 +3,38 @@ import { computed } from 'vue'
 import { format } from '@formkit/tempo'
 
 const props = defineProps<{
-  isCastrated: boolean
-  isCompatible: boolean
-  birthDate: Date
-  location: string
+  isCastrated?: boolean | null
+  isCompatible?: boolean | null
+  birthDate?: Date | null
+  location?: string | null
 }>()
 
 const details = computed(() => ({
   castration: {
     icon: props.isCastrated ? 'i-mingcute-lock-fill' : 'i-mingcute-unlock-line',
-    label: props.isCastrated ? 'Castrado' : 'Sin castrar'
+    label:
+      props.isCastrated == undefined
+        ? 'Desconocido'
+        : props.isCastrated
+          ? 'Castrado'
+          : 'Sin castrar'
   },
   compatibility: {
     icon: props.isCompatible ? 'i-mingcute-paw-fill' : 'i-mingcute-paw-line',
-    label: props.isCompatible ? 'Compatible con animales' : 'No compatible con animales'
+    label:
+      props.isCompatible == undefined
+        ? 'Desconocido'
+        : props.isCompatible
+          ? 'Compatible con animales'
+          : 'No compatible con animales'
   },
   location: {
     icon: 'i-mingcute-location-2-fill',
-    label: props.location
+    label: props.location ?? 'Desconocido'
   },
   birth: {
     icon: 'i-mingcute-birthday-2-fill',
-    label: format(props.birthDate, 'medium', 'es-ES')
+    label: props.birthDate == undefined ? 'Desconocido' : format(props.birthDate, 'medium', 'es-ES')
   }
 }))
 </script>

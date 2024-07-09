@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { omit, max } from 'lodash'
@@ -11,6 +11,7 @@ import AnimalFiltersMenuButton from '@/modules/Animal/components/AnimalFiltersMe
 import { useAnimalStore } from '@/store/AnimalStore'
 import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
+import type { Animal } from '@/modules/Animal/declarations'
 
 const router = useRouter()
 const { animalList, yardList } = storeToRefs(useAnimalStore())
@@ -19,14 +20,22 @@ const searchInput = ref<HTMLElement | null>(null)
 
 const filters = ref<AnimalFilters>({
   name: '',
-  yards: yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
+  yards: {
+    ...yardList.value.reduce((acc, yard) => ({ ...acc, [yard.name]: true }), {}),
+    'Sin patio': true
+  },
   sex: {
     female: true,
     male: true
   },
   age: {
     min: 0,
-    max: max(animalList.value.map((animal) => diffYears(new Date(), animal.birthDate))) ?? 0
+    max:
+      max(
+        animalList.value.map((animal) =>
+          animal.birthDate == undefined ? undefined : diffYears(new Date(), animal.birthDate)
+        )
+      ) ?? 0
   },
   castration: {
     true: true,
@@ -40,8 +49,18 @@ const filters = ref<AnimalFilters>({
 
 const filteredAnimals = useAnimalFilters(animalList, filters)
 
-const yardAnimals = (yard: string) =>
-  filteredAnimals.value.filter((animal) => animal.yard.name == yard)
+const animalsByYard = computed(() => {
+  const groupedAnimals = yardList.value.reduce(
+    (acc, yard) => ({
+      ...acc,
+      [yard.name]: filteredAnimals.value.filter((animal) => animal.yard?.name === yard.name)
+    }),
+    {} as Record<number, Animal[]>
+  )
+
+  const nonYardAnimals = filteredAnimals.value.filter((animal) => animal.yard == undefined)
+  return { ...groupedAnimals, 'Sin patio': nonYardAnimals }
+})
 
 const navigateAnimal = (id: number) => router.push({ name: 'animal', params: { id } })
 
@@ -53,7 +72,10 @@ watch(yardList, () => {
   filters.value.yards = {
     ...filters.value.yards,
     ...omit(
-      yardList.value.reduce((acc, yard) => ({ ...acc, [yard]: true }), {}),
+      {
+        ...yardList.value.reduce((acc, yard) => ({ ...acc, [yard.name]: true }), {}),
+        'Sin patio': true
+      },
       Object.keys(filters.value.yards)
     )
   }
@@ -61,7 +83,9 @@ watch(yardList, () => {
 
 watch(animalList, () => {
   const animalListMaxAge = max(
-    animalList.value.map((animal) => diffYears(new Date(), animal.birthDate))
+    animalList.value.map((animal) =>
+      animal.birthDate == undefined ? undefined : diffYears(new Date(), animal.birthDate)
+    )
   )
 
   if (animalListMaxAge) {
@@ -95,18 +119,22 @@ watch(animalList, () => {
           />
         </div>
         <div class="flex flex-col gap-1 px-0">
-          <div v-for="(yard, yardNumber) in yardList" :key="yard" class="flex flex-col px-6">
+          <div
+            v-for="(animals, yard, yardNumber) in animalsByYard"
+            :key="yard"
+            class="flex flex-col px-6"
+          >
             <h2 class="text-xl font-semibold">{{ yard }}</h2>
             <div class="carousel w-full gap-4 py-4">
               <VerticalAnimalCard
-                v-for="animal in yardAnimals(yard)"
+                v-for="animal in animals"
                 :key="animal.id"
                 :animal="animal"
                 class="carousel-item rounded-lg shadow-lg"
                 @click="navigateAnimal(animal.id)"
               />
             </div>
-            <div v-if="yardNumber != yardList.length - 1" class="divider m-1" />
+            <div v-if="yardNumber != yardList.length" class="divider m-1" />
           </div>
         </div>
       </div>

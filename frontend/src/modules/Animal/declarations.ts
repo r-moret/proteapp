@@ -8,35 +8,23 @@ export const YardSchema = z.object({
 export const TreatmentSchema = z.object({
   id: z.number(),
   name: z.string(),
-  zone: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((x) => x ?? undefined),
-  frequency: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((x) => x ?? undefined)
+  zone: z.string().nullish(),
+  frequency: z.number().nullish()
 })
 
 export const AnimalSchema = z.object({
   id: z.number(),
   name: z.string(),
-  personality: z.string(),
-  description: z.string(),
+  personality: z.string().nullish(),
+  description: z.string().nullish(),
   sex: z.enum(['female', 'male']),
-  birthDate: z.coerce.date(),
-  entryDate: z.coerce.date(),
-  yard: YardSchema,
-  isAnimalCompatible: z.boolean(),
-  isCastrated: z.boolean(),
-  image: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((x) => x ?? undefined),
-  treatments: z.array(TreatmentSchema)
+  birthDate: z.coerce.date().nullish(),
+  entryDate: z.coerce.date().nullish(),
+  yard: YardSchema.nullish(),
+  isAnimalCompatible: z.boolean().nullish(),
+  isCastrated: z.boolean().nullish(),
+  image: z.string().nullish(),
+  treatments: z.array(TreatmentSchema).nullish()
 })
 
 export type Yard = z.infer<typeof YardSchema>

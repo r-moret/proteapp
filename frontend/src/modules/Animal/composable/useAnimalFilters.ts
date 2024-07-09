@@ -1,6 +1,7 @@
 import { computed, type Ref } from 'vue'
 
-import type { Animal, AnimalFilters } from '@/types'
+import type { AnimalFilters } from '@/types'
+import type { Animal } from '@/modules/Animal/declarations'
 import { diffYears } from '@formkit/tempo'
 
 const age = (birthdate: Date) => diffYears(new Date(), birthdate)
@@ -15,7 +16,9 @@ export const useAnimalFilters = (animals: Ref<Animal[]>, filters: Ref<AnimalFilt
           filtered = filtered.filter((animal) => animal.name.includes(filters.value.name))
           break
         case 'yards':
-          filtered = filtered.filter((animal) => filters.value.yards[animal.yard.name])
+          filtered = filtered.filter(
+            (animal) => filters.value.yards[animal.yard?.name ?? 'Sin patio']
+          )
           break
         case 'sex':
           filtered = filtered.filter((animal) => filters.value.sex[animal.sex])
@@ -23,8 +26,9 @@ export const useAnimalFilters = (animals: Ref<Animal[]>, filters: Ref<AnimalFilt
         case 'age':
           filtered = filtered.filter(
             (animal) =>
-              age(animal.birthDate) <= filters.value.age.max &&
-              age(animal.birthDate) >= filters.value.age.min
+              animal.birthDate == undefined ||
+              (age(animal.birthDate) <= filters.value.age.max &&
+                age(animal.birthDate) >= filters.value.age.min)
           )
           break
         case 'castration':
