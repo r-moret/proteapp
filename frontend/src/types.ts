@@ -15,8 +15,9 @@ export type IconItemConfig = {
   }
 }
 
+// TODO: Handle undefined opional fields: birthDate, entryDate, yard, ...
 export type Animal = {
-  id: string
+  id: number
   name: string
   personality: string
   description: string
@@ -26,7 +27,6 @@ export type Animal = {
   yard: Yard
   isAnimalCompatible: boolean
   isCastrated: boolean
-  hasTreatment?: boolean
   image?: string
 }
 

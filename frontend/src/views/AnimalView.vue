@@ -16,7 +16,7 @@ const navigateBack = () => router.back()
 const navigateTreatments = () =>
   router.push({ name: 'animal.treatments', params: { id: route.params.id } })
 
-const animal = computed(() => getAnimal(route.params.id as string))
+const animal = computed(() => getAnimal(Number(route.params.id as string)))
 const age = computed(() => {
   if (!animal.value) return
 
@@ -45,8 +45,9 @@ const age = computed(() => {
           'indicator absolute right-0 top-0 mx-3 mt-4 flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 text-white backdrop-blur-lg'
         ]"
       >
+        <!-- TODO: Update treatments conditional -->
         <span
-          v-if="animal.hasTreatment"
+          v-if="true"
           class="badge indicator-item badge-secondary badge-md indicator-start font-semibold"
         >
           !

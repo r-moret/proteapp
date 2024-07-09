@@ -22,7 +22,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading.value = false
   }
 
-  const getAnimal = computed(() => (id: string): Animal | undefined => {
+  const getAnimal = computed(() => (id: number): Animal | undefined => {
     return animalList.value.find((animal) => animal.id == id)
   })
 

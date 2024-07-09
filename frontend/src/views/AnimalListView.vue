@@ -43,7 +43,7 @@ const filteredAnimals = useAnimalFilters(animalList, filters)
 const yardAnimals = (yard: string) =>
   filteredAnimals.value.filter((animal) => animal.yard.name == yard)
 
-const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
+const navigateAnimal = (id: number) => router.push({ name: 'animal', params: { id } })
 
 const updateFilters = (newFilters: AnimalFilters) => {
   filters.value = newFilters
