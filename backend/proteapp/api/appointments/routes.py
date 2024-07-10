@@ -29,3 +29,14 @@ def post_appointment(appointment: CreateAppointment, session: Session = Depends(
     session.refresh(appointment_db)
 
     return appointment_db
+
+
+@router.delete("/{id}")
+def delete_appointment(id: int, session: Session = Depends(get_session)):
+    appointment_db = session.get(Appointment, id)
+
+    if appointment_db is None:
+        raise HTTPException(404, "No animal found")
+
+    session.delete(appointment_db)
+    session.commit()
