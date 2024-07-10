@@ -16,11 +16,15 @@ const navigateBack = () => router.back()
 const navigateTreatments = () =>
   router.push({ name: 'animal.treatments', params: { id: route.params.id } })
 
-const animal = computed(() => getAnimal(route.params.id as string))
+const animal = computed(() => getAnimal(Number(route.params.id as string)))
 const age = computed(() => {
-  if (!animal.value) return
+  if (!animal.value || !animal.value.birthDate) return
 
-  const ageMs = Math.max(0, new Date().valueOf() - animal.value.birthDate.valueOf())
+  const ageMs = Math.max(
+    1 * 24 * 60 * 60 * 1000, // 1 day is the smallest amount of time displayed
+    new Date().valueOf() - animal.value.birthDate.valueOf()
+  )
+
   return humanizeDuration(ageMs, {
     language: 'es',
     units: ['y', 'mo', 'd'],
@@ -45,8 +49,9 @@ const age = computed(() => {
           'indicator absolute right-0 top-0 mx-3 mt-4 flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 text-white backdrop-blur-lg'
         ]"
       >
+        <!-- TODO: Update treatments conditional -->
         <span
-          v-if="animal.hasTreatment"
+          v-if="true"
           class="badge indicator-item badge-secondary badge-md indicator-start font-semibold"
         >
           !
@@ -62,7 +67,7 @@ const age = computed(() => {
           <p class="text-xs italic text-white">{{ animal.personality }}</p>
         </div>
 
-        <p class="ml-auto text-lg font-semibold text-white">{{ age }},</p>
+        <p class="ml-auto text-lg font-semibold text-white">{{ age ?? 'edad desconocida' }},</p>
         <span
           :class="[
             'text-2xl text-white',
@@ -76,12 +81,13 @@ const age = computed(() => {
         :birth-date="animal.birthDate"
         :is-castrated="animal.isCastrated"
         :is-compatible="animal.isAnimalCompatible"
-        :location="animal.yard"
+        :location="animal.yard?.name"
         class="my-3 bg-base-300"
       />
       <div class="flex items-center gap-2">
         <span class="i-mingcute-calendar-2-line text-3xl" />
-        <p>Entró el {{ format(animal.entryDate, 'medium', 'es-ES') }}</p>
+        <p v-if="animal.entryDate">Entró el {{ format(animal.entryDate, 'medium', 'es-ES') }}</p>
+        <p v-else>Se desconoce su fecha de entrada</p>
       </div>
       <p>{{ animal.description }}</p>
       <p>{{ animal.description }}</p>

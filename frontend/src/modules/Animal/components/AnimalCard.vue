@@ -36,10 +36,8 @@ const openAnimalView = () => {
 <template>
   <div class="card card-side mx-0 my-0 h-32 gap-6 rounded-none" @click="openAnimalView">
     <div class="indicator my-auto h-fit w-fit">
-      <div
-        v-if="props.animal.hasTreatment"
-        class="indicator-item indicator-start flex h-14 w-14 items-end justify-end"
-      >
+      <!-- TODO: Handle treatments indicator conditional -->
+      <div v-if="true" class="indicator-item indicator-start flex h-14 w-14 items-end justify-end">
         <span class="flex h-fit w-fit items-center rounded-full bg-secondary p-0.5">
           <span class="i-mingcute-stethoscope-line text-3xl text-secondary-content" />
         </span>

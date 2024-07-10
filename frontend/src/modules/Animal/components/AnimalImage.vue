@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 const props = defineProps<{
-  image?: string
+  image?: string | null
 }>()
 
 const PLACEHOLDER_IMAGE = '/images/dog.png'

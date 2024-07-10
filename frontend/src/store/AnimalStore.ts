@@ -1,24 +1,30 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { sleep } from '@/utils'
-import type { Animal } from '@/types'
-import { fakeAnimals, fakeYards } from '@/fakes'
+import type { Animal, Yard } from '@/modules/Animal/declarations'
+import { listAnimal as listAnimalApi, listYards as listYardApi } from '@/modules/Animal/api'
+import { AnimalAdapter } from '@/modules/Animal/adapters'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<Animal[]>([])
-  const yardList = ref<string[]>([])
+  const yardList = ref<Yard[]>([])
   const isLoading = ref(false)
 
   async function fetchAnimals() {
     isLoading.value = true
 
-    await sleep(3000)
-    animalList.value = fakeAnimals
-    yardList.value = fakeYards
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listAnimalApi}`)
+      .then((res) => res.json())
+      .then((json) => json.map(AnimalAdapter))
+      .then((animals) => (animalList.value = animals))
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
+      .then((res) => res.json())
+      .then((json: Yard[]) => (yardList.value = json))
+
     isLoading.value = false
   }
 
-  const getAnimal = computed(() => (id: string): Animal | undefined => {
+  const getAnimal = computed(() => (id: number): Animal | undefined => {
     return animalList.value.find((animal) => animal.id == id)
   })
 

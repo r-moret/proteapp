@@ -15,19 +15,24 @@ export type IconItemConfig = {
   }
 }
 
+// TODO: Handle undefined opional fields: birthDate, entryDate, yard, ...
 export type Animal = {
-  id: string
+  id: number
   name: string
   personality: string
   description: string
   sex: 'male' | 'female'
   birthDate: Date
   entryDate: Date
-  yard: string
+  yard: Yard
   isAnimalCompatible: boolean
   isCastrated: boolean
-  hasTreatment?: boolean
   image?: string
+}
+
+export type Yard = {
+  id: number
+  name: string
 }
 
 export type TextFilter = {

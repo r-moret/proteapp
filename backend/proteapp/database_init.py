@@ -4,6 +4,13 @@ from datetime import datetime
 
 from proteapp.models.treatments import Treatment
 from proteapp.models.appointments import Appointment
+from proteapp.models.yards import Yard
+
+yards = [
+    Yard(name="Patio 1"),
+    Yard(name="Patio 2"),
+    Yard(name="Patio inmunodeficiencia"),
+]
 
 animals = [
     Animal(
@@ -16,6 +23,7 @@ animals = [
         is_castrated=True,
         is_animal_compatible=True,
         image="https://cdn2.thecatapi.com/images/9vh.jpg",
+        yard=yards[0],
         treatments=[
             Treatment(
                 name="Cicaplast",
@@ -28,11 +36,8 @@ animals = [
             ),
         ],
         appointments=[
-            Appointment(
-                date = datetime(2024, 5, 17, 18, 30),
-                description="Vacuna calcivirus"
-            )
-        ]
+            Appointment(date=datetime(2024, 5, 17, 18, 30), description="Vacuna calcivirus")
+        ],
     ),
     Animal(
         name="Tiger",
@@ -44,6 +49,7 @@ animals = [
         is_castrated=False,
         is_animal_compatible=False,
         image="https://cdn2.thecatapi.com/images/27r.jpg",
+        yard=yards[0],
     ),
     Animal(
         name="Simón",
@@ -55,6 +61,7 @@ animals = [
         is_castrated=False,
         is_animal_compatible=True,
         image="https://cdn2.thecatapi.com/images/abc.jpg",
+        yard=yards[1],
         treatments=[
             Treatment(
                 name="Paracetamol",
@@ -72,11 +79,9 @@ animals = [
         is_castrated=True,
         is_animal_compatible=False,
         appointments=[
-            Appointment(
-                date = datetime(2024, 6, 17, 18, 00),
-                description="Revisión patita"
-            )
-        ]
+            Appointment(date=datetime(2024, 6, 17, 18, 00), description="Revisión patita")
+        ],
+        yard=yards[2],
     ),
 ]
 
