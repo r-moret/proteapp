@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/skeleton/AppHeader.vue'
 
 const treatments = ref([
@@ -10,6 +11,12 @@ const treatments = ref([
   { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
   { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' }
 ])
+
+const router = useRouter()
+const route = useRoute()
+
+const navigateAppointments = () =>
+  router.push({ name: 'animal.appointments', params: { id: route.params.id } })
 
 const modalOpen = ref(false)
 const newTreatment = ref({
@@ -44,7 +51,12 @@ const removeTratamiento = (index: number) => {
 
 <template>
   <main class="flex flex-col">
-    <AppHeader left="back" title="Citas médicas" />
+    <AppHeader left="back" title="Tratamientos">
+      <button class="btn btn-square btn-ghost" @click="navigateAppointments">
+        <span class="i-mingcute-hospital-line text-3xl" />
+      </button>
+    </AppHeader>
+
     <div class="grid min-h-0 flex-grow">
       <div class="col-start-1 row-start-1 min-h-0">
         <div class="flex h-1/4 w-full flex-col items-center justify-center">
