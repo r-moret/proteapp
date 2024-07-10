@@ -12,7 +12,7 @@ const date = ref()
   <main class="flex flex-col items-end">
     <AppHeader title="Informe" />
     <section class="min-h-0 w-full flex-grow">
-      <DateInput class="mb-4 mt-2" v-model="date" />
+      <DateInput class="mb-4 mt-2" v-model="date" :include-time="false" />
     </section>
   </main>
 </template>

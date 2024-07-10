@@ -5,8 +5,12 @@ import { format } from '@formkit/tempo'
 
 const model = defineModel<Date>()
 
+const props = defineProps<{
+  includeTime: boolean
+}>()
+
 const dateFormatter = (date: Date) => {
-  return format(date, { date: 'long' })
+  return format(date, { date: 'long', time: props.includeTime ? 'short' : undefined })
 }
 </script>
 
@@ -22,7 +26,7 @@ const dateFormatter = (date: Date) => {
       auto-apply
       no-today
       hide-input-icon
-      :enable-time-picker="false"
+      :enable-time-picker="props.includeTime"
       locale="es-ES"
       placeholder="Selecciona una fecha"
       :format="dateFormatter"
@@ -37,6 +41,7 @@ const dateFormatter = (date: Date) => {
 <style>
 .calendar-menu {
   border-radius: 1.5rem;
+  overflow: hidden;
 }
 
 .calendar-input {
