@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const model = defineModel<string>()
+const model = defineModel<string | null>()
 
 const props = defineProps<{
   name: string
@@ -8,7 +8,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="mb-4 mt-2 flex h-12 w-full">
+  <div class="flex h-12 w-full">
     <template v-if="$slots.icon">
       <div class="flex items-center justify-center rounded-l-lg bg-white px-3">
         <slot name="icon"></slot>

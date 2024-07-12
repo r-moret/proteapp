@@ -10,7 +10,7 @@ const TimeUnit = {
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: number
+    modelValue?: number | null
     name: string
     timeSize?: 'small' | 'big'
     units?: (keyof typeof TimeUnit)[]
@@ -34,14 +34,14 @@ function handleModification() {
 </script>
 
 <template>
-  <div class="mb-4 mt-2 flex h-12 flex-row gap-2">
+  <div class="flex h-12 flex-row gap-2">
     <input
       type="number"
       step="1"
+      v-model="time"
       :name="`${props.name}-time`"
       :id="`${props.name}-time`"
       :class="['h-full rounded-lg px-4', props.timeSize === 'small' ? 'w-16' : 'w-24']"
-      v-model="time"
       @input="handleModification"
     />
 
