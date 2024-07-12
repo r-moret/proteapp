@@ -10,7 +10,7 @@ router = APIRouter(prefix="/appointment", tags=["appointment"])
 
 @router.get("/search", response_model=list[PublicAppointment])
 def get_appointments(session: Session = Depends(get_session)):
-    return session.exec(select(Appointment)).all()
+    return session.exec(select(Appointment)).all() 
 
 
 @router.post("/", response_model=PublicAppointment, status_code=201)
@@ -29,3 +29,14 @@ def post_appointment(appointment: CreateAppointment, session: Session = Depends(
     session.refresh(appointment_db)
 
     return appointment_db
+
+
+@router.delete("/{id}")
+def delete_appointment(id: int, session: Session = Depends(get_session)):
+    appointment_db = session.get(Appointment, id)
+
+    if appointment_db is None:
+        raise HTTPException(404, "No animal found")
+
+    session.delete(appointment_db)
+    session.commit()

@@ -5,6 +5,13 @@ export const YardSchema = z.object({
   name: z.string()
 })
 
+export const AppointmentSchema = z.object({
+  id: z.number(),
+  date: z.coerce.date(),
+  description: z.string(),
+  is_past: z.boolean()
+})
+
 export const TreatmentSchema = z.object({
   id: z.number().nullish(),
   name: z.string(),
@@ -26,9 +33,11 @@ export const AnimalSchema = z.object({
   isAnimalCompatible: z.boolean().nullish(),
   isCastrated: z.boolean().nullish(),
   image: z.string().nullish(),
-  treatments: z.array(TreatmentSchema).nullish()
+  treatments: z.array(TreatmentSchema).nullish(),
+  appointments: z.array(AppointmentSchema).nullish()
 })
 
 export type Yard = z.infer<typeof YardSchema>
 export type Treatment = z.infer<typeof TreatmentSchema>
+export type Appointment = z.infer<typeof AppointmentSchema>
 export type Animal = z.infer<typeof AnimalSchema>

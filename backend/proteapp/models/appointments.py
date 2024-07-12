@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class BaseAppointment(SQLModel):
     date: datetime
-    description: str | None = Field(default=None)
+    description: str
 
     @computed_field
     @property

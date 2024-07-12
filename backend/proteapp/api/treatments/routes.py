@@ -29,3 +29,14 @@ def post_treatment(treatment: CreateTreatment, session: Session = Depends(get_se
     session.refresh(treatment_db)
 
     return treatment_db
+
+
+@router.delete("/{id}")
+def delete_treatment(id: int, session: Session = Depends(get_session)):
+    treatment_db = session.get(Treatment, id)
+
+    if treatment_db is None:
+        raise HTTPException(404, "No animal found")
+
+    session.delete(treatment_db)
+    session.commit()

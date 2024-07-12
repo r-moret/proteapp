@@ -1,27 +1,45 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { format } from '@formkit/tempo'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
 import TextInput from '@/components/TextInput.vue'
 import TimeInput from '@/components/TimeInput.vue'
 import DateInput from '@/components/DateInput.vue'
-import type { Treatment } from '@/modules/Animal/declarations'
-
-const treatments = ref([
-  { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
-  { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
-  { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' },
-  { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
-  { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
-  { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' }
-])
+import type { Animal, Treatment } from '@/modules/Animal/declarations'
+import humanizeDuration from 'humanize-duration'
 
 const router = useRouter()
-const route = useRoute()
 
-const navigateAppointments = () =>
-  router.push({ name: 'animal.appointments', params: { id: route.params.id } })
+const props = defineProps<{
+  animal: Animal
+}>()
+
+const nextAppointment = computed(() => {
+  if (!props.animal || !props.animal.appointments) return
+
+  const futureAppointments = props.animal.appointments.filter((appointment) => !appointment.is_past)
+  if (futureAppointments.length === 0) return
+
+  return futureAppointments.reduce((closest, appointment) =>
+    !closest || appointment.date < closest.date ? appointment : closest
+  )
+})
+
+function formatFrequency(minutes: number): string {
+  if (minutes === 1440) {
+    return 'una vez al día'
+  }
+
+  const milliseconds = minutes * 60 * 1000
+  return `cada ${humanizeDuration(milliseconds, { language: 'es', units: ['w', 'd', 'h', 'm'], round: true, conjunction: ' y ' })}`
+}
+
+const navigateAppointments = () => {
+  // TODO: Using route props
+  // router.push({ name: 'animal.appointments', params: { id: route.params.id } })
+}
 
 const newTreatmentForm = ref<HTMLFormElement | null>(null)
 const newTreatment = ref<Treatment>({ name: '' })
@@ -53,10 +71,15 @@ function handleAddTreatment(closeDrawer: () => void) {
                 class="mb-5 flex items-center justify-center gap-4 rounded-2xl bg-blue-500 px-6 py-4 text-white shadow-lg"
               >
                 <span class="i-mingcute-calendar-2-fill text-5xl"></span>
-                <p class="text-2xl">2 de septiembre 15:00</p>
+                <p v-if="nextAppointment?.date" class="text-2xl">
+                  {{ format(nextAppointment?.date, 'long', 'es-ES') }}
+                </p>
+                <p v-else class="text-xl">No hay cita médica</p>
               </div>
             </div>
-            <p class="text-center text-lg text-gray-600">Motivo: vacuna</p>
+            <p v-if="nextAppointment?.date" class="text-center text-lg text-gray-600">
+              {{ nextAppointment.description }}
+            </p>
           </div>
         </div>
 
@@ -65,19 +88,29 @@ function handleAddTreatment(closeDrawer: () => void) {
             <p class="text-2xl font-bold text-gray-700">Tratamientos</p>
           </div>
           <div class="mx-5 mt-4 flex-1 overflow-y-auto">
-            <ul class="space-y-2">
+            <p v-if="!animal?.treatments?.length" class="mt-5 text-center">No hay tratamientos</p>
+            <ul v-else class="space-y-2">
               <li
-                v-for="(treatment, index) in treatments"
+                v-for="(treatment, index) in props.animal.treatments"
                 :key="index"
                 class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
               >
                 <span
                   class="i-mingcute-close-fill absolute right-2 top-4 h-6 w-6 cursor-pointer text-gray-500"
-                  @click="undefined"
                 ></span>
                 <p class="text-lg font-semibold text-blue-600">{{ treatment.name }}</p>
-                <p class="text-base text-gray-700">Zona: {{ treatment.zone }}</p>
-                <p class="text-base text-gray-700">Frecuencia: {{ treatment.freq }}</p>
+                <p v-if="treatment.zone" class="text-base text-gray-700">
+                  Zona: {{ treatment.zone }}
+                </p>
+                <p v-if="treatment.frequency" class="text-base text-gray-700">
+                  Frecuencia: {{ formatFrequency(treatment.frequency) }}
+                </p>
+                <p v-if="treatment.amount" class="text-base text-gray-700">
+                  Cantidad: {{ treatment.amount }}
+                </p>
+                <p v-if="treatment.endDate" class="text-base text-gray-700">
+                  Fecha de finalización: {{ format(treatment.endDate, 'medium', 'es-ES') }}
+                </p>
               </li>
             </ul>
           </div>

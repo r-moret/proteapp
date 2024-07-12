@@ -15,6 +15,9 @@ router = APIRouter(prefix="/animal", tags=["animal"])
 @router.get("/search", response_model=list[PublicAnimalWithRelationships])
 def get_animals(session: Session = Depends(get_session)):
     animals = session.exec(select(Animal)).all()
+    for animal in animals:
+        if animal.appointments:
+            animal.appointments = sorted(animal.appointments, key=lambda x: x.date, reverse=True)
     return animals
 
 
