@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onBeforeMount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { omit, max } from 'lodash'
@@ -14,7 +14,9 @@ import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 import type { Animal } from '@/modules/Animal/declarations'
 
 const router = useRouter()
-const { animalList, yardList } = storeToRefs(useAnimalStore())
+
+const animalStore = useAnimalStore()
+const { animalList, yardList, isLoading } = storeToRefs(animalStore)
 
 const searchInput = ref<HTMLElement | null>(null)
 
@@ -95,12 +97,19 @@ watch(animalList, () => {
     }
   }
 })
+
+onBeforeMount(async () => {
+  await animalStore.fetchAnimals()
+})
 </script>
 
 <template>
   <main class="flex flex-col">
     <AppHeader left="profile" title="Animales" />
-    <div class="grid flex-grow overflow-y-scroll">
+    <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
+      <span class="loading loading-spinner loading-lg text-secondary" />
+    </div>
+    <div v-else class="grid flex-grow overflow-y-scroll">
       <div class="col-start-1 row-start-1 overflow-y-scroll">
         <div class="mb-4 mt-2 flex h-12 w-full px-4" @click="searchInput?.focus()">
           <div class="flex items-center justify-center rounded-l-lg bg-white px-3">

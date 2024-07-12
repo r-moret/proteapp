@@ -1,12 +1,19 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Animal, Yard } from '@/modules/Animal/declarations'
-import { listAnimal as listAnimalApi, listYards as listYardApi } from '@/modules/Animal/api'
+import {
+  listAnimal as listAnimalApi,
+  listYards as listYardApi,
+  crudAnimal as crudAnimalApi
+} from '@/modules/Animal/api'
 import { AnimalAdapter } from '@/modules/Animal/adapters'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<Animal[]>([])
+  const animalDetails = ref<Animal>()
+
   const yardList = ref<Yard[]>([])
+
   const isLoading = ref(false)
 
   async function fetchAnimals() {
@@ -24,12 +31,20 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading.value = false
   }
 
-  const getAnimal = computed(() => (id: number): Animal | undefined => {
-    return animalList.value.find((animal) => animal.id == id)
-  })
+  async function getAnimal(id: number) {
+    isLoading.value = true
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${id}`)
+      .then((res) => res.json())
+      .then(AnimalAdapter)
+      .then((animal) => (animalDetails.value = animal))
+
+    isLoading.value = false
+  }
 
   return {
     animalList,
+    animalDetails,
     yardList,
     isLoading,
     fetchAnimals,
