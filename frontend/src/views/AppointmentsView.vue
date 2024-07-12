@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
+import { useAnimalStore } from '@/store/AnimalStore'
+import { useRoute } from 'vue-router'
 
-const appointments = ref([
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Consulta', is_past: false },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Vacuna', is_past: false },
-  { date: new Date(2024, 5, 20, 18, 30), description: 'Revisión', is_past: false },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Consulta', is_past: true },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Vacuna', is_past: true },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Revisión', is_past: true },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Revisión', is_past: true },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Consulta', is_past: true },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Vacuna', is_past: true },
-  { date: new Date(2024, 5, 17, 18, 30), description: 'Revisión', is_past: true }
-])
+const { getAnimal } = useAnimalStore()
+const route = useRoute()
+const animal = computed(() => getAnimal(Number(route.params.id as string)))
 
 const modalOpen = ref(false)
 const newAppointment = ref({
@@ -28,21 +21,6 @@ const openModal = () => {
 
 const closeModal = () => {
   modalOpen.value = false
-}
-
-const saveAppointment = () => {
-  appointments.value.push({
-    date: newAppointment.value.date,
-    description: newAppointment.value.description,
-    is_past: newAppointment.value.is_past
-  })
-  closeModal()
-  // Limpiar el formulario después de guardar
-  newAppointment.value = { date: new Date(2024, 5, 17, 18, 30), description: '', is_past: false }
-}
-
-const removeTratamiento = (index: number) => {
-  appointments.value.splice(index, 1)
 }
 
 const formatDate = (date: Date) => {
@@ -66,16 +44,18 @@ const formatDate = (date: Date) => {
             <p class="text-2xl font-bold text-gray-700">Historial de citas</p>
           </div> -->
           <div class="mx-5 mt-4 flex-1 overflow-y-auto">
-            <ul class="space-y-2">
+            <p v-if="!animal?.appointments?.length" class="mt-5 text-center">
+              No hay citas médicas
+            </p>
+            <ul v-else class="space-y-2">
               <li
-                v-for="(appointment, index) in appointments"
+                v-for="(appointment, index) in animal.appointments"
                 :key="index"
                 class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
               >
                 <span
                   v-if="!appointment.is_past"
                   class="i-mingcute-close-fill absolute right-2 top-4 h-6 w-6 cursor-pointer text-gray-500"
-                  @click="removeTratamiento(index)"
                 ></span>
                 <p
                   :class="[
@@ -119,7 +99,8 @@ const formatDate = (date: Date) => {
             </button>
             <div class="mb-4">
               <h2 class="mb-4 text-2xl font-semibold text-gray-800">Añadir tratamiento</h2>
-              <form @submit.prevent="saveAppointment">
+              <form>
+                <!-- @submit.prevent="saveAppointment" -->
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Motivo de la cita</span>

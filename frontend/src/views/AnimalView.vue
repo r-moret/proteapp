@@ -51,7 +51,10 @@ const age = computed(() => {
       >
         <!-- TODO: Update treatments conditional -->
         <span
-          v-if="true"
+          v-if="
+            animal?.treatments?.length ||
+            animal?.appointments?.some((appointment) => !appointment.is_past)
+          "
           class="badge indicator-item badge-secondary badge-md indicator-start font-semibold"
         >
           !

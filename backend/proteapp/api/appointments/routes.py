@@ -10,7 +10,7 @@ router = APIRouter(prefix="/appointment", tags=["appointment"])
 
 @router.get("/search", response_model=list[PublicAppointment])
 def get_appointments(session: Session = Depends(get_session)):
-    return session.exec(select(Appointment)).all()
+    return session.exec(select(Appointment)).all() 
 
 
 @router.post("/", response_model=PublicAppointment, status_code=201)
