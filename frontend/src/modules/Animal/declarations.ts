@@ -18,7 +18,8 @@ export const TreatmentSchema = z.object({
   zone: z.string().nullish(),
   frequency: z.number().nullish(),
   amount: z.string().nullish(),
-  endDate: z.coerce.date().nullish()
+  endDate: z.coerce.date().nullish(),
+  animalId: z.number().nullish()
 })
 
 export const AnimalSchema = z.object({

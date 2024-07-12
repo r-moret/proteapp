@@ -1,25 +1,31 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onBeforeMount, ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { format } from '@formkit/tempo'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
 import TextInput from '@/components/TextInput.vue'
 import TimeInput from '@/components/TimeInput.vue'
 import DateInput from '@/components/DateInput.vue'
-import type { Animal, Treatment } from '@/modules/Animal/declarations'
+import type { Treatment } from '@/modules/Animal/declarations'
 import humanizeDuration from 'humanize-duration'
+import { useAnimalStore } from '@/store/AnimalStore'
+import { storeToRefs } from 'pinia'
+
+const animalStore = useAnimalStore()
+const { animalDetails, isLoading } = storeToRefs(animalStore)
 
 const router = useRouter()
+const route = useRoute()
 
-const props = defineProps<{
-  animal: Animal
-}>()
+const { id }: { id?: string } = route.params
 
 const nextAppointment = computed(() => {
-  if (!props.animal || !props.animal.appointments) return
+  if (!animalDetails.value || !animalDetails.value.appointments) return
 
-  const futureAppointments = props.animal.appointments.filter((appointment) => !appointment.isPast)
+  const futureAppointments = animalDetails.value.appointments.filter(
+    (appointment) => !appointment.isPast
+  )
   if (futureAppointments.length === 0) return
 
   return futureAppointments.reduce((closest, appointment) =>
@@ -37,18 +43,29 @@ function formatFrequency(minutes: number): string {
 }
 
 const navigateAppointments = () => {
-  // TODO: Using route props
-  // router.push({ name: 'animal.appointments', params: { id: route.params.id } })
+  router.push({ name: 'animal.appointments', params: { id } })
 }
 
 const newTreatmentForm = ref<HTMLFormElement | null>(null)
-const newTreatment = ref<Treatment>({ name: '' })
+const newTreatment = ref<Treatment>({ name: '', animalId: animalDetails.value?.id })
 
-function handleAddTreatment(closeDrawer: () => void) {
-  // TODO
+async function handleAddTreatment(closeDrawer: () => void) {
+  if (!animalDetails.value || !newTreatment.value) return
+
+  // TODO: Add treatment validation
+  console.log(newTreatment.value)
+  await animalStore.createTreatment(newTreatment.value)
+
   newTreatmentForm.value?.reset()
   closeDrawer()
 }
+
+onBeforeMount(async () => {
+  if (!animalDetails.value || animalDetails.value.id !== Number(id)) {
+    await animalStore.getAnimal(Number(id))
+    newTreatment.value.animalId = animalDetails.value?.id
+  }
+})
 </script>
 
 <template>
@@ -59,7 +76,11 @@ function handleAddTreatment(closeDrawer: () => void) {
       </button>
     </AppHeader>
 
-    <div class="grid min-h-0 flex-grow">
+    <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
+      <span class="loading loading-spinner loading-lg text-secondary" />
+    </div>
+
+    <div v-else-if="animalDetails" class="grid min-h-0 flex-grow">
       <div class="col-start-1 row-start-1 min-h-0">
         <div class="flex h-1/4 w-full flex-col items-center justify-center">
           <div class="w-full max-w-md rounded-lg p-4">
@@ -88,10 +109,12 @@ function handleAddTreatment(closeDrawer: () => void) {
             <p class="text-2xl font-bold text-gray-700">Tratamientos</p>
           </div>
           <div class="mx-5 mt-4 flex-1 overflow-y-auto">
-            <p v-if="!animal?.treatments?.length" class="mt-5 text-center">No hay tratamientos</p>
+            <p v-if="!animalDetails.treatments?.length" class="mt-5 text-center">
+              No hay tratamientos
+            </p>
             <ul v-else class="space-y-2">
               <li
-                v-for="(treatment, index) in props.animal.treatments"
+                v-for="(treatment, index) in animalDetails.treatments"
                 :key="index"
                 class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
               >

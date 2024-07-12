@@ -18,8 +18,7 @@ const { id }: { id?: string } = route.params
 
 const navigateBack = () => router.back()
 const navigateTreatments = () =>
-  router.push({ name: 'animal.treatments', params: { id: route.params.id } }) // TODO: Using router props
-
+  router.push({ name: 'animal.treatments', params: { id: route.params.id } })
 const age = computed(() => {
   if (!animalDetails.value || !animalDetails.value.birthDate) return
 
