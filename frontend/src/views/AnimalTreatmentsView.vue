@@ -2,6 +2,11 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/skeleton/AppHeader.vue'
+import BottomDrawer from '@/components/BottomDrawer.vue'
+import TextInput from '@/components/TextInput.vue'
+import TimeInput from '@/components/TimeInput.vue'
+import DateInput from '@/components/DateInput.vue'
+import type { Treatment } from '@/modules/Animal/declarations'
 
 const treatments = ref([
   { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
@@ -18,34 +23,13 @@ const route = useRoute()
 const navigateAppointments = () =>
   router.push({ name: 'animal.appointments', params: { id: route.params.id } })
 
-const modalOpen = ref(false)
-const newTreatment = ref({
-  name: '',
-  zone: '',
-  freq: ''
-})
+const newTreatmentForm = ref<HTMLFormElement | null>(null)
+const newTreatment = ref<Treatment>({ name: '' })
 
-const openModal = () => {
-  modalOpen.value = true
-}
-
-const closeModal = () => {
-  modalOpen.value = false
-}
-
-const saveTratamiento = () => {
-  treatments.value.push({
-    name: newTreatment.value.name,
-    zone: newTreatment.value.zone,
-    freq: newTreatment.value.freq
-  })
-  closeModal()
-  // Limpiar el formulario después de guardar
-  newTreatment.value = { name: '', zone: '', freq: '' }
-}
-
-const removeTratamiento = (index: number) => {
-  treatments.value.splice(index, 1)
+function handleAddTreatment(closeDrawer: () => void) {
+  // TODO
+  newTreatmentForm.value?.reset()
+  closeDrawer()
 }
 </script>
 
@@ -89,7 +73,7 @@ const removeTratamiento = (index: number) => {
               >
                 <span
                   class="i-mingcute-close-fill absolute right-2 top-4 h-6 w-6 cursor-pointer text-gray-500"
-                  @click="removeTratamiento(index)"
+                  @click="undefined"
                 ></span>
                 <p class="text-lg font-semibold text-blue-600">{{ treatment.name }}</p>
                 <p class="text-base text-gray-700">Zona: {{ treatment.zone }}</p>
@@ -99,68 +83,85 @@ const removeTratamiento = (index: number) => {
           </div>
         </div>
       </div>
-      <div class="col-start-1 row-start-1 flex flex-col items-end justify-end p-4">
-        <button
-          @click="openModal"
-          class="z-10 flex items-center justify-center rounded-full bg-blue-500 p-4 text-white shadow-lg"
-        >
-          <span class="i-mingcute-add-fill text-xl" />
-        </button>
 
-        <div
-          :class="{ hidden: !modalOpen }"
-          class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-        >
-          <div class="relative mx-auto w-full max-w-sm rounded-lg bg-white p-8 shadow-lg">
+      <div class="z-10 col-start-1 row-start-1 place-self-end justify-self-end p-4">
+        <BottomDrawer class="bg-base-200" size="big">
+          <template #button="{ open }">
             <button
-              @click="closeModal"
-              class="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+              @click="open"
+              class="flex items-center justify-center rounded-full bg-secondary p-4 text-white"
             >
-              <span class="i-mingcute-close-fill h-6 w-6"></span>
+              <span class="i-mingcute-add-fill text-xl" />
             </button>
-            <div class="mb-4">
-              <h2 class="mb-4 text-2xl font-semibold text-gray-800">Añadir tratamiento</h2>
-              <form @submit.prevent="saveTratamiento">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Nombre</span>
+          </template>
+
+          <template #drawer="{ close }">
+            <div class="flex h-full flex-col gap-5">
+              <h1 class="text-3xl font-semibold">Nuevo tratamiento</h1>
+              <form
+                @submit.prevent="handleAddTreatment(close)"
+                ref="newTreatmentForm"
+                class="flex h-full flex-col gap-6 pb-10"
+              >
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-name">
+                    Nombre del tratamiento
                   </label>
-                  <input
+                  <TextInput
+                    name="new-treatment-name"
+                    placeholder="ej. Clorexhidina"
                     v-model="newTreatment.name"
-                    type="text"
-                    class="input input-bordered"
-                    required
                   />
                 </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Zona</span>
-                  </label>
-                  <input
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-zone">Zona de aplicación</label>
+                  <TextInput
+                    name="new-treatment-zone"
+                    placeholder="ej. Pata superior derecha"
                     v-model="newTreatment.zone"
-                    type="text"
-                    class="input input-bordered"
-                    required
                   />
                 </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Frecuencia</span>
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-freq">Aplicar cada</label>
+                  <TimeInput
+                    name="new-treatment-freq"
+                    time-size="small"
+                    :units="['d', 'h', 'min']"
+                    v-model="newTreatment.frequency"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-quantity">
+                    Cantidad a aplicar
                   </label>
-                  <input
-                    v-model="newTreatment.freq"
-                    type="text"
-                    class="input input-bordered"
-                    required
+                  <TextInput
+                    name="new-treatment-quantity"
+                    placeholder="ej. Media pastilla"
+                    v-model="newTreatment.amount"
                   />
                 </div>
-                <div class="mt-4">
-                  <button type="submit" class="btn w-full">Guardar tratamiento</button>
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="">Fecha de finalización</label>
+                  <DateInput
+                    :include-time="false"
+                    placeholder="ej. 23 de mayo de 2023"
+                    v-model="newTreatment.endDate"
+                  />
                 </div>
+
+                <button
+                  class="mt-auto w-fit self-center rounded-lg bg-secondary px-10 py-3 text-xl font-semibold text-white"
+                >
+                  Añadir
+                </button>
               </form>
             </div>
-          </div>
-        </div>
+          </template>
+        </BottomDrawer>
       </div>
     </div>
   </main>
