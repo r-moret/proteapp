@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const SIZES = {
+  small: 'h-3/5',
+  medium: 'h-3/4',
+  big: 'h-5/6'
+}
+
 defineOptions({
   inheritAttrs: false
 })
@@ -8,9 +14,11 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     includeClose: boolean
+    size: 'small' | 'medium' | 'big'
   }>(),
   {
-    includeClose: true
+    includeClose: true,
+    size: 'medium'
   }
 )
 
@@ -35,8 +43,9 @@ const handleCloseSlide = () => {
         v-bind="$attrs"
         @animationend="handleCloseSlide"
         :class="[
-          'col-start-1 row-start-1 flex h-3/4 w-full flex-col place-self-end rounded-t-3xl px-5 pt-4',
-          isClosing ? 'slide-out' : 'slide-in'
+          'col-start-1 row-start-1 flex w-full flex-col place-self-end rounded-t-3xl px-5 pt-4',
+          isClosing ? 'slide-out' : 'slide-in',
+          SIZES[props.size]
         ]"
       >
         <button
