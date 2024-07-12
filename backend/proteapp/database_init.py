@@ -24,13 +24,13 @@ animals = [
         is_animal_compatible=True,
         image="https://cdn2.thecatapi.com/images/9vh.jpg",
         yard=yards[0],
-        treatments = [
+        treatments=[
             Treatment(
                 name="Cicaplast",
                 zone="Lomo",
                 frequency=1440,
-                final_date=datetime(2024, 10, 17, 18, 30),
-                amount="12 ml"
+                end_date=datetime(2024, 10, 17, 18, 30),
+                amount="12 ml",
             ),
             Treatment(
                 name="Malta",
@@ -43,29 +43,35 @@ animals = [
             Treatment(
                 name="Ibuprofeno",
                 frequency=720,
-                final_date=datetime(2024, 9, 30, 10, 0),
-                amount="400 mg"
+                end_date=datetime(2024, 9, 30, 10, 0),
+                amount="400 mg",
             ),
             Treatment(
                 name="Pastilla desparasitación",
                 frequency=2880,
-                final_date=datetime(2024, 11, 15, 15, 45),
-                amount="500 mg"
+                end_date=datetime(2024, 11, 15, 15, 45),
+                amount="500 mg",
             ),
             Treatment(
                 name="Paracetamol",
                 frequency=1440,
             ),
         ],
-        appointments = [
-            Appointment(date=datetime(2024, 10, 17, 18, 30), description="Vacuna calcivirus para gato"),
+        appointments=[
+            Appointment(
+                date=datetime(2024, 10, 17, 18, 30), description="Vacuna calcivirus para gato"
+            ),
             Appointment(date=datetime(2024, 7, 5, 15, 0), description="Chequeo médico anual"),
             Appointment(date=datetime(2024, 8, 12, 10, 15), description="Revisión odontológica"),
             Appointment(date=datetime(2024, 6, 3, 9, 0), description="Consulta de dermatología"),
-            Appointment(date=datetime(2024, 11, 8, 11, 0), description="Vacuna parvovirus para cachorro"),
+            Appointment(
+                date=datetime(2024, 11, 8, 11, 0), description="Vacuna parvovirus para cachorro"
+            ),
             Appointment(date=datetime(2024, 12, 15, 16, 45), description="Cirugía programada"),
             Appointment(date=datetime(2024, 7, 22, 17, 30), description="Control de peso y dieta"),
-            Appointment(date=datetime(2024, 5, 17, 18, 30), description="Vacuna contra la leptospirosis")
+            Appointment(
+                date=datetime(2024, 5, 17, 18, 30), description="Vacuna contra la leptospirosis"
+            ),
         ],
     ),
     Animal(

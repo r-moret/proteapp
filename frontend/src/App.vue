@@ -2,14 +2,12 @@
 import NavigationBar from '@/skeleton/NavigationBar.vue'
 import { onBeforeMount } from 'vue'
 import { RouterView } from 'vue-router'
-import { useAnimalStore } from './store/AnimalStore'
 import { useUserStore } from './store/UserStore'
 
-const animalStore = useAnimalStore()
 const userStore = useUserStore()
 
 onBeforeMount(async () => {
-  Promise.allSettled([animalStore.fetchAnimals(), userStore.fetchUser()])
+  Promise.allSettled([userStore.fetchUser()])
 })
 </script>
 

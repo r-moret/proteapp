@@ -3,15 +3,20 @@ import Datepicker from '@vuepic/vue-datepicker'
 
 import { format } from '@formkit/tempo'
 
-const model = defineModel<Date>()
+const model = defineModel<Date | null>()
+
+const props = defineProps<{
+  includeTime: boolean
+  placeholder?: string
+}>()
 
 const dateFormatter = (date: Date) => {
-  return format(date, { date: 'long' })
+  return format(date, { date: 'long', time: props.includeTime ? 'short' : undefined })
 }
 </script>
 
 <template>
-  <div class="flex h-12 w-full px-4">
+  <div class="flex h-12 w-full">
     <div class="flex items-center justify-center rounded-l-lg bg-white px-3">
       <span class="i-mingcute-calendar-2-line text-2xl text-secondary" />
     </div>
@@ -22,9 +27,9 @@ const dateFormatter = (date: Date) => {
       auto-apply
       no-today
       hide-input-icon
-      :enable-time-picker="false"
+      :enable-time-picker="props.includeTime"
       locale="es-ES"
-      placeholder="Selecciona una fecha"
+      :placeholder="props.placeholder"
       :format="dateFormatter"
       :ui="{
         menu: 'calendar-menu',
@@ -37,6 +42,7 @@ const dateFormatter = (date: Date) => {
 <style>
 .calendar-menu {
   border-radius: 1.5rem;
+  overflow: hidden;
 }
 
 .calendar-input {

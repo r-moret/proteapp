@@ -10,7 +10,7 @@ class BaseTreatment(SQLModel):
     name: str
     zone: str | None = Field(default=None)
     frequency: int | None = Field(default=None)
-    final_date: datetime | None = Field(default=None)
+    end_date: datetime | None = Field(default=None)
     amount: str | None = Field(default=None)
 
     animal_id: int = Field(default=None, foreign_key="animal.id")

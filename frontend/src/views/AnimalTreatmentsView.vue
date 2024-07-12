@@ -1,21 +1,25 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { format } from '@formkit/tempo'
 import AppHeader from '@/skeleton/AppHeader.vue'
-import { useAnimalStore } from '@/store/AnimalStore'
+import BottomDrawer from '@/components/BottomDrawer.vue'
+import TextInput from '@/components/TextInput.vue'
+import TimeInput from '@/components/TimeInput.vue'
+import DateInput from '@/components/DateInput.vue'
+import type { Animal, Treatment } from '@/modules/Animal/declarations'
 import humanizeDuration from 'humanize-duration'
 
-const { getAnimal } = useAnimalStore()
 const router = useRouter()
-const route = useRoute()
 
-const animal = computed(() => getAnimal(Number(route.params.id as string)))
-const treatments = animal.value?.treatments
+const props = defineProps<{
+  animal: Animal
+}>()
 
 const nextAppointment = computed(() => {
-  if (!animal.value || !animal.value.appointments) return
-  const futureAppointments = animal.value.appointments.filter((appointment) => !appointment.is_past)
+  if (!props.animal || !props.animal.appointments) return
+
+  const futureAppointments = props.animal.appointments.filter((appointment) => !appointment.is_past)
   if (futureAppointments.length === 0) return
 
   return futureAppointments.reduce((closest, appointment) =>
@@ -32,38 +36,19 @@ function formatFrequency(minutes: number): string {
   return `cada ${humanizeDuration(milliseconds, { language: 'es', units: ['w', 'd', 'h', 'm'], round: true, conjunction: ' y ' })}`
 }
 
-const navigateAppointments = () =>
-  router.push({ name: 'animal.appointments', params: { id: route.params.id } })
-
-const modalOpen = ref(false)
-const newTreatment = ref({
-  name: '',
-  zone: '',
-  freq: ''
-})
-
-const openModal = () => {
-  modalOpen.value = true
+const navigateAppointments = () => {
+  // TODO: Using route props
+  // router.push({ name: 'animal.appointments', params: { id: route.params.id } })
 }
 
-const closeModal = () => {
-  modalOpen.value = false
+const newTreatmentForm = ref<HTMLFormElement | null>(null)
+const newTreatment = ref<Treatment>({ name: '' })
+
+function handleAddTreatment(closeDrawer: () => void) {
+  // TODO
+  newTreatmentForm.value?.reset()
+  closeDrawer()
 }
-
-// const saveTratamiento = () => {
-//   treatments?.value.push({
-//     name: newTreatment.value.name,
-//     zone: newTreatment.value.zone,
-//     freq: newTreatment.value.freq
-//   })
-//   closeModal()
-//   // Limpiar el formulario después de guardar
-//   newTreatment.value = { name: '', zone: '', freq: '' }
-// }
-
-// const removeTratamiento = (index: number) => {
-//   treatments.value.splice(index, 1)
-// }
 </script>
 
 <template>
@@ -106,7 +91,7 @@ const closeModal = () => {
             <p v-if="!animal?.treatments?.length" class="mt-5 text-center">No hay tratamientos</p>
             <ul v-else class="space-y-2">
               <li
-                v-for="(treatment, index) in treatments"
+                v-for="(treatment, index) in props.animal.treatments"
                 :key="index"
                 class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
               >
@@ -123,76 +108,93 @@ const closeModal = () => {
                 <p v-if="treatment.amount" class="text-base text-gray-700">
                   Cantidad: {{ treatment.amount }}
                 </p>
-                <p v-if="treatment.final_date" class="text-base text-gray-700">
-                  Fecha de finalización: {{ format(treatment.final_date, 'medium', 'es-ES') }}
+                <p v-if="treatment.endDate" class="text-base text-gray-700">
+                  Fecha de finalización: {{ format(treatment.endDate, 'medium', 'es-ES') }}
                 </p>
               </li>
             </ul>
           </div>
         </div>
       </div>
-      <div class="col-start-1 row-start-1 flex flex-col items-end justify-end p-4">
-        <button
-          @click="openModal"
-          class="z-10 flex items-center justify-center rounded-full bg-blue-500 p-4 text-white shadow-lg"
-        >
-          <span class="i-mingcute-add-fill text-xl" />
-        </button>
 
-        <div
-          :class="{ hidden: !modalOpen }"
-          class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-        >
-          <div class="relative mx-auto w-full max-w-sm rounded-lg bg-white p-8 shadow-lg">
+      <div class="z-10 col-start-1 row-start-1 place-self-end justify-self-end p-4">
+        <BottomDrawer class="bg-base-200" size="big">
+          <template #button="{ open }">
             <button
-              @click="closeModal"
-              class="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+              @click="open"
+              class="flex items-center justify-center rounded-full bg-secondary p-4 text-white"
             >
-              <span class="i-mingcute-close-fill h-6 w-6"></span>
+              <span class="i-mingcute-add-fill text-xl" />
             </button>
-            <div class="mb-4">
-              <h2 class="mb-4 text-2xl font-semibold text-gray-800">Añadir tratamiento</h2>
-              <form>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Nombre</span>
+          </template>
+
+          <template #drawer="{ close }">
+            <div class="flex h-full flex-col gap-5">
+              <h1 class="text-3xl font-semibold">Nuevo tratamiento</h1>
+              <form
+                @submit.prevent="handleAddTreatment(close)"
+                ref="newTreatmentForm"
+                class="flex h-full flex-col gap-6 pb-10"
+              >
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-name">
+                    Nombre del tratamiento
                   </label>
-                  <input
+                  <TextInput
+                    name="new-treatment-name"
+                    placeholder="ej. Clorexhidina"
                     v-model="newTreatment.name"
-                    type="text"
-                    class="input input-bordered"
-                    required
                   />
                 </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Zona</span>
-                  </label>
-                  <input
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-zone">Zona de aplicación</label>
+                  <TextInput
+                    name="new-treatment-zone"
+                    placeholder="ej. Pata superior derecha"
                     v-model="newTreatment.zone"
-                    type="text"
-                    class="input input-bordered"
-                    required
                   />
                 </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Frecuencia</span>
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-freq">Aplicar cada</label>
+                  <TimeInput
+                    name="new-treatment-freq"
+                    time-size="small"
+                    :units="['d', 'h', 'min']"
+                    v-model="newTreatment.frequency"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="new-treatment-quantity">
+                    Cantidad a aplicar
                   </label>
-                  <input
-                    v-model="newTreatment.freq"
-                    type="text"
-                    class="input input-bordered"
-                    required
+                  <TextInput
+                    name="new-treatment-quantity"
+                    placeholder="ej. Media pastilla"
+                    v-model="newTreatment.amount"
                   />
                 </div>
-                <div class="mt-4">
-                  <button type="submit" class="btn w-full">Guardar tratamiento</button>
+
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold" for="">Fecha de finalización</label>
+                  <DateInput
+                    :include-time="false"
+                    placeholder="ej. 23 de mayo de 2023"
+                    v-model="newTreatment.endDate"
+                  />
                 </div>
+
+                <button
+                  class="mt-auto w-fit self-center rounded-lg bg-secondary px-10 py-3 text-xl font-semibold text-white"
+                >
+                  Añadir
+                </button>
               </form>
             </div>
-          </div>
-        </div>
+          </template>
+        </BottomDrawer>
       </div>
     </div>
   </main>

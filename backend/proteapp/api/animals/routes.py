@@ -21,9 +21,6 @@ def get_animals(session: Session = Depends(get_session)):
     return animals
 
 
-
-
-
 @router.post("/", response_model=PublicAnimal, status_code=201)
 def post_animal(animal: CreateAnimal, session: Session = Depends(get_session)):
     animal_db = Animal.model_validate(animal)
