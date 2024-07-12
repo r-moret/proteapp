@@ -1,4 +1,5 @@
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship
+from proteapp.models.globals import GlobalBaseSQLModel
 from pydantic import computed_field
 from typing import TYPE_CHECKING
 from datetime import datetime
@@ -7,7 +8,7 @@ if TYPE_CHECKING:
     from proteapp.models.animals import Animal
 
 
-class BaseAppointment(SQLModel):
+class BaseAppointment(GlobalBaseSQLModel):
     date: datetime
     description: str
 

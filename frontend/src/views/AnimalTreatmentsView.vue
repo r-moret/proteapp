@@ -19,7 +19,7 @@ const props = defineProps<{
 const nextAppointment = computed(() => {
   if (!props.animal || !props.animal.appointments) return
 
-  const futureAppointments = props.animal.appointments.filter((appointment) => !appointment.is_past)
+  const futureAppointments = props.animal.appointments.filter((appointment) => !appointment.isPast)
   if (futureAppointments.length === 0) return
 
   return futureAppointments.reduce((closest, appointment) =>

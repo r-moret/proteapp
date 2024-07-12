@@ -1,11 +1,12 @@
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING
+from proteapp.models.globals import GlobalBaseSQLModel
 
 if TYPE_CHECKING:
     from proteapp.models.animals import Animal
 
 
-class BaseYard(SQLModel):
+class BaseYard(GlobalBaseSQLModel):
     name: str
 
 

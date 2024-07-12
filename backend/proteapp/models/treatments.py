@@ -1,12 +1,13 @@
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING
 from datetime import datetime
+from proteapp.models.globals import GlobalBaseSQLModel
 
 if TYPE_CHECKING:
     from proteapp.models.animals import Animal
 
 
-class BaseTreatment(SQLModel):
+class BaseTreatment(GlobalBaseSQLModel):
     name: str
     zone: str | None = Field(default=None)
     frequency: int | None = Field(default=None)

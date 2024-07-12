@@ -65,7 +65,7 @@ onBeforeMount(async () => {
           <span
             v-if="
               animalDetails.treatments?.length ||
-              animalDetails.appointments?.some((appointment) => !appointment.is_past)
+              animalDetails.appointments?.some((appointment) => !appointment.isPast)
             "
             class="badge indicator-item badge-secondary badge-md indicator-start font-semibold"
           >

@@ -1,4 +1,5 @@
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship
+from proteapp.models.globals import GlobalBaseSQLModel
 from datetime import date
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -14,7 +15,7 @@ class Sex(StrEnum):
     female = "female"
 
 
-class BaseAnimal(SQLModel):
+class BaseAnimal(GlobalBaseSQLModel):
     name: str
     sex: Sex
     personality: str | None = Field(default=None)

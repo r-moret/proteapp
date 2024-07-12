@@ -9,7 +9,7 @@ export const AppointmentSchema = z.object({
   id: z.number(),
   date: z.coerce.date(),
   description: z.string(),
-  is_past: z.boolean()
+  isPast: z.boolean()
 })
 
 export const TreatmentSchema = z.object({
