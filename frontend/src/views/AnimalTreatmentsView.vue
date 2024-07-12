@@ -1,19 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { format } from '@formkit/tempo'
 import AppHeader from '@/skeleton/AppHeader.vue'
+import { useAnimalStore } from '@/store/AnimalStore'
+import humanizeDuration from 'humanize-duration'
 
-const treatments = ref([
-  { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
-  { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
-  { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' },
-  { name: 'Paracetamol', zone: 'Cabeza', freq: '3 días' },
-  { name: 'Ibuprofeno', zone: 'Cuello', freq: 'Cada 4 días' },
-  { name: 'Aspirina', zone: 'Pata', freq: 'Cada 1 día' }
-])
-
+const { getAnimal } = useAnimalStore()
 const router = useRouter()
 const route = useRoute()
+
+const animal = computed(() => getAnimal(Number(route.params.id as string)))
+const treatments = animal.value?.treatments
+
+const nextAppointment = computed(() => {
+  if (!animal.value || !animal.value.appointments) return
+  const futureAppointments = animal.value.appointments.filter((appointment) => !appointment.is_past)
+  if (futureAppointments.length === 0) return
+
+  return futureAppointments.reduce((closest, appointment) =>
+    !closest || appointment.date < closest.date ? appointment : closest
+  )
+})
+
+function formatFrequency(minutes: number): string {
+  if (minutes === 1440) {
+    return 'una vez al día'
+  }
+
+  const milliseconds = minutes * 60 * 1000
+  return `cada ${humanizeDuration(milliseconds, { language: 'es', units: ['w', 'd', 'h', 'm'], round: true, conjunction: ' y ' })}`
+}
 
 const navigateAppointments = () =>
   router.push({ name: 'animal.appointments', params: { id: route.params.id } })
@@ -33,20 +50,20 @@ const closeModal = () => {
   modalOpen.value = false
 }
 
-const saveTratamiento = () => {
-  treatments.value.push({
-    name: newTreatment.value.name,
-    zone: newTreatment.value.zone,
-    freq: newTreatment.value.freq
-  })
-  closeModal()
-  // Limpiar el formulario después de guardar
-  newTreatment.value = { name: '', zone: '', freq: '' }
-}
+// const saveTratamiento = () => {
+//   treatments?.value.push({
+//     name: newTreatment.value.name,
+//     zone: newTreatment.value.zone,
+//     freq: newTreatment.value.freq
+//   })
+//   closeModal()
+//   // Limpiar el formulario después de guardar
+//   newTreatment.value = { name: '', zone: '', freq: '' }
+// }
 
-const removeTratamiento = (index: number) => {
-  treatments.value.splice(index, 1)
-}
+// const removeTratamiento = (index: number) => {
+//   treatments.value.splice(index, 1)
+// }
 </script>
 
 <template>
@@ -69,10 +86,15 @@ const removeTratamiento = (index: number) => {
                 class="mb-5 flex items-center justify-center gap-4 rounded-2xl bg-blue-500 px-6 py-4 text-white shadow-lg"
               >
                 <span class="i-mingcute-calendar-2-fill text-5xl"></span>
-                <p class="text-2xl">2 de septiembre 15:00</p>
+                <p v-if="nextAppointment?.date" class="text-2xl">
+                  {{ format(nextAppointment?.date, 'long', 'es-ES') }}
+                </p>
+                <p v-else class="text-xl">No hay cita médica</p>
               </div>
             </div>
-            <p class="text-center text-lg text-gray-600">Motivo: vacuna</p>
+            <p v-if="nextAppointment?.date" class="text-center text-lg text-gray-600">
+              {{ nextAppointment.description }}
+            </p>
           </div>
         </div>
 
@@ -81,7 +103,8 @@ const removeTratamiento = (index: number) => {
             <p class="text-2xl font-bold text-gray-700">Tratamientos</p>
           </div>
           <div class="mx-5 mt-4 flex-1 overflow-y-auto">
-            <ul class="space-y-2">
+            <p v-if="!animal?.treatments?.length" class="mt-5 text-center">No hay tratamientos</p>
+            <ul v-else class="space-y-2">
               <li
                 v-for="(treatment, index) in treatments"
                 :key="index"
@@ -89,11 +112,20 @@ const removeTratamiento = (index: number) => {
               >
                 <span
                   class="i-mingcute-close-fill absolute right-2 top-4 h-6 w-6 cursor-pointer text-gray-500"
-                  @click="removeTratamiento(index)"
                 ></span>
                 <p class="text-lg font-semibold text-blue-600">{{ treatment.name }}</p>
-                <p class="text-base text-gray-700">Zona: {{ treatment.zone }}</p>
-                <p class="text-base text-gray-700">Frecuencia: {{ treatment.freq }}</p>
+                <p v-if="treatment.zone" class="text-base text-gray-700">
+                  Zona: {{ treatment.zone }}
+                </p>
+                <p v-if="treatment.frequency" class="text-base text-gray-700">
+                  Frecuencia: {{ formatFrequency(treatment.frequency) }}
+                </p>
+                <p v-if="treatment.amount" class="text-base text-gray-700">
+                  Cantidad: {{ treatment.amount }}
+                </p>
+                <p v-if="treatment.final_date" class="text-base text-gray-700">
+                  Fecha de finalización: {{ format(treatment.final_date, 'medium', 'es-ES') }}
+                </p>
               </li>
             </ul>
           </div>
@@ -120,7 +152,7 @@ const removeTratamiento = (index: number) => {
             </button>
             <div class="mb-4">
               <h2 class="mb-4 text-2xl font-semibold text-gray-800">Añadir tratamiento</h2>
-              <form @submit.prevent="saveTratamiento">
+              <form>
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text">Nombre</span>
