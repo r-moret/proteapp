@@ -11,6 +11,8 @@ defineOptions({
   inheritAttrs: false
 })
 
+const isOpen = defineModel<boolean>()
+
 const props = withDefaults(
   defineProps<{
     includeClose: boolean
@@ -22,7 +24,6 @@ const props = withDefaults(
   }
 )
 
-const isOpen = ref(false)
 const isClosing = ref(false)
 
 const handleCloseSlide = () => {
@@ -34,8 +35,6 @@ const handleCloseSlide = () => {
 </script>
 
 <template>
-  <slot name="button" :open="() => (isOpen = true)" />
-
   <Teleport to="body">
     <div v-show="isOpen" class="fixed top-0 z-50 grid h-screen w-screen">
       <span class="col-start-1 row-start-1 bg-black bg-opacity-60" @click="isClosing = true" />
@@ -56,7 +55,7 @@ const handleCloseSlide = () => {
           <span class="i-mingcute-close-line text-2xl" />
         </button>
         <div class="flex-1 overflow-y-scroll pb-4">
-          <slot name="drawer" :close="() => (isClosing = true)" />
+          <slot :close="() => (isClosing = true)" />
         </div>
       </div>
     </div>
