@@ -19,7 +19,7 @@ function removeNotification(id: string) {
 </script>
 
 <template>
-  <div v-if="notifications.length" class="toast toast-center toast-top z-50 w-full pt-6">
+  <div v-if="notifications.length" class="toast toast-center toast-top z-[100] w-full pt-6">
     <div
       v-for="notification in notifications"
       :class="[
@@ -28,16 +28,12 @@ function removeNotification(id: string) {
       ]"
       :key="notification.id"
     >
-      <div v-if="notification.icon">
+      <div v-if="notification.icon" class="flex flex-none items-center">
         <span
-          :class="[
-            'flex flex-none items-center text-2xl',
-            notification.icon,
-            notification.iconStyle ?? 'text-secondary'
-          ]"
+          :class="['text-2xl', notification.icon, notification.iconStyle ?? 'text-secondary']"
         />
       </div>
-      <p :class="['text-wrap font-semibold', notification.textStyle ?? 'text-black']">
+      <p :class="['text-wrap text-start font-semibold', notification.textStyle ?? 'text-black']">
         {{ notification.text }}
       </p>
       <button class="ml-auto flex flex-none pl-2" @click="removeNotification(notification.id)">

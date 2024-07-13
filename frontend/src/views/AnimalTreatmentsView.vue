@@ -13,6 +13,8 @@ import humanizeDuration from 'humanize-duration'
 import { useAnimalStore } from '@/store/AnimalStore'
 import { storeToRefs } from 'pinia'
 import { useToastNotifications } from '@/composable/useToastNotifications'
+import { TreatmentAdapter } from '@/modules/Animal/adapters'
+import { ZodError } from 'zod'
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
@@ -57,15 +59,21 @@ const newTreatment = ref<Treatment>({ name: '', animalId: animalDetails.value?.i
 async function handleAddTreatment(closeDrawer: () => void) {
   if (!animalDetails.value || !newTreatment.value) return
 
-  // TODO: Add treatment validation
   try {
+    TreatmentAdapter(newTreatment.value)
+
     await animalStore.createTreatment(newTreatment.value)
     showSuccessNotification('Tratamiento añadido correctamente.')
 
     newTreatmentForm.value?.reset()
+    newTreatment.value = { name: '', animalId: animalDetails.value?.id }
     closeDrawer()
   } catch (error) {
-    showErrorNotification('Ha ocurrido un error, prueba otra vez.')
+    if (error instanceof ZodError) {
+      showErrorNotification('Parece que hay un error con los datos del tratamiento.')
+    } else {
+      showErrorNotification('Ha ocurrido un error, prueba otra vez.')
+    }
   }
 }
 
