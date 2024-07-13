@@ -7,10 +7,15 @@ import BottomDrawer from '@/components/BottomDrawer.vue'
 import TextInput from '@/components/TextInput.vue'
 import TimeInput from '@/components/TimeInput.vue'
 import DateInput from '@/components/DateInput.vue'
+import ToastNotifications from '../components/ToastNotifications.vue'
 import type { Treatment } from '@/modules/Animal/declarations'
 import humanizeDuration from 'humanize-duration'
 import { useAnimalStore } from '@/store/AnimalStore'
 import { storeToRefs } from 'pinia'
+import { useToastNotifications } from '@/composable/useToastNotifications'
+
+const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
+const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 
 const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
@@ -42,7 +47,7 @@ function formatFrequency(minutes: number): string {
   return `cada ${humanizeDuration(milliseconds, { language: 'es', units: ['w', 'd', 'h', 'm'], round: true, conjunction: ' y ' })}`
 }
 
-const navigateAppointments = () => {
+function navigateAppointments() {
   router.push({ name: 'animal.appointments', params: { id } })
 }
 
@@ -53,11 +58,15 @@ async function handleAddTreatment(closeDrawer: () => void) {
   if (!animalDetails.value || !newTreatment.value) return
 
   // TODO: Add treatment validation
-  console.log(newTreatment.value)
-  await animalStore.createTreatment(newTreatment.value)
+  try {
+    await animalStore.createTreatment(newTreatment.value)
+    showSuccessNotification('Tratamiento añadido correctamente.')
 
-  newTreatmentForm.value?.reset()
-  closeDrawer()
+    newTreatmentForm.value?.reset()
+    closeDrawer()
+  } catch (error) {
+    showErrorNotification('Ha ocurrido un error, prueba otra vez.')
+  }
 }
 
 onBeforeMount(async () => {
@@ -70,6 +79,8 @@ onBeforeMount(async () => {
 
 <template>
   <main class="flex flex-col">
+    <ToastNotifications ref="notificationsRef" />
+
     <AppHeader left="back" title="Tratamientos">
       <button class="btn btn-square btn-ghost" @click="navigateAppointments">
         <span class="i-mingcute-hospital-line text-3xl" />
