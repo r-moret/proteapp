@@ -1,136 +1,192 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { useAnimalStore } from '@/store/AnimalStore'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import ItemList from '@/components/ItemList.vue'
+import { sortBy, reverse } from 'lodash'
+import { format, addDay } from '@formkit/tempo'
+import BottomDrawer from '@/components/BottomDrawer.vue'
+import type { Appointment, CreateAppointment } from '@/modules/Animal/declarations'
+import TextInput from '@/components/TextInput.vue'
+import DateInput from '@/components/DateInput.vue'
+import { CreateAppointmentAdapter } from '@/modules/Animal/adapters'
+import { ZodError } from 'zod'
+import ToastNotifications from '@/components/ToastNotifications.vue'
+import { useToastNotifications } from '@/composable/useToastNotifications'
 
-const { getAnimal } = useAnimalStore()
+const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
+const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
+
+const animalStore = useAnimalStore()
+const { animalDetails, isLoading } = storeToRefs(animalStore)
+
 const route = useRoute()
-const animal = computed(() => getAnimal(Number(route.params.id as string)))
+const { id }: { id?: string } = route.params
 
-const modalOpen = ref(false)
-const newAppointment = ref({
-  date: new Date(2024, 5, 17, 18, 30),
-  description: '',
-  is_past: false
-})
+const newAppointmentOpen = ref(false)
+const newAppointmentForm = ref<HTMLFormElement | null>(null)
+const newAppointment = ref<CreateAppointment>()
 
-const openModal = () => {
-  modalOpen.value = true
-}
+const sortedAppointments = computed(() =>
+  reverse(sortBy(animalDetails.value?.appointments, ['date']))
+)
 
-const closeModal = () => {
-  modalOpen.value = false
-}
+async function handleAddAppointment(closeDrawer: () => void) {
+  if (!animalDetails.value || !newAppointment.value) return
 
-const formatDate = (date: Date) => {
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  try {
+    CreateAppointmentAdapter(newAppointment.value)
+
+    await animalStore.createAppointment(newAppointment.value)
+    showSuccessNotification('Cita médica añadida correctamente.')
+
+    newAppointmentForm.value?.reset()
+    newAppointment.value = {
+      date: addDay(new Date()),
+      description: '',
+      animalId: animalDetails.value!.id
+    }
+    closeDrawer()
+  } catch (error) {
+    if (error instanceof ZodError) {
+      showErrorNotification('Parece que hay un error con los datos de la cita.')
+    } else {
+      showErrorNotification('Ha ocurrido un error, prueba otra vez.')
+    }
   }
-  return date.toLocaleDateString('es-ES', options)
 }
+
+async function handleDeleteAppointment(appointment: Appointment) {
+  try {
+    await animalStore.deleteAppointment(appointment)
+    showSuccessNotification('Cita médica eliminada correctamente')
+  } catch (error) {
+    showErrorNotification('Ha ocurrido un error, prueba otra vez.')
+  }
+}
+
+onBeforeMount(async () => {
+  if (!animalDetails.value || animalDetails.value.id !== Number(id)) {
+    await animalStore.getAnimal(Number(id))
+  }
+
+  newAppointment.value = {
+    date: addDay(new Date()),
+    description: '',
+    animalId: animalDetails.value!.id
+  }
+})
 </script>
 
 <template>
   <main class="flex flex-col">
+    <ToastNotifications ref="notificationsRef" />
+
     <AppHeader left="back" title="Citas médicas" />
-    <div class="grid min-h-0 flex-grow">
+
+    <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
+      <span class="loading loading-spinner loading-lg text-secondary" />
+    </div>
+
+    <div v-else-if="animalDetails" class="grid min-h-0 flex-grow">
       <div class="col-start-1 row-start-1 min-h-0">
         <div class="flex h-full w-full flex-col">
-          <!-- <div class="mt-4 flex items-center justify-center">
-            <p class="text-2xl font-bold text-gray-700">Historial de citas</p>
-          </div> -->
-          <div class="mx-5 mt-4 flex-1 overflow-y-auto">
-            <p v-if="!animal?.appointments?.length" class="mt-5 text-center">
-              No hay citas médicas
-            </p>
-            <ul v-else class="space-y-2">
-              <li
-                v-for="(appointment, index) in animal.appointments"
-                :key="index"
-                class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
-              >
-                <span
-                  v-if="!appointment.is_past"
-                  class="i-mingcute-close-fill absolute right-2 top-4 h-6 w-6 cursor-pointer text-gray-500"
-                ></span>
-                <p
-                  :class="[
-                    'mb-2 text-xl font-semibold',
-                    appointment.is_past ? 'text-gray-400' : 'text-blue-600'
-                  ]"
-                >
-                  {{ appointment.description }}
-                </p>
-                <div
-                  :class="['flex items-center space-x-2', { 'text-gray-400': appointment.is_past }]"
-                >
-                  <span class="i-mingcute-calendar-time-add-line text-3xl" />
-                  <p class="text-base">
-                    {{ formatDate(appointment.date) }}
+          <ItemList
+            :items="sortedAppointments"
+            delete-title="¿Estás seguro de que quieres borrar esta cita médica?"
+            class="mx-5"
+            @delete="handleDeleteAppointment"
+          >
+            <template #empty>
+              <div class="mt-6 flex flex-col items-center">
+                <span class="i-mingcute-calendar-time-add-line text-6xl" />
+                <p class="text-gray-500">{{ animalDetails.name }} no tiene citas médicas</p>
+              </div>
+            </template>
+
+            <template #item="{ item, openConfirm }">
+              <div class="flex flex-row justify-between px-4 py-2">
+                <div class="flex flex-col">
+                  <p
+                    :class="[
+                      'mb-1 text-lg font-semibold',
+                      item.isPast ? 'text-gray-400' : 'text-secondary'
+                    ]"
+                  >
+                    {{ item.description }}
+                  </p>
+                  <p :class="['text-base', item.isPast ? 'text-gray-400' : 'text-gray-700']">
+                    {{ format(item.date, { date: 'long', time: 'short' }) }}
                   </p>
                 </div>
-              </li>
-            </ul>
-          </div>
+                <button v-if="!item.isPast" class="my-1 flex flex-col" @click="openConfirm(item)">
+                  <span class="i-mingcute-close-fill text-xl text-gray-400" />
+                </button>
+              </div>
+            </template>
+
+            <template #delete="{ item }">
+              <p>
+                <span class="font-semibold">{{ item.description }}</span>
+                <span>
+                  {{
+                    `, el día ${format(item.date, { date: 'long' })} a las ${format(item.date, { time: 'short' })}`
+                  }}
+                </span>
+              </p>
+            </template>
+          </ItemList>
         </div>
       </div>
-      <div class="col-start-1 row-start-1 flex flex-col items-end justify-end p-4">
+
+      <div class="z-10 col-start-1 row-start-1 justify-end place-self-end p-4">
         <button
-          @click="openModal"
+          @click="newAppointmentOpen = true"
           class="z-10 flex items-center justify-center rounded-full bg-blue-500 p-4 text-white shadow-lg"
         >
           <span class="i-mingcute-add-fill text-xl" />
         </button>
-
-        <div
-          :class="{ hidden: !modalOpen }"
-          class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-        >
-          <div class="relative mx-auto w-full max-w-sm rounded-lg bg-white p-8 shadow-lg">
-            <button
-              @click="closeModal"
-              class="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-            >
-              <span class="i-mingcute-close-fill h-6 w-6"></span>
-            </button>
-            <div class="mb-4">
-              <h2 class="mb-4 text-2xl font-semibold text-gray-800">Añadir tratamiento</h2>
-              <form>
-                <!-- @submit.prevent="saveAppointment" -->
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Motivo de la cita</span>
-                  </label>
-                  <input
-                    v-model="newAppointment.description"
-                    type="text"
-                    class="input input-bordered"
-                    required
-                  />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Fecha y hora</span>
-                  </label>
-                  <input
-                    v-model="newAppointment.date"
-                    type="datetime-local"
-                    class="input input-bordered"
-                    required
-                  />
-                </div>
-                <div class="mt-4">
-                  <button type="submit" class="btn w-full">Guardar cita médica</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
+
+    <BottomDrawer class="bg-base-200" size="small" v-model="newAppointmentOpen" v-slot="{ close }">
+      <div class="flex h-full flex-col gap-5">
+        <h1 class="text-3xl font-semibold">Nueva cita médica</h1>
+        <form
+          v-if="newAppointment"
+          ref="newAppointmentForm"
+          class="flex h-full flex-col gap-6 pb-10"
+          @submit.prevent="handleAddAppointment(close)"
+        >
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="new-appointment-description">
+              Descripción de la cita
+            </label>
+            <TextInput
+              name="new-appointment-description"
+              placeholder="ej. Vacuna calcivirus"
+              v-model="newAppointment.description"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold" for="">Fecha de la cita</label>
+            <DateInput
+              :include-time="true"
+              placeholder="ej. 23 de mayo de 2023, 18:30"
+              v-model="newAppointment.date"
+            />
+          </div>
+
+          <button
+            class="mt-auto w-fit self-center rounded-lg bg-secondary px-10 py-3 text-xl font-semibold text-white"
+          >
+            Añadir
+          </button>
+        </form>
+      </div>
+    </BottomDrawer>
   </main>
 </template>

@@ -8,9 +8,12 @@ export const YardSchema = z.object({
 export const AppointmentSchema = z.object({
   id: z.number(),
   date: z.coerce.date(),
-  description: z.string(),
-  isPast: z.boolean()
+  description: z.string().min(1),
+  isPast: z.boolean(),
+  animalId: z.number()
 })
+
+export const CreateAppointmentSchema = AppointmentSchema.omit({ id: true, isPast: true })
 
 export const TreatmentSchema = z.object({
   id: z.number().nullish(),
@@ -41,4 +44,5 @@ export const AnimalSchema = z.object({
 export type Yard = z.infer<typeof YardSchema>
 export type Treatment = z.infer<typeof TreatmentSchema>
 export type Appointment = z.infer<typeof AppointmentSchema>
+export type CreateAppointment = z.infer<typeof CreateAppointmentSchema>
 export type Animal = z.infer<typeof AnimalSchema>

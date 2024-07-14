@@ -1,13 +1,20 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { Animal, Treatment, Yard } from '@/modules/Animal/declarations'
+import type {
+  Animal,
+  Appointment,
+  CreateAppointment,
+  Treatment,
+  Yard
+} from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
   listYards as listYardApi,
   crudAnimal as crudAnimalApi,
-  crudTreatment as crudTreatmentApi
+  crudTreatment as crudTreatmentApi,
+  crudAppointment as crudAppointmentApi
 } from '@/modules/Animal/api'
-import { AnimalAdapter, TreatmentAdapter } from '@/modules/Animal/adapters'
+import { AnimalAdapter, AppointmentAdapter, TreatmentAdapter } from '@/modules/Animal/adapters'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<Animal[]>([])
@@ -85,6 +92,52 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     )
   }
 
+  async function createAppointment(appointment: CreateAppointment) {
+    if (!animalDetails.value || appointment.animalId !== animalDetails.value?.id) {
+      throw Error(
+        'Cannot create an appointment for an animal different than the one that is loaded'
+      )
+    }
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}`, {
+      method: 'post',
+      body: JSON.stringify(appointment),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((res) => res.json())
+      .then(AppointmentAdapter)
+      .then((appointment) => {
+        if (!animalDetails.value || appointment.animalId !== animalDetails.value?.id) {
+          throw Error(
+            'Cannot create an appointment for an animal different than the one that is loaded'
+          )
+        }
+
+        animalDetails.value.appointments = [
+          ...(animalDetails.value.appointments ?? []),
+          appointment
+        ]
+      })
+  }
+
+  async function deleteAppointment(appointment: Appointment) {
+    if (!animalDetails.value || appointment.animalId !== animalDetails.value?.id) {
+      throw Error(
+        'Cannot delete an appointment for an animal different than the one that is loaded'
+      )
+    }
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}/${appointment.id}`, {
+      method: 'delete'
+    })
+
+    animalDetails.value.appointments = animalDetails.value.appointments?.filter(
+      (appo) => appo.id !== appointment.id
+    )
+  }
+
   return {
     animalList,
     animalDetails,
@@ -93,6 +146,8 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     fetchAnimals,
     getAnimal,
     createTreatment,
-    deleteTreatment
+    deleteTreatment,
+    createAppointment,
+    deleteAppointment
   }
 })
