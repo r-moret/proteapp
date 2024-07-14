@@ -71,6 +71,20 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       })
   }
 
+  async function deleteTreatment(treatment: Treatment) {
+    if (!animalDetails.value || treatment.animalId !== animalDetails.value?.id) {
+      throw Error('Cannot create a treatment for an animal different than the one that is loaded')
+    }
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}/${treatment.id}`, {
+      method: 'delete'
+    })
+
+    animalDetails.value.treatments = animalDetails.value.treatments?.filter(
+      (treat) => treat.id !== treatment.id
+    )
+  }
+
   return {
     animalList,
     animalDetails,
@@ -78,6 +92,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading,
     fetchAnimals,
     getAnimal,
-    createTreatment
+    createTreatment,
+    deleteTreatment
   }
 })

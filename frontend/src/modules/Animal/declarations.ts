@@ -14,7 +14,7 @@ export const AppointmentSchema = z.object({
 
 export const TreatmentSchema = z.object({
   id: z.number().nullish(),
-  name: z.string(),
+  name: z.string().min(1),
   zone: z.string().nullish(),
   frequency: z.number().nullish(),
   amount: z.string().nullish(),

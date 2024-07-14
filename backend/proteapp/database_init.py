@@ -5,6 +5,17 @@ from datetime import datetime
 from proteapp.models.treatments import Treatment
 from proteapp.models.appointments import Appointment
 from proteapp.models.yards import Yard
+from proteapp.models.users import User
+from proteapp.models.people import Person, PhoneNumber
+
+people = [
+    Person(
+        name="Cris",
+        first_surname="Espejo",
+        phone= PhoneNumber("+34640040545"),
+        user=User(active=True, password="hola")
+    )
+]
 
 yards = [
     Yard(name="Patio 1"),
@@ -141,6 +152,7 @@ def init_database_data():
         session = next(session_generator)
 
         list(map(session.add, animals))
+        list(map(session.add, people))
 
         session.commit()
 

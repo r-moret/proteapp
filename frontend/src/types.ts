@@ -66,3 +66,12 @@ export type AnimalFilters = {
   castration: { [castration: string]: boolean }
   compatible: { [compatible: string]: boolean }
 }
+
+export type Notification = {
+  id: string
+  text: string
+  icon?: string
+  cardStyle?: string
+  textStyle?: string
+  iconStyle?: string
+}
