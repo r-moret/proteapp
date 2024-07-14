@@ -31,9 +31,6 @@ const newTreatmentOpen = ref(false)
 const newTreatmentForm = ref<HTMLFormElement | null>(null)
 const newTreatment = ref<Treatment>({ name: '', animalId: animalDetails.value?.id })
 
-const confirmDeleteOpen = ref(false)
-const pendingDeleteTreatment = ref<Treatment>()
-
 const nextAppointment = computed(() => {
   if (!animalDetails.value || !animalDetails.value.appointments) return
 
@@ -81,21 +78,13 @@ async function handleAddTreatment(closeDrawer: () => void) {
   }
 }
 
-async function handleDeleteTreatment(closeDrawer: () => void) {
-  if (!pendingDeleteTreatment.value) return
-
+async function handleDeleteTreatment(treatment: Treatment) {
   try {
-    await animalStore.deleteTreatment(pendingDeleteTreatment.value)
+    await animalStore.deleteTreatment(treatment)
     showSuccessNotification('Tratamiento eliminado correctamente.')
-    closeDrawer()
   } catch (error) {
     showErrorNotification('Ha ocurrido un error, prueba otra vez.')
   }
-}
-
-function handleDeleteConfirmation(treatment: Treatment) {
-  confirmDeleteOpen.value = true
-  pendingDeleteTreatment.value = treatment
 }
 
 onBeforeMount(async () => {
@@ -151,6 +140,8 @@ onBeforeMount(async () => {
 
           <ItemList
             :items="animalDetails.treatments"
+            title="name"
+            delete-title="¿Estás seguro de que quieres borrar este tratamiento?"
             :labels="{
               zone: 'Zona',
               amount: 'Cantidad',
@@ -162,13 +153,25 @@ onBeforeMount(async () => {
               endDate: (date) => format(date, 'medium', 'es-ES')
             }"
             class="mx-5 mt-4"
-            @delete="handleDeleteConfirmation"
+            @delete="handleDeleteTreatment"
           >
             <template #empty>
               <div class="mt-6 flex flex-col items-center">
                 <span class="i-mingcute-injection-fill text-6xl" />
                 <p class="text-gray-500">{{ animalDetails.name }} no tiene tratamientos</p>
               </div>
+            </template>
+
+            <template #delete="{ item }">
+              <p>
+                <span class="font-semibold">{{ item.name }}</span>
+                <span v-if="item.amount">
+                  {{ ` (${item.amount})` }}
+                </span>
+                <span v-if="item.endDate">
+                  {{ `, con duración hasta el ${format(item.endDate, 'long', 'es-ES')}` }}
+                </span>
+              </p>
             </template>
           </ItemList>
         </div>
@@ -244,47 +247,6 @@ onBeforeMount(async () => {
             Añadir
           </button>
         </form>
-      </div>
-    </BottomDrawer>
-
-    <BottomDrawer
-      v-if="pendingDeleteTreatment"
-      class="bg-base-200"
-      size="tiny"
-      v-model="confirmDeleteOpen"
-      v-slot="{ close }"
-    >
-      <div class="flex h-full flex-col gap-6 pb-8">
-        <h1 class="text-3xl font-semibold">
-          ¿Estás seguro de que quieres borrar este tratamiento?
-        </h1>
-        <div>
-          <p>
-            <span class="font-semibold">{{ pendingDeleteTreatment.name }}</span>
-            <span v-if="pendingDeleteTreatment.amount">
-              {{ ` (${pendingDeleteTreatment.amount})` }}
-            </span>
-            <span v-if="pendingDeleteTreatment.endDate">
-              {{
-                `, con duración hasta el ${format(pendingDeleteTreatment.endDate, 'long', 'es-ES')}`
-              }}
-            </span>
-          </p>
-        </div>
-        <div class="mt-auto flex flex-col gap-2">
-          <div class="divider my-1" />
-          <div class="flex justify-center gap-10">
-            <button class="rounded-lg bg-base-100 px-6 py-2 text-lg font-semibold" @click="close">
-              Cancelar
-            </button>
-            <button
-              class="rounded-lg bg-red-700 px-6 py-2 text-lg font-semibold text-white"
-              @click="handleDeleteTreatment(close)"
-            >
-              Si, borrar
-            </button>
-          </div>
-        </div>
       </div>
     </BottomDrawer>
   </main>
