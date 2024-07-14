@@ -12,17 +12,22 @@ const router = createRouter({
     {
       path: '/animals',
       name: 'animals',
-      component: () => import('../views/AnimalListView.vue')
+      component: () => import('@/modules/Animal/views/AnimalListView.vue')
     },
     {
       path: '/animals/:id',
       name: 'animal',
-      component: () => import('../views/AnimalView.vue')
+      component: () => import('@/modules/Animal/views/AnimalView.vue')
     },
     {
       path: '/animals/:id/treatments',
       name: 'animal.treatments',
-      component: () => import('../views/AnimalTreatmentsView.vue')
+      component: () => import('@/modules/Animal/views/TreatmentsView.vue')
+    },
+    {
+      path: '/animals/:id/appointments',
+      name: 'animal.appointments',
+      component: () => import('@/modules/Animal/views/AppointmentsView.vue')
     },
     {
       path: '/shift',
@@ -38,11 +43,6 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: () => import('../views/ProfileView.vue')
-    },
-    {
-      path: '/animals/:id/appointments',
-      name: 'animal.appointments',
-      component: () => import('../views/AppointmentsView.vue')
     }
   ]
 })
