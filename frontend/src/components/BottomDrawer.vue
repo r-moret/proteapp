@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 
 const SIZES = {
+  tiny: 'h-2/5',
   small: 'h-3/5',
   medium: 'h-3/4',
   big: 'h-5/6'
@@ -16,7 +17,7 @@ const isOpen = defineModel<boolean>()
 const props = withDefaults(
   defineProps<{
     includeClose: boolean
-    size: 'small' | 'medium' | 'big'
+    size: 'tiny' | 'small' | 'medium' | 'big'
   }>(),
   {
     includeClose: true,
