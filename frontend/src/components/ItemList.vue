@@ -1,9 +1,10 @@
-<script setup lang="ts" generic="T extends { name: string; [key: string]: any }">
+<script setup lang="ts" generic="T extends { [key: string]: any }">
 import { useSlots, onBeforeMount } from 'vue'
 
 const props = withDefaults(
   defineProps<{
     items?: T[] | null
+    title?: keyof T
     canDelete?: boolean
     labels?: Partial<Record<keyof T, string>>
     formatters?: Partial<Record<keyof T, (value: any) => string>>
@@ -26,9 +27,9 @@ function formatField(field: keyof T, value: any) {
 }
 
 onBeforeMount(() => {
-  if (!slots.item && !props.labels) {
+  if (!slots.item && (!props.labels || !props.title)) {
     throw Error(
-      'One of item slot or field labels props must be provided in order to render the list'
+      'One of item slot or field labels and title props must be provided in order to render the list'
     )
   }
 })
@@ -44,7 +45,7 @@ onBeforeMount(() => {
         <slot name="item" :item="item">
           <div class="flex flex-row justify-between px-4 py-2">
             <div class="flex flex-col">
-              <p class="mb-1 text-lg font-semibold text-blue-600">{{ item.name }}</p>
+              <p class="mb-1 text-lg font-semibold text-blue-600">{{ item[props.title!] }}</p>
               <template v-for="(label, field) in props.labels" :key="field">
                 <p v-if="item[field]" class="text-base text-gray-700">
                   {{ label }}: {{ formatField(field, item[field]) }}
