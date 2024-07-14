@@ -15,6 +15,7 @@ import { storeToRefs } from 'pinia'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { TreatmentAdapter } from '@/modules/Animal/adapters'
 import { ZodError } from 'zod'
+import ItemList from '@/components/ItemList.vue'
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
@@ -147,36 +148,29 @@ onBeforeMount(async () => {
           <div class="mt-4 flex items-center justify-center">
             <p class="text-2xl font-bold text-gray-700">Tratamientos</p>
           </div>
-          <div class="mx-5 mt-4 flex-1 overflow-y-auto">
-            <p v-if="!animalDetails.treatments?.length" class="mt-5 text-center">
-              No hay tratamientos
-            </p>
-            <ul v-else class="space-y-2">
-              <li
-                v-for="(treatment, index) in animalDetails.treatments"
-                :key="index"
-                class="relative flex flex-col rounded-lg p-4 shadow-sm transition hover:bg-gray-200"
-              >
-                <span
-                  class="i-mingcute-close-fill absolute right-2 top-4 h-6 w-6 cursor-pointer text-gray-500"
-                  @click="handleDeleteConfirmation(treatment)"
-                ></span>
-                <p class="text-lg font-semibold text-blue-600">{{ treatment.name }}</p>
-                <p v-if="treatment.zone" class="text-base text-gray-700">
-                  Zona: {{ treatment.zone }}
-                </p>
-                <p v-if="treatment.frequency" class="text-base text-gray-700">
-                  Frecuencia: {{ formatFrequency(treatment.frequency) }}
-                </p>
-                <p v-if="treatment.amount" class="text-base text-gray-700">
-                  Cantidad: {{ treatment.amount }}
-                </p>
-                <p v-if="treatment.endDate" class="text-base text-gray-700">
-                  Fecha de finalización: {{ format(treatment.endDate, 'medium', 'es-ES') }}
-                </p>
-              </li>
-            </ul>
-          </div>
+
+          <ItemList
+            :items="animalDetails.treatments"
+            :labels="{
+              zone: 'Zona',
+              amount: 'Cantidad',
+              frequency: 'Frecuencia',
+              endDate: 'Fecha de finalización'
+            }"
+            :formatters="{
+              frequency: formatFrequency,
+              endDate: (date) => format(date, 'medium', 'es-ES')
+            }"
+            class="mx-5 mt-4"
+            @delete="handleDeleteConfirmation"
+          >
+            <template #empty>
+              <div class="mt-6 flex flex-col items-center">
+                <span class="i-mingcute-injection-fill text-6xl" />
+                <p class="text-gray-500">{{ animalDetails.name }} no tiene tratamientos</p>
+              </div>
+            </template>
+          </ItemList>
         </div>
       </div>
 
