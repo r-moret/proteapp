@@ -2,19 +2,28 @@ from proteapp.api.deps import get_session
 from proteapp.models.animals import Animal, Sex
 from datetime import datetime
 
+from odmantic import SyncEngine
+
 from proteapp.models.treatments import Treatment
 from proteapp.models.appointments import Appointment
 from proteapp.models.yards import Yard
 from proteapp.models.users import User
 from proteapp.models.people import Person, PhoneNumber
+from proteapp.models.nosql.inform import Inform, Note, Arrival, TestedAnimal, Adoption, Loss
 
 people = [
     Person(
         name="Cris",
         first_surname="Espejo",
-        phone= PhoneNumber("+34640040545"),
-        user=User(active=True, password="hola")
-    )
+        phone=PhoneNumber("+34640040545"),
+        user=User(active=True, password="hola"),
+    ),
+    Person(
+        name="Rafael",
+        first_surname="Moret",
+        phone=PhoneNumber("+34640564432"),
+        user=User(active=True, password="adios"),
+    ),
 ]
 
 yards = [
@@ -156,6 +165,67 @@ def init_database_data():
 
         session.commit()
 
+        list(map(session.refresh, animals))
+        list(map(session.refresh, people))
+
         next(session_generator)
     except StopIteration:
-        print("Initialization FINISHED!")
+        print("SQL data initialization is finished!")
+
+    informs = [
+        Inform(
+            creator=people[0].id,
+            volunteers=[people[1].id],
+            start_time=datetime(2024, 7, 15, 16, 30),
+            end_time=datetime(2024, 7, 15, 20, 0),
+            highlights=["Todo estaba muy ordenado"],
+            notes=[
+                Note(
+                    yard=animals[0].yard_id,
+                    animal=animals[0].id,
+                    text="Estaba perfecta",
+                ),
+                Note(
+                    yard=animals[1].yard_id,
+                    animal=animals[1].id,
+                    text="Hoy ha sido probado con perros",
+                ),
+            ],
+            arrivals=[Arrival(name="Lulu", description="Gata blanca con manchas marrones")],
+            tested_animals=[
+                TestedAnimal(
+                    animal=animals[1].id,
+                    compatible=False,
+                )
+            ],
+        ),
+        Inform(
+            creator=people[1].id,
+            volunteers=[people[0].id],
+            start_time=datetime(2024, 7, 16, 16, 30),
+            end_time=datetime(2024, 7, 16, 20, 0),
+            notes=[
+                Note(
+                    yard=animals[2].yard_id,
+                    animal=animals[2].id,
+                    text="Tenía un comportamiento normal",
+                ),
+                Note(
+                    yard=animals[0].yard_id,
+                    animal=animals[0].id,
+                    text="Se encontraba regular",
+                ),
+            ],
+            tested_animals=[
+                TestedAnimal(
+                    animal=animals[1].id,
+                    compatible=False,
+                )
+            ],
+            adoptions=[Adoption(animal=animals[3].id, foster=False)],
+            losses=[Loss(animal=animals[4].id)],
+        ),
+    ]
+
+    mongo_engine = SyncEngine()
+    list(map(mongo_engine.save, informs))
