@@ -6,6 +6,7 @@ from proteapp.api.appointments.routes import router as appointment_router
 from proteapp.api.yards.routes import router as yards_router
 from proteapp.api.people.routes import router as people_router
 from proteapp.api.users.routes import router as users_router
+from proteapp.api.informs.routes import router as informs_router
 from proteapp.database_init import init_database_data
 from contextlib import asynccontextmanager
 from proteapp.api.deps import connect_mongo
@@ -34,3 +35,4 @@ app.include_router(appointment_router)
 app.include_router(yards_router)
 app.include_router(people_router)
 app.include_router(users_router)
+app.include_router(informs_router)
