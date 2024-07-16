@@ -6,7 +6,7 @@ from typing import Optional
 
 
 class Note(EmbeddedModel):
-    yard: int
+    yard: Optional[int] = None
     animal: int
     text: str = Field(min_length=1)
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from proteapp.api.deps import get_session
+from proteapp.api.deps import get_sql_session
 from proteapp.models.animals import Animal
 from proteapp.api.appointments.schemas import CreateAppointment, PublicAppointment
 from proteapp.models.appointments import Appointment
@@ -9,12 +9,12 @@ router = APIRouter(prefix="/appointment", tags=["appointment"])
 
 
 @router.get("/search", response_model=list[PublicAppointment])
-def get_appointments(session: Session = Depends(get_session)):
-    return session.exec(select(Appointment)).all() 
+def get_appointments(session: Session = Depends(get_sql_session)):
+    return session.exec(select(Appointment)).all()
 
 
 @router.post("/", response_model=PublicAppointment, status_code=201)
-def post_appointment(appointment: CreateAppointment, session: Session = Depends(get_session)):
+def post_appointment(appointment: CreateAppointment, session: Session = Depends(get_sql_session)):
     appointment_db = Appointment.model_validate(appointment)
 
     animal_db = session.get(Animal, appointment.animal_id)
@@ -32,7 +32,7 @@ def post_appointment(appointment: CreateAppointment, session: Session = Depends(
 
 
 @router.delete("/{id}")
-def delete_appointment(id: int, session: Session = Depends(get_session)):
+def delete_appointment(id: int, session: Session = Depends(get_sql_session)):
     appointment_db = session.get(Appointment, id)
 
     if appointment_db is None:
