@@ -1,4 +1,4 @@
-from proteapp.api.deps import get_sql_session, get_nosql_session
+from proteapp.api.deps import get_sql_session
 from proteapp.models.animals import Animal, Sex
 from datetime import datetime
 
@@ -155,7 +155,7 @@ animals = [
 ]
 
 
-def init_database_data():
+async def init_database_data():
     try:
         sql_session_generator = get_sql_session()
         sql_session = next(sql_session_generator)
@@ -172,76 +172,70 @@ def init_database_data():
     except StopIteration:
         print("SQL data initialization is finished!")
 
-    try:
-        nosql_session_generator = get_nosql_session()
-        nosql_session = next(nosql_session_generator)
+    animal_0_id = cast(int, animals[0].id)
+    animal_1_id = cast(int, animals[1].id)
+    animal_2_id = cast(int, animals[2].id)
+    animal_3_id = cast(int, animals[3].id)
+    animal_4_id = cast(int, animals[4].id)
 
-        animal_0_id = cast(int, animals[0].id)
-        animal_1_id = cast(int, animals[1].id)
-        animal_2_id = cast(int, animals[2].id)
-        animal_3_id = cast(int, animals[3].id)
-        animal_4_id = cast(int, animals[4].id)
+    person_0_id = cast(int, people[0].id)
+    person_1_id = cast(int, people[1].id)
 
-        person_0_id = cast(int, people[0].id)
-        person_1_id = cast(int, people[1].id)
+    informs = [
+        Inform(
+            creator=person_0_id,
+            volunteers=[person_1_id],
+            start_time=datetime(2024, 7, 15, 16, 30),
+            end_time=datetime(2024, 7, 15, 20, 0),
+            highlights=["Todo estaba muy ordenado"],
+            notes=[
+                Note(
+                    yard=animals[0].yard_id,
+                    animal=animal_0_id,
+                    text="Estaba perfecta",
+                ),
+                Note(
+                    yard=animals[1].yard_id,
+                    animal=animal_1_id,
+                    text="Hoy ha sido probado con perros",
+                ),
+            ],
+            arrivals=[Arrival(name="Lulu", description="Gata blanca con manchas marrones")],
+            tested_animals=[
+                TestedAnimal(
+                    animal=animal_1_id,
+                    compatible=False,
+                )
+            ],
+        ),
+        Inform(
+            creator=person_1_id,
+            volunteers=[person_0_id],
+            start_time=datetime(2024, 7, 16, 16, 30),
+            end_time=datetime(2024, 7, 16, 20, 0),
+            notes=[
+                Note(
+                    yard=animals[2].yard_id,
+                    animal=animal_2_id,
+                    text="Tenía un comportamiento normal",
+                ),
+                Note(
+                    yard=animals[0].yard_id,
+                    animal=animal_0_id,
+                    text="Se encontraba regular",
+                ),
+            ],
+            tested_animals=[
+                TestedAnimal(
+                    animal=animal_1_id,
+                    compatible=False,
+                )
+            ],
+            adoptions=[Adoption(animal=animal_3_id, foster=False)],
+            losses=[Loss(animal=animal_4_id)],
+        ),
+    ]
 
-        informs = [
-            Inform(
-                creator=person_0_id,
-                volunteers=[person_1_id],
-                start_time=datetime(2024, 7, 15, 16, 30),
-                end_time=datetime(2024, 7, 15, 20, 0),
-                highlights=["Todo estaba muy ordenado"],
-                notes=[
-                    Note(
-                        yard=animals[0].yard_id,
-                        animal=animal_0_id,
-                        text="Estaba perfecta",
-                    ),
-                    Note(
-                        yard=animals[1].yard_id,
-                        animal=animal_1_id,
-                        text="Hoy ha sido probado con perros",
-                    ),
-                ],
-                arrivals=[Arrival(name="Lulu", description="Gata blanca con manchas marrones")],
-                tested_animals=[
-                    TestedAnimal(
-                        animal=animal_1_id,
-                        compatible=False,
-                    )
-                ],
-            ),
-            Inform(
-                creator=person_1_id,
-                volunteers=[person_0_id],
-                start_time=datetime(2024, 7, 16, 16, 30),
-                end_time=datetime(2024, 7, 16, 20, 0),
-                notes=[
-                    Note(
-                        yard=animals[2].yard_id,
-                        animal=animal_2_id,
-                        text="Tenía un comportamiento normal",
-                    ),
-                    Note(
-                        yard=animals[0].yard_id,
-                        animal=animal_0_id,
-                        text="Se encontraba regular",
-                    ),
-                ],
-                tested_animals=[
-                    TestedAnimal(
-                        animal=animal_1_id,
-                        compatible=False,
-                    )
-                ],
-                adoptions=[Adoption(animal=animal_3_id, foster=False)],
-                losses=[Loss(animal=animal_4_id)],
-            ),
-        ]
+    await Inform.insert_many(informs)
 
-        list(map(nosql_session.save, informs))
-
-        next(nosql_session_generator)
-    except StopIteration:
-        print("NoSQL data initialization is finished!")
+    print("NoSQL data initialization is finished!")

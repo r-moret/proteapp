@@ -1,42 +1,40 @@
-from odmantic import Model, Field, EmbeddedModel
-
 from datetime import datetime
-from bson import ObjectId
 from typing import Optional
+from pydantic import BaseModel, Field
+from beanie import Document
 
 
-class Note(EmbeddedModel):
+class Note(BaseModel):
     yard: Optional[int] = None
     animal: int
     text: str = Field(min_length=1)
 
 
-class Visit(EmbeddedModel):
+class Visit(BaseModel):
     visitor: str = Field(min_length=1)
     description: str = Field(min_length=1)
 
 
-class Arrival(EmbeddedModel):
+class Arrival(BaseModel):
     name: str = Field(min_length=1)
     description: Optional[str] = Field(default=None, min_length=1)
 
 
-class Loss(EmbeddedModel):
+class Loss(BaseModel):
     animal: int
 
 
-class Adoption(EmbeddedModel):
+class Adoption(BaseModel):
     animal: int
     foster: bool
 
 
-class TestedAnimal(EmbeddedModel):
+class TestedAnimal(BaseModel):
     animal: int
     compatible: bool
 
 
-class Inform(Model):
-    id: ObjectId = Field(default_factory=ObjectId, primary_field=True)
+class BaseInform(BaseModel):
     creator: int
     volunteers: list[int]
     start_time: datetime
@@ -48,3 +46,8 @@ class Inform(Model):
     losses: Optional[list[Loss]] = None
     adoptions: Optional[list[Adoption]] = None
     tested_animals: Optional[list[TestedAnimal]] = None
+
+
+class Inform(Document, BaseInform):
+    class Settings:
+        validate_on_save = True

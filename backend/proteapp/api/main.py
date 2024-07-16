@@ -7,10 +7,18 @@ from proteapp.api.yards.routes import router as yards_router
 from proteapp.api.people.routes import router as people_router
 from proteapp.api.users.routes import router as users_router
 from proteapp.database_init import init_database_data
+from contextlib import asynccontextmanager
+from proteapp.api.deps import connect_mongo
 
-init_database_data()
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await connect_mongo()
+    await init_database_data()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
