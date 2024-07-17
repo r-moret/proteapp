@@ -7,19 +7,19 @@ from proteapp.api.yards.schemas import (
 )
 from proteapp.models.yards import Yard
 from sqlmodel import Session, select
-from proteapp.api.deps import get_session
+from proteapp.api.deps import get_sql_session
 
 router = APIRouter(prefix="/yard", tags=["yard"])
 
 
 @router.get("/search", response_model=list[PublicYardWithRelationships])
-def get_yards(session: Session = Depends(get_session)):
+def get_yards(session: Session = Depends(get_sql_session)):
     yards = session.exec(select(Yard)).all()
     return yards
 
 
 @router.post("/", response_model=PublicYard, status_code=201)
-def post_yard(yard: CreateYard, session: Session = Depends(get_session)):
+def post_yard(yard: CreateYard, session: Session = Depends(get_sql_session)):
     yard_db = Yard.model_validate(yard)
 
     session.add(yard_db)
@@ -30,7 +30,7 @@ def post_yard(yard: CreateYard, session: Session = Depends(get_session)):
 
 
 @router.get("/{id}", response_model=PublicYardWithRelationships)
-def get_yard(id: int, session: Session = Depends(get_session)):
+def get_yard(id: int, session: Session = Depends(get_sql_session)):
     yard_db = session.get(Yard, id)
 
     if yard_db is None:
@@ -40,7 +40,7 @@ def get_yard(id: int, session: Session = Depends(get_session)):
 
 
 @router.put("/{id}", response_model=PublicYard)
-def put_yard(id: int, yard: UpdateYard, session: Session = Depends(get_session)):
+def put_yard(id: int, yard: UpdateYard, session: Session = Depends(get_sql_session)):
     yard_db = session.get(Yard, id)
 
     if yard_db is None:
@@ -56,7 +56,7 @@ def put_yard(id: int, yard: UpdateYard, session: Session = Depends(get_session))
 
 
 @router.delete("/{id}")
-def delete_yard(id: int, session: Session = Depends(get_session)):
+def delete_yard(id: int, session: Session = Depends(get_sql_session)):
     yard_db = session.get(Yard, id)
 
     if yard_db is None:

@@ -7,13 +7,13 @@ from proteapp.api.animals.schemas import (
     UpdateAnimal,
 )
 from proteapp.models.animals import Animal
-from proteapp.api.deps import get_session
+from proteapp.api.deps import get_sql_session
 
 router = APIRouter(prefix="/animal", tags=["animal"])
 
 
 @router.get("/search", response_model=list[PublicAnimalWithRelationships])
-def get_animals(session: Session = Depends(get_session)):
+def get_animals(session: Session = Depends(get_sql_session)):
     animals = session.exec(select(Animal)).all()
     for animal in animals:
         if animal.appointments:
@@ -22,7 +22,7 @@ def get_animals(session: Session = Depends(get_session)):
 
 
 @router.post("/", response_model=PublicAnimal, status_code=201)
-def post_animal(animal: CreateAnimal, session: Session = Depends(get_session)):
+def post_animal(animal: CreateAnimal, session: Session = Depends(get_sql_session)):
     animal_db = Animal.model_validate(animal)
 
     session.add(animal_db)
@@ -33,7 +33,7 @@ def post_animal(animal: CreateAnimal, session: Session = Depends(get_session)):
 
 
 @router.get("/{id}", response_model=PublicAnimalWithRelationships)
-def get_animal(id: int, session: Session = Depends(get_session)):
+def get_animal(id: int, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
     if animal_db is None:
@@ -43,7 +43,7 @@ def get_animal(id: int, session: Session = Depends(get_session)):
 
 
 @router.put("/{id}", response_model=PublicAnimal)
-def put_animal(id: int, animal: UpdateAnimal, session: Session = Depends(get_session)):
+def put_animal(id: int, animal: UpdateAnimal, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
     if animal_db is None:
@@ -59,7 +59,7 @@ def put_animal(id: int, animal: UpdateAnimal, session: Session = Depends(get_ses
 
 
 @router.delete("/{id}")
-def delete_animal(id: int, session: Session = Depends(get_session)):
+def delete_animal(id: int, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
     if animal_db is None:
