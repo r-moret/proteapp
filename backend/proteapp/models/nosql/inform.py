@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from beanie import Document
+from ulid import ULID
 
 
 class BaseInform(BaseModel):
@@ -55,5 +56,12 @@ class BaseInform(BaseModel):
 
 
 class Inform(BaseInform, Document):
+    id: ULID = Field(default_factory=ULID)
+
+    @field_serializer("id")
+    def serialize_id(self, id: ULID):
+        return str(id)
+
     class Settings:
         validate_on_save = True
+        bson_encoders = {ULID: str}

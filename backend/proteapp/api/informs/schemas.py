@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
 from proteapp.models.nosql.inform import BaseInform
-from beanie import PydanticObjectId
+from ulid import ULID
 
 
 class ListedInform(BaseModel):
-    id: PydanticObjectId
+    id: ULID
     creator: BaseInform.Person
     volunteers: list[BaseInform.Person]
     start_time: datetime
@@ -14,7 +14,7 @@ class ListedInform(BaseModel):
 
 
 class CompleteInform(BaseInform):
-    id: PydanticObjectId
+    id: ULID
 
 
 class EditableInform(BaseModel):
