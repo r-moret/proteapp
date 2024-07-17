@@ -2,14 +2,13 @@ from proteapp.api.deps import get_sql_session
 from proteapp.models.animals import Animal, Sex
 from datetime import datetime
 
-from typing import cast
 
 from proteapp.models.treatments import Treatment
 from proteapp.models.appointments import Appointment
 from proteapp.models.yards import Yard
 from proteapp.models.users import User
 from proteapp.models.people import Person, PhoneNumber
-from proteapp.models.nosql.inform import Inform, Note, Arrival, TestedAnimal, Adoption, Loss
+from proteapp.models.nosql.inform import Inform
 
 people = [
     Person(
@@ -168,74 +167,69 @@ async def init_database_data():
         list(map(sql_session.refresh, animals))
         list(map(sql_session.refresh, people))
 
+        informs = [
+            Inform(
+                creator=Inform.Person.model_validate(people[0].model_dump()),
+                volunteers=[Inform.Person.model_validate(people[1].model_dump())],
+                start_time=datetime(2024, 7, 15, 16, 30),
+                end_time=datetime(2024, 7, 15, 20, 0),
+                highlights=["Todo estaba muy ordenado"],
+                notes=[
+                    Inform.Note(
+                        yard=Inform.Note.Yard.model_validate(animals[0].yard.model_dump()),
+                        animal=Inform.Animal.model_validate(animals[0].model_dump()),
+                        text="Estaba perfecta",
+                    ),
+                    Inform.Note(
+                        yard=Inform.Note.Yard.model_validate(animals[1].yard.model_dump()),
+                        animal=Inform.Animal.model_validate(animals[1].model_dump()),
+                        text="Hoy ha sido probado con perros",
+                    ),
+                ],
+                arrivals=[
+                    Inform.Arrival(name="Lulu", description="Gata blanca con manchas marrones")
+                ],
+                tested_animals=[
+                    Inform.TestedAnimal(
+                        animal=Inform.Animal.model_validate(animals[1].model_dump()),
+                        compatible=False,
+                    )
+                ],
+            ),
+            Inform(
+                creator=Inform.Person.model_validate(people[1].model_dump()),
+                volunteers=[Inform.Person.model_validate(people[0].model_dump())],
+                start_time=datetime(2024, 7, 16, 16, 30),
+                end_time=datetime(2024, 7, 16, 20, 0),
+                notes=[
+                    Inform.Note(
+                        yard=Inform.Note.Yard.model_validate(animals[2].yard.model_dump()),
+                        animal=Inform.Animal.model_validate(animals[2].model_dump()),
+                        text="Tenía un comportamiento normal",
+                    ),
+                    Inform.Note(
+                        yard=Inform.Note.Yard.model_validate(animals[0].yard.model_dump()),
+                        animal=Inform.Animal.model_validate(animals[0].model_dump()),
+                        text="Se encontraba regular",
+                    ),
+                ],
+                tested_animals=[
+                    Inform.TestedAnimal(
+                        animal=Inform.Animal.model_validate(animals[2].model_dump()),
+                        compatible=True,
+                    )
+                ],
+                adoptions=[
+                    Inform.Adoption(
+                        animal=Inform.Animal.model_validate(animals[3].model_dump()), foster=False
+                    )
+                ],
+                losses=[Inform.Loss(animal=Inform.Animal.model_validate(animals[4].model_dump()))],
+            ),
+        ]
+
+        await Inform.insert_many(informs)
+
         next(sql_session_generator)
     except StopIteration:
-        print("SQL data initialization is finished!")
-
-    animal_0_id = cast(int, animals[0].id)
-    animal_1_id = cast(int, animals[1].id)
-    animal_2_id = cast(int, animals[2].id)
-    animal_3_id = cast(int, animals[3].id)
-    animal_4_id = cast(int, animals[4].id)
-
-    person_0_id = cast(int, people[0].id)
-    person_1_id = cast(int, people[1].id)
-
-    informs = [
-        Inform(
-            creator=person_0_id,
-            volunteers=[person_1_id],
-            start_time=datetime(2024, 7, 15, 16, 30),
-            end_time=datetime(2024, 7, 15, 20, 0),
-            highlights=["Todo estaba muy ordenado"],
-            notes=[
-                Note(
-                    yard=animals[0].yard_id,
-                    animal=animal_0_id,
-                    text="Estaba perfecta",
-                ),
-                Note(
-                    yard=animals[1].yard_id,
-                    animal=animal_1_id,
-                    text="Hoy ha sido probado con perros",
-                ),
-            ],
-            arrivals=[Arrival(name="Lulu", description="Gata blanca con manchas marrones")],
-            tested_animals=[
-                TestedAnimal(
-                    animal=animal_1_id,
-                    compatible=False,
-                )
-            ],
-        ),
-        Inform(
-            creator=person_1_id,
-            volunteers=[person_0_id],
-            start_time=datetime(2024, 7, 16, 16, 30),
-            end_time=datetime(2024, 7, 16, 20, 0),
-            notes=[
-                Note(
-                    yard=animals[2].yard_id,
-                    animal=animal_2_id,
-                    text="Tenía un comportamiento normal",
-                ),
-                Note(
-                    yard=animals[0].yard_id,
-                    animal=animal_0_id,
-                    text="Se encontraba regular",
-                ),
-            ],
-            tested_animals=[
-                TestedAnimal(
-                    animal=animal_1_id,
-                    compatible=False,
-                )
-            ],
-            adoptions=[Adoption(animal=animal_3_id, foster=False)],
-            losses=[Loss(animal=animal_4_id)],
-        ),
-    ]
-
-    await Inform.insert_many(informs)
-
-    print("NoSQL data initialization is finished!")
+        print("Data initialization is finished!")
