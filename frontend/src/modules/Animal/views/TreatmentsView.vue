@@ -151,6 +151,7 @@ onBeforeMount(async () => {
 
           <ItemList
             :items="animalDetails.treatments"
+            title="name"
             :labels="{
               zone: 'Zona',
               amount: 'Cantidad',

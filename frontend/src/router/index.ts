@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import('@/modules/Animal/views/AppointmentsView.vue')
     },
     {
+      path: '/adoptions',
+      name: 'adoptions',
+      component: () => import('@/modules/Animal/views/AdoptionListView.vue')
+    },
+    {
       path: '/shift',
       name: 'shift',
       component: () => import('../views/ShiftView.vue')

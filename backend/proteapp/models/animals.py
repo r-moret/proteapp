@@ -2,13 +2,15 @@ from sqlmodel import Field, Relationship
 from proteapp.models.globals import GlobalBaseSQLModel
 from datetime import date
 from enum import StrEnum
+from proteapp.models.adoptions import Adoption
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from proteapp.models.treatments import Treatment
     from proteapp.models.appointments import Appointment
     from proteapp.models.yards import Yard
-
+    from proteapp.models.adoptions import Adoption
+    
 
 class Sex(StrEnum):
     male = "male"
@@ -35,3 +37,4 @@ class Animal(BaseAnimal, table=True):
     treatments: list["Treatment"] = Relationship(back_populates="animal")
     appointments: list["Appointment"] = Relationship(back_populates="animal")
     yard: "Yard" = Relationship(back_populates="animals")
+    adopters: list["Adoption"] = Relationship(back_populates="animal")

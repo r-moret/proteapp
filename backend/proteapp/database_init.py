@@ -1,12 +1,14 @@
 from proteapp.api.deps import get_session
 from proteapp.models.animals import Animal, Sex
-from datetime import datetime
+from datetime import datetime, date
 
 from proteapp.models.treatments import Treatment
 from proteapp.models.appointments import Appointment
 from proteapp.models.yards import Yard
 from proteapp.models.users import User
+from proteapp.models.adoptions import Adoption, AdoptionKind
 from proteapp.models.people import Person, PhoneNumber
+
 
 people = [
     Person(
@@ -146,6 +148,19 @@ animals = [
 ]
 
 
+adoption_1 = Adoption(
+    animal=animals[0],
+    person=people[0],
+    register_date=date(2022, 10, 9),
+    kind=AdoptionKind.permanent
+)
+
+# for link in people[0].adoptions:
+#     print("animal:")
+#     print(link.animal)
+#     print("person")
+#     print(link.person)
+
 def init_database_data():
     try:
         session_generator = get_session()
@@ -154,6 +169,7 @@ def init_database_data():
         list(map(session.add, animals))
         list(map(session.add, people))
 
+        session.add(adoption_1)
         session.commit()
 
         next(session_generator)

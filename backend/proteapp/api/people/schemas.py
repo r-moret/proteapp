@@ -9,7 +9,10 @@ class PublicPerson(BasePerson):
 
 class PublicPersonWithRelationships(PublicPerson):
     user: "PublicUser" = None
+    adoptions: list["PublicAdoption"] = []
 
 from proteapp.api.users.schemas import PublicUser # noqa: E402
+from proteapp.api.adoptions.schemas import PublicAdoption # noqa: E402
+from proteapp.api.animals.schemas import PublicAnimal
 
 PublicPersonWithRelationships.model_rebuild()
