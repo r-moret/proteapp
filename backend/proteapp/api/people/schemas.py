@@ -1,15 +1,18 @@
-from proteapp.models.people import BasePerson
+from proteapp.models.base import ULIDSchema, BaseSchema
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
-class CreatePerson(BasePerson): ...
 
-class UpdatePerson(BasePerson): ...
+class EditablePerson(BaseSchema):
+    name: str
+    first_surname: str
+    phone: PhoneNumber
+    second_surname: str | None = None
+    email: str | None = None
 
-class PublicPerson(BasePerson):
-  id: int
 
-class PublicPersonWithRelationships(PublicPerson):
-    user: "PublicUser" = None
-
-from proteapp.api.users.schemas import PublicUser # noqa: E402
-
-PublicPersonWithRelationships.model_rebuild()
+class CompletePerson(ULIDSchema):
+    name: str
+    first_surname: str
+    phone: PhoneNumber
+    second_surname: str | None
+    email: str | None

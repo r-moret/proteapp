@@ -5,7 +5,7 @@ from proteapp.api.informs.schemas import (
     EditableInform,
 )
 from proteapp.models.nosql.inform import Inform
-from beanie import PydanticObjectId
+from ulid import ULID
 from proteapp.api.informs.adapters import to_inform
 from pydantic import ValidationError
 
@@ -30,7 +30,7 @@ async def create_inform(inform: EditableInform):
 
 
 @router.get("/{id}", response_model=CompleteInform)
-async def get_inform(id: PydanticObjectId):
+async def get_inform(id: ULID):
     inform_db = await Inform.get(id)
 
     if not inform_db:
@@ -40,7 +40,7 @@ async def get_inform(id: PydanticObjectId):
 
 
 @router.put("/{id}", response_model=CompleteInform)
-async def update_inform(id: PydanticObjectId, inform: EditableInform):
+async def update_inform(id: ULID, inform: EditableInform):
     inform_db = await Inform.get(id)
 
     if not inform_db:
@@ -62,7 +62,7 @@ async def update_inform(id: PydanticObjectId, inform: EditableInform):
 
 
 @router.delete("/{id}")
-async def delete_inform(id: PydanticObjectId):
+async def delete_inform(id: ULID):
     inform_db = await Inform.get(id)
 
     if not inform_db:

@@ -1,14 +1,15 @@
 from sqlmodel import Field, Relationship
-from proteapp.models.globals import GlobalBaseSQLModel
+from proteapp.models.base import SQLULIDSchema, SQLAlchemyULIDType
 from pydantic import computed_field
 from typing import TYPE_CHECKING
 from datetime import datetime
+from ulid import ULID
 
 if TYPE_CHECKING:
-    from proteapp.models.animals import Animal
+    from proteapp.models.sql.animals import Animal
 
 
-class BaseAppointment(GlobalBaseSQLModel):
+class Appointment(SQLULIDSchema, table=True):
     date: datetime
     description: str
 
@@ -17,10 +18,6 @@ class BaseAppointment(GlobalBaseSQLModel):
     def is_past(self) -> bool:
         return self.date < datetime.now()
 
-    animal_id: int = Field(default=None, foreign_key="animal.id")
-
-
-class Appointment(BaseAppointment, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    animal_id: ULID = Field(default=None, foreign_key="animal.id", sa_type=SQLAlchemyULIDType)
 
     animal: "Animal" = Relationship(back_populates="appointments")

@@ -5,12 +5,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 # These imports are mandatory to ensure that once the SQL database
 # is created, all models are registered
-from proteapp.models.animals import Animal  # noqa: F401
-from proteapp.models.appointments import Appointment  # noqa: F401
-from proteapp.models.treatments import Treatment  # noqa: F401
-from proteapp.models.yards import Yard  # noqa: F401
-from proteapp.models.people import Person  # noqa: F401
-from proteapp.models.users import User  # noqa: F401
+from proteapp.models.sql.animals import Animal  # noqa: F401
+from proteapp.models.sql.appointments import Appointment  # noqa: F401
+from proteapp.models.sql.treatments import Treatment  # noqa: F401
+from proteapp.models.sql.yards import Yard  # noqa: F401
+from proteapp.models.sql.people import Person  # noqa: F401
+from proteapp.models.sql.users import User  # noqa: F401
 
 from proteapp.models.nosql.inform import Inform
 

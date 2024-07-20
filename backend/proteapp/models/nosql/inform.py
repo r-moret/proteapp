@@ -1,45 +1,41 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, field_serializer
-from beanie import Document
-from ulid import ULID
+from pydantic import Field
+from proteapp.models.base import ULIDSchema, BaseSchema, NoSQLULIDSchema
 
 
-class BaseInform(BaseModel):
-    class Person(BaseModel):
-        id: int
+class Inform(NoSQLULIDSchema):
+    class Person(ULIDSchema):
         name: str
 
-    class Animal(BaseModel):
-        id: int
+    class Animal(ULIDSchema):
         name: str
 
-    class Note(BaseModel):
-        class Yard(BaseModel):
-            id: int
+    class Note(BaseSchema):
+        class Yard(ULIDSchema):
             name: str
 
         yard: Optional[Yard] = None
-        animal: "BaseInform.Animal"
+        animal: "Inform.Animal"
         text: str = Field(min_length=1)
 
-    class Visit(BaseModel):
+    class Visit(BaseSchema):
         visitor: str = Field(min_length=1)
         description: str = Field(min_length=1)
 
-    class Arrival(BaseModel):
+    class Arrival(BaseSchema):
         name: str = Field(min_length=1)
         description: Optional[str] = Field(default=None, min_length=1)
 
-    class Loss(BaseModel):
-        animal: "BaseInform.Animal"
+    class Loss(BaseSchema):
+        animal: "Inform.Animal"
 
-    class Adoption(BaseModel):
-        animal: "BaseInform.Animal"
+    class Adoption(BaseSchema):
+        animal: "Inform.Animal"
         foster: bool
 
-    class TestedAnimal(BaseModel):
-        animal: "BaseInform.Animal"
+    class TestedAnimal(BaseSchema):
+        animal: "Inform.Animal"
         compatible: bool
 
     creator: Person
@@ -53,15 +49,3 @@ class BaseInform(BaseModel):
     losses: Optional[list[Loss]] = None
     adoptions: Optional[list[Adoption]] = None
     tested_animals: Optional[list[TestedAnimal]] = None
-
-
-class Inform(BaseInform, Document):
-    id: ULID = Field(default_factory=ULID)
-
-    @field_serializer("id")
-    def serialize_id(self, id: ULID):
-        return str(id)
-
-    class Settings:
-        validate_on_save = True
-        bson_encoders = {ULID: str}

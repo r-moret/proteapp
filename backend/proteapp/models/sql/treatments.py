@@ -1,23 +1,20 @@
 from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING
 from datetime import datetime
-from proteapp.models.globals import GlobalBaseSQLModel
+from proteapp.models.base import SQLULIDSchema, SQLAlchemyULIDType
+from ulid import ULID
 
 if TYPE_CHECKING:
-    from proteapp.models.animals import Animal
+    from proteapp.models.sql.animals import Animal
 
 
-class BaseTreatment(GlobalBaseSQLModel):
+class Treatment(SQLULIDSchema, table=True):
     name: str
     zone: str | None = Field(default=None)
     frequency: int | None = Field(default=None)
     end_date: datetime | None = Field(default=None)
     amount: str | None = Field(default=None)
 
-    animal_id: int = Field(default=None, foreign_key="animal.id")
-
-
-class Treatment(BaseTreatment, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    animal_id: ULID = Field(default=None, foreign_key="animal.id", sa_type=SQLAlchemyULIDType)
 
     animal: "Animal" = Relationship(back_populates="treatments")

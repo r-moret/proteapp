@@ -1,27 +1,27 @@
 from proteapp.api.deps import get_sql_session
-from proteapp.models.animals import Animal, Sex
-from datetime import datetime
-
-
-from proteapp.models.treatments import Treatment
-from proteapp.models.appointments import Appointment
-from proteapp.models.yards import Yard
-from proteapp.models.users import User
-from proteapp.models.people import Person, PhoneNumber
 from proteapp.models.nosql.inform import Inform
+from proteapp.models.sql.animals import Animal, Sex
+from datetime import datetime
+from typing import cast
+
+from proteapp.models.sql.treatments import Treatment
+from proteapp.models.sql.appointments import Appointment
+from proteapp.models.sql.yards import Yard
+from proteapp.models.sql.users import User
+from proteapp.models.sql.people import Person, PhoneNumber
 
 people = [
     Person(
         name="Cris",
         first_surname="Espejo",
         phone=PhoneNumber("+34640040545"),
-        user=User(active=True, password="hola"),
+        user=User(active=True, veteran=True, password="hola"),
     ),
     Person(
         name="Rafael",
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
-        user=User(active=True, password="adios"),
+        user=User(active=True, veteran=False, password="adios"),
     ),
 ]
 
@@ -168,63 +168,66 @@ async def init_database_data():
         list(map(sql_session.refresh, people))
 
         informs = [
-            Inform(
-                creator=Inform.Person.model_validate(people[0].model_dump()),
-                volunteers=[Inform.Person.model_validate(people[1].model_dump())],
-                start_time=datetime(2024, 7, 15, 16, 30),
-                end_time=datetime(2024, 7, 15, 20, 0),
-                highlights=["Todo estaba muy ordenado"],
-                notes=[
-                    Inform.Note(
-                        yard=Inform.Note.Yard.model_validate(animals[0].yard.model_dump()),
-                        animal=Inform.Animal.model_validate(animals[0].model_dump()),
-                        text="Estaba perfecta",
-                    ),
-                    Inform.Note(
-                        yard=Inform.Note.Yard.model_validate(animals[1].yard.model_dump()),
-                        animal=Inform.Animal.model_validate(animals[1].model_dump()),
-                        text="Hoy ha sido probado con perros",
-                    ),
-                ],
-                arrivals=[
-                    Inform.Arrival(name="Lulu", description="Gata blanca con manchas marrones")
-                ],
-                tested_animals=[
-                    Inform.TestedAnimal(
-                        animal=Inform.Animal.model_validate(animals[1].model_dump()),
-                        compatible=False,
-                    )
-                ],
+            Inform.model_validate(
+                dict(
+                    creator=dict(people[0]),
+                    volunteers=[dict(people[1])],
+                    start_time=datetime(2024, 7, 15, 16, 30),
+                    end_time=datetime(2024, 7, 15, 20, 0),
+                    highlights=["Todo estaba muy ordenado"],
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[0].yard)),
+                            animal=dict(animals[0]),
+                            text="Estaba perfecta",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[1].yard)),
+                            animal=dict(animals[1]),
+                            text="Hoy ha sido probado con perros",
+                        ),
+                    ],
+                    arrivals=[dict(name="Lulu", description="Gata blanca con manchas marrones")],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[1]),
+                            compatible=False,
+                        )
+                    ],
+                )
             ),
-            Inform(
-                creator=Inform.Person.model_validate(people[1].model_dump()),
-                volunteers=[Inform.Person.model_validate(people[0].model_dump())],
-                start_time=datetime(2024, 7, 16, 16, 30),
-                end_time=datetime(2024, 7, 16, 20, 0),
-                notes=[
-                    Inform.Note(
-                        yard=Inform.Note.Yard.model_validate(animals[2].yard.model_dump()),
-                        animal=Inform.Animal.model_validate(animals[2].model_dump()),
-                        text="Tenía un comportamiento normal",
-                    ),
-                    Inform.Note(
-                        yard=Inform.Note.Yard.model_validate(animals[0].yard.model_dump()),
-                        animal=Inform.Animal.model_validate(animals[0].model_dump()),
-                        text="Se encontraba regular",
-                    ),
-                ],
-                tested_animals=[
-                    Inform.TestedAnimal(
-                        animal=Inform.Animal.model_validate(animals[2].model_dump()),
-                        compatible=True,
-                    )
-                ],
-                adoptions=[
-                    Inform.Adoption(
-                        animal=Inform.Animal.model_validate(animals[3].model_dump()), foster=False
-                    )
-                ],
-                losses=[Inform.Loss(animal=Inform.Animal.model_validate(animals[4].model_dump()))],
+            Inform.model_validate(
+                dict(
+                    creator=dict(people[1]),
+                    volunteers=[dict(people[0])],
+                    start_time=datetime(2024, 7, 16, 16, 30),
+                    end_time=datetime(2024, 7, 16, 20, 0),
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[2].yard)),
+                            animal=dict(animals[2]),
+                            text="Tenía un comportamiento normal",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[0].yard)),
+                            animal=dict(animals[0]),
+                            text="Se encontraba regular",
+                        ),
+                    ],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[2]),
+                            compatible=True,
+                        )
+                    ],
+                    adoptions=[
+                        dict(
+                            animal=dict(animals[3]),
+                            foster=False,
+                        )
+                    ],
+                    losses=[dict(animal=dict(animals[4]))],
+                )
             ),
         ]
 
