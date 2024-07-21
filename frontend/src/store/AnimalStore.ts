@@ -1,11 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type {
+  Yard,
   Animal,
-  Appointment,
-  CreateAppointment,
-  Treatment,
-  Yard
+  AnimalInfo,
+  EditAppointment,
+  EditTreatment
 } from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
@@ -14,23 +14,22 @@ import {
   crudTreatment as crudTreatmentApi,
   crudAppointment as crudAppointmentApi
 } from '@/modules/Animal/api'
-import { AnimalAdapter, AppointmentAdapter, TreatmentAdapter } from '@/modules/Animal/adapters'
+import { AnimalAdapter, AnimalInfoAdapter } from '@/modules/Animal/adapters'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
-  const animalList = ref<Animal[]>([])
+  const animalList = ref<AnimalInfo[]>([])
   const animalDetails = ref<Animal>()
 
   const yardList = ref<Yard[]>([])
 
   const isLoading = ref(false)
-  const isSaving = ref(false)
 
   async function fetchAnimals() {
     isLoading.value = true
 
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listAnimalApi}`)
       .then((res) => res.json())
-      .then((json) => json.map(AnimalAdapter))
+      .then((json) => json.map(AnimalInfoAdapter))
       .then((animals) => (animalList.value = animals))
 
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
@@ -40,7 +39,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading.value = false
   }
 
-  async function getAnimal(id: number) {
+  async function fetchAnimal(id: string) {
     isLoading.value = true
 
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${id}`)
@@ -51,12 +50,10 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading.value = false
   }
 
-  async function createTreatment(treatment: Treatment) {
-    if (!animalDetails.value || treatment.animalId !== animalDetails.value?.id) {
+  async function createTreatment(treatment: EditTreatment) {
+    if (!animalDetails.value || treatment.animal !== animalDetails.value.id) {
       throw Error('Cannot create a treatment for an animal different than the one that is loaded')
     }
-
-    // TODO: Add treatment validation
 
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}`, {
       method: 'post',
@@ -65,35 +62,33 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
         'Content-Type': 'application/json'
       }
     })
-      .then((res) => res.json())
-      .then(TreatmentAdapter)
-      .then((treatment) => {
-        if (!animalDetails.value || treatment.animalId !== animalDetails.value?.id) {
-          throw Error(
-            'Cannot create a treatment for an animal different than the one that is loaded'
-          )
-        }
 
-        animalDetails.value.treatments = [...(animalDetails.value.treatments ?? []), treatment]
-      })
+    // INFO: This could be an improvement point, insert manually the returned
+    // treatment instead of refetching the whole animal
+    await fetchAnimal(animalDetails.value.id)
   }
 
-  async function deleteTreatment(treatment: Treatment) {
-    if (!animalDetails.value || treatment.animalId !== animalDetails.value?.id) {
-      throw Error('Cannot create a treatment for an animal different than the one that is loaded')
+  async function deleteTreatment(treatmentId: string) {
+    if (
+      !animalDetails.value ||
+      !animalDetails.value.treatments.map((treatment) => treatment.id).includes(treatmentId)
+    ) {
+      throw Error(
+        'Cannot delete a treatment that belongs to an animal different than the one that is loaded'
+      )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}/${treatment.id}`, {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}/${treatmentId}`, {
       method: 'delete'
     })
 
-    animalDetails.value.treatments = animalDetails.value.treatments?.filter(
-      (treat) => treat.id !== treatment.id
+    animalDetails.value.treatments = animalDetails.value.treatments.filter(
+      (treatment) => treatment.id !== treatmentId
     )
   }
 
-  async function createAppointment(appointment: CreateAppointment) {
-    if (!animalDetails.value || appointment.animalId !== animalDetails.value?.id) {
+  async function createAppointment(appointment: EditAppointment) {
+    if (!animalDetails.value || appointment.animal !== animalDetails.value.id) {
       throw Error(
         'Cannot create an appointment for an animal different than the one that is loaded'
       )
@@ -106,35 +101,27 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
         'Content-Type': 'application/json'
       }
     })
-      .then((res) => res.json())
-      .then(AppointmentAdapter)
-      .then((appointment) => {
-        if (!animalDetails.value || appointment.animalId !== animalDetails.value?.id) {
-          throw Error(
-            'Cannot create an appointment for an animal different than the one that is loaded'
-          )
-        }
 
-        animalDetails.value.appointments = [
-          ...(animalDetails.value.appointments ?? []),
-          appointment
-        ]
-      })
+    // INFO: Improvement point, same as treatment
+    await fetchAnimal(animalDetails.value.id)
   }
 
-  async function deleteAppointment(appointment: Appointment) {
-    if (!animalDetails.value || appointment.animalId !== animalDetails.value?.id) {
+  async function deleteAppointment(appointmentId: string) {
+    if (
+      !animalDetails.value ||
+      !animalDetails.value.appointments.map((appointment) => appointment.id).includes(appointmentId)
+    ) {
       throw Error(
-        'Cannot delete an appointment for an animal different than the one that is loaded'
+        'Cannot delete an appointment that belongs to an animal different than the one that is loaded'
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}/${appointment.id}`, {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}/${appointmentId}`, {
       method: 'delete'
     })
 
-    animalDetails.value.appointments = animalDetails.value.appointments?.filter(
-      (appo) => appo.id !== appointment.id
+    animalDetails.value.appointments = animalDetails.value.appointments.filter(
+      (appointment) => appointment.id !== appointmentId
     )
   }
 
@@ -144,7 +131,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     yardList,
     isLoading,
     fetchAnimals,
-    getAnimal,
+    fetchAnimal,
     createTreatment,
     deleteTreatment,
     createAppointment,

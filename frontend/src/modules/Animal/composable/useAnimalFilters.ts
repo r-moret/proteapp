@@ -1,12 +1,12 @@
 import { computed, type Ref } from 'vue'
 
 import type { AnimalFilters } from '@/types'
-import type { Animal } from '@/modules/Animal/declarations'
+import type { AnimalInfo } from '@/modules/Animal/declarations'
 import { diffYears } from '@formkit/tempo'
 
 const age = (birthdate: Date) => diffYears(new Date(), birthdate)
 
-export const useAnimalFilters = (animals: Ref<Animal[]>, filters: Ref<AnimalFilters>) => {
+export const useAnimalFilters = (animals: Ref<AnimalInfo[]>, filters: Ref<AnimalFilters>) => {
   return computed(() => {
     let filtered = animals.value
 

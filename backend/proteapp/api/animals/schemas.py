@@ -28,6 +28,9 @@ class ListedAnimal(ULIDSchema):
     sex: Sex
     image: str | None
     yard: Yard | None
+    birth_date: date | None
+    is_animal_compatible: bool | None
+    is_castrated: bool | None
     treatments: list[Treatment]
 
 

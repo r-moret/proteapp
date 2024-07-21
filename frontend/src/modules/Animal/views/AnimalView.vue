@@ -36,7 +36,12 @@ const age = computed(() => {
 })
 
 onBeforeMount(async () => {
-  await animalStore.getAnimal(Number(id))
+  if (!id) {
+    navigateBack()
+    return
+  }
+
+  await animalStore.fetchAnimal(id)
 })
 </script>
 

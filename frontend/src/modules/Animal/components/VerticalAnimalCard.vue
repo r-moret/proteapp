@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Animal } from '@/modules/Animal/declarations'
+import type { AnimalInfo } from '@/modules/Animal/declarations'
 import AnimalImage from './AnimalImage.vue'
 
 const props = defineProps<{
-  animal: Animal
+  animal: AnimalInfo
 }>()
 </script>
 
