@@ -2,7 +2,7 @@
 import { computed, onBeforeMount, ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { useAnimalStore } from '@/store/AnimalStore'
-import { useRoute, useRouter } from 'vue-router'
+import { useParams } from '@/composable/useParams'
 import { storeToRefs } from 'pinia'
 import ItemList from '@/components/ItemList.vue'
 import { sortBy, reverse } from 'lodash'
@@ -22,9 +22,7 @@ const { showErrorNotification, showSuccessNotification } = useToastNotifications
 const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
 
-const router = useRouter()
-const route = useRoute()
-const { id }: { id?: string } = route.params
+const routeParams = useParams<{ id: string }>()
 
 const newAppointmentOpen = ref(false)
 const newAppointmentForm = ref<HTMLFormElement | null>(null)
@@ -69,13 +67,8 @@ async function handleDeleteAppointment(appointmentId: string) {
 }
 
 onBeforeMount(async () => {
-  if (!id) {
-    router.back()
-    return
-  }
-
-  if (!animalDetails.value || animalDetails.value.id !== id) {
-    await animalStore.fetchAnimal(id)
+  if (!animalDetails.value || animalDetails.value.id !== routeParams.value.id) {
+    await animalStore.fetchAnimal(routeParams.value.id)
   }
 
   newAppointment.value = {

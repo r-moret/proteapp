@@ -2,23 +2,19 @@
 import AnimalDetails from '@/modules/Animal/components/AnimalDetails.vue'
 import AnimalImage from '@/modules/Animal/components/AnimalImage.vue'
 import { computed, onBeforeMount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAnimalStore } from '@/store/AnimalStore'
 import humanizeDuration from 'humanize-duration'
 import { format } from '@formkit/tempo'
 import { storeToRefs } from 'pinia'
+import { useParams } from '@/composable/useParams'
 
 const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
 
 const router = useRouter()
-const route = useRoute()
+const routeParams = useParams<{ id: string }>()
 
-const { id }: { id?: string } = route.params
-
-const navigateBack = () => router.back()
-const navigateTreatments = () =>
-  router.push({ name: 'animal.treatments', params: { id: route.params.id } })
 const age = computed(() => {
   if (!animalDetails.value || !animalDetails.value.birthDate) return
 
@@ -35,13 +31,13 @@ const age = computed(() => {
   })
 })
 
-onBeforeMount(async () => {
-  if (!id) {
-    navigateBack()
-    return
-  }
+const navigateBack = () => router.back()
+const navigateTreatments = () => {
+  router.push({ name: 'animal.treatments', params: { id: routeParams.value.id } })
+}
 
-  await animalStore.fetchAnimal(id)
+onBeforeMount(async () => {
+  await animalStore.fetchAnimal(routeParams.value.id)
 })
 </script>
 

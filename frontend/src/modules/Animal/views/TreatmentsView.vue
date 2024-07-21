@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { useParams } from '@/composable/useParams'
 import { format } from '@formkit/tempo'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
@@ -24,8 +25,7 @@ const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
 
 const router = useRouter()
-const route = useRoute()
-const { id }: { id?: string } = route.params
+const routeParams = useParams<{ id: string }>()
 
 const newTreatmentOpen = ref(false)
 const newTreatmentForm = ref<HTMLFormElement | null>(null)
@@ -54,7 +54,7 @@ function formatFrequency(minutes: number): string {
 }
 
 function navigateAppointments() {
-  router.push({ name: 'animal.appointments', params: { id } })
+  router.push({ name: 'animal.appointments', params: { id: routeParams.value.id } })
 }
 
 async function handleAddTreatment(closeDrawer: () => void) {
@@ -88,13 +88,8 @@ async function handleDeleteTreatment(treatmentId: string) {
 }
 
 onBeforeMount(async () => {
-  if (!id) {
-    router.back()
-    return
-  }
-
-  if (!animalDetails.value || animalDetails.value.id !== id) {
-    await animalStore.fetchAnimal(id)
+  if (!animalDetails.value || animalDetails.value.id !== routeParams.value.id) {
+    await animalStore.fetchAnimal(routeParams.value.id)
   }
 
   newTreatment.value = { name: '', animal: animalDetails.value!.id }
