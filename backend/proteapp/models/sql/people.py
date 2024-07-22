@@ -13,8 +13,8 @@ PhoneNumber.phone_format = "E164"
 class Person(SQLULIDSchema, table=True):
     name: str
     first_surname: str
+    email: str
     phone: PhoneNumber
     second_surname: str | None = Field(default=None)
-    email: str | None = Field(default=None)
 
     user: Optional["User"] = Relationship(back_populates="person")

@@ -14,12 +14,14 @@ people = [
     Person(
         name="Cris",
         first_surname="Espejo",
+        email="cris@espejo.com",
         phone=PhoneNumber("+34640040545"),
         user=User(active=True, veteran=True, password="hola"),
     ),
     Person(
         name="Rafael",
         first_surname="Moret",
+        email="rafa@moret.com",
         phone=PhoneNumber("+34640564432"),
         user=User(active=True, veteran=False, password="adios"),
     ),

@@ -15,6 +15,7 @@ class ListedUser(ULIDSchema):
     class Person(ULIDSchema):
         name: str
         first_surname: str
+        email: str
         second_surname: str | None
 
     active: bool
@@ -29,6 +30,6 @@ class CompleteUser(ListedUser):
         first_surname: str
         phone: PhoneNumber
         second_surname: str | None
-        email: str | None
+        email: str
 
     person: Person
