@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { useParams } from '@/composable/useParams'
 import { format } from '@formkit/tempo'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
@@ -8,12 +9,12 @@ import TextInput from '@/components/TextInput.vue'
 import TimeInput from '@/components/TimeInput.vue'
 import DateInput from '@/components/DateInput.vue'
 import ToastNotifications from '@/components/ToastNotifications.vue'
-import type { Treatment } from '@/modules/Animal/declarations'
+import type { EditTreatment } from '@/modules/Animal/declarations'
 import humanizeDuration from 'humanize-duration'
 import { useAnimalStore } from '@/store/AnimalStore'
 import { storeToRefs } from 'pinia'
 import { useToastNotifications } from '@/composable/useToastNotifications'
-import { TreatmentAdapter } from '@/modules/Animal/adapters'
+import { EditTreatmentAdapter } from '@/modules/Animal/adapters'
 import { ZodError } from 'zod'
 import ItemList from '@/components/ItemList.vue'
 
@@ -24,12 +25,11 @@ const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
 
 const router = useRouter()
-const route = useRoute()
-const { id }: { id?: string } = route.params
+const routeParams = useParams<{ id: string }>()
 
 const newTreatmentOpen = ref(false)
 const newTreatmentForm = ref<HTMLFormElement | null>(null)
-const newTreatment = ref<Treatment>({ name: '', animalId: animalDetails.value?.id })
+const newTreatment = ref<EditTreatment>()
 
 const nextAppointment = computed(() => {
   if (!animalDetails.value || !animalDetails.value.appointments) return
@@ -54,20 +54,20 @@ function formatFrequency(minutes: number): string {
 }
 
 function navigateAppointments() {
-  router.push({ name: 'animal.appointments', params: { id } })
+  router.push({ name: 'animal.appointments', params: { id: routeParams.value.id } })
 }
 
 async function handleAddTreatment(closeDrawer: () => void) {
   if (!animalDetails.value || !newTreatment.value) return
 
   try {
-    TreatmentAdapter(newTreatment.value)
+    EditTreatmentAdapter(newTreatment.value)
 
     await animalStore.createTreatment(newTreatment.value)
     showSuccessNotification('Tratamiento añadido correctamente.')
 
     newTreatmentForm.value?.reset()
-    newTreatment.value = { name: '', animalId: animalDetails.value?.id }
+    newTreatment.value = { name: '', animal: animalDetails.value.id }
     closeDrawer()
   } catch (error) {
     if (error instanceof ZodError) {
@@ -78,9 +78,9 @@ async function handleAddTreatment(closeDrawer: () => void) {
   }
 }
 
-async function handleDeleteTreatment(treatment: Treatment) {
+async function handleDeleteTreatment(treatmentId: string) {
   try {
-    await animalStore.deleteTreatment(treatment)
+    await animalStore.deleteTreatment(treatmentId)
     showSuccessNotification('Tratamiento eliminado correctamente.')
   } catch (error) {
     showErrorNotification('Ha ocurrido un error, prueba otra vez.')
@@ -88,10 +88,11 @@ async function handleDeleteTreatment(treatment: Treatment) {
 }
 
 onBeforeMount(async () => {
-  if (!animalDetails.value || animalDetails.value.id !== Number(id)) {
-    await animalStore.getAnimal(Number(id))
-    newTreatment.value.animalId = animalDetails.value?.id
+  if (!animalDetails.value || animalDetails.value.id !== routeParams.value.id) {
+    await animalStore.fetchAnimal(routeParams.value.id)
   }
+
+  newTreatment.value = { name: '', animal: animalDetails.value!.id }
 })
 </script>
 
@@ -153,7 +154,7 @@ onBeforeMount(async () => {
               endDate: (date) => format(date, 'medium', 'es-ES')
             }"
             class="mx-5 mt-4"
-            @delete="handleDeleteTreatment"
+            @delete="(treatment) => handleDeleteTreatment(treatment.id)"
           >
             <template #empty>
               <div class="mt-6 flex flex-col items-center">
@@ -191,12 +192,13 @@ onBeforeMount(async () => {
       <div class="flex h-full flex-col gap-5">
         <h1 class="text-3xl font-semibold">Nuevo tratamiento</h1>
         <form
+          v-if="newTreatment"
           @submit.prevent="handleAddTreatment(close)"
           ref="newTreatmentForm"
           class="flex h-full flex-col gap-6 pb-10"
         >
           <div class="flex flex-col gap-2">
-            <label class="font-semibold" for="new-treatment-name"> Nombre del tratamiento </label>
+            <label class="font-semibold" for="new-treatment-name">Nombre del tratamiento</label>
             <TextInput
               name="new-treatment-name"
               placeholder="ej. Clorexhidina"

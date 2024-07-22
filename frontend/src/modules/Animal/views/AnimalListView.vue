@@ -11,7 +11,7 @@ import AnimalFiltersMenuButton from '@/modules/Animal/components/AnimalFiltersMe
 import { useAnimalStore } from '@/store/AnimalStore'
 import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
-import type { Animal } from '@/modules/Animal/declarations'
+import type { AnimalInfo } from '@/modules/Animal/declarations'
 
 const router = useRouter()
 
@@ -57,14 +57,14 @@ const animalsByYard = computed(() => {
       ...acc,
       [yard.name]: filteredAnimals.value.filter((animal) => animal.yard?.name === yard.name)
     }),
-    {} as Record<number, Animal[]>
+    {} as Record<string, AnimalInfo[]>
   )
 
   const nonYardAnimals = filteredAnimals.value.filter((animal) => animal.yard == undefined)
   return { ...groupedAnimals, 'Sin patio': nonYardAnimals }
 })
 
-const navigateAnimal = (id: number) => router.push({ name: 'animal', params: { id } })
+const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
 
 function navigateAdoptions() {
   router.push({ name: 'adoptions' })
@@ -90,7 +90,7 @@ watch(yardList, () => {
 watch(animalList, () => {
   const animalListMaxAge = max(
     animalList.value.map((animal) =>
-      animal.birthDate == undefined ? undefined : diffYears(new Date(), animal.birthDate)
+      animal.birthDate == undefined ? undefined : diffYears(new Date(), animal.birthDate) + 1
     )
   )
 
@@ -132,7 +132,6 @@ onBeforeMount(async () => {
             placeholder="Buscar animal"
             ref="searchInput"
             autocomplete="off"
-            v-model="filters.name"
           />
         </div>
         <div class="flex flex-col gap-1 px-0">

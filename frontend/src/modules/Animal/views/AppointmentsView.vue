@@ -2,19 +2,19 @@
 import { computed, onBeforeMount, ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { useAnimalStore } from '@/store/AnimalStore'
-import { useRoute } from 'vue-router'
+import { useParams } from '@/composable/useParams'
 import { storeToRefs } from 'pinia'
 import ItemList from '@/components/ItemList.vue'
 import { sortBy, reverse } from 'lodash'
 import { format, addDay } from '@formkit/tempo'
 import BottomDrawer from '@/components/BottomDrawer.vue'
-import type { Appointment, CreateAppointment } from '@/modules/Animal/declarations'
 import TextInput from '@/components/TextInput.vue'
 import DateInput from '@/components/DateInput.vue'
-import { CreateAppointmentAdapter } from '@/modules/Animal/adapters'
+import { EditAppointmentAdapter } from '@/modules/Animal/adapters'
 import { ZodError } from 'zod'
 import ToastNotifications from '@/components/ToastNotifications.vue'
 import { useToastNotifications } from '@/composable/useToastNotifications'
+import type { EditAppointment } from '../declarations'
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
@@ -22,12 +22,11 @@ const { showErrorNotification, showSuccessNotification } = useToastNotifications
 const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
 
-const route = useRoute()
-const { id }: { id?: string } = route.params
+const routeParams = useParams<{ id: string }>()
 
 const newAppointmentOpen = ref(false)
 const newAppointmentForm = ref<HTMLFormElement | null>(null)
-const newAppointment = ref<CreateAppointment>()
+const newAppointment = ref<EditAppointment>()
 
 const sortedAppointments = computed(() =>
   reverse(sortBy(animalDetails.value?.appointments, ['date']))
@@ -37,7 +36,7 @@ async function handleAddAppointment(closeDrawer: () => void) {
   if (!animalDetails.value || !newAppointment.value) return
 
   try {
-    CreateAppointmentAdapter(newAppointment.value)
+    EditAppointmentAdapter(newAppointment.value)
 
     await animalStore.createAppointment(newAppointment.value)
     showSuccessNotification('Cita médica añadida correctamente.')
@@ -46,7 +45,7 @@ async function handleAddAppointment(closeDrawer: () => void) {
     newAppointment.value = {
       date: addDay(new Date()),
       description: '',
-      animalId: animalDetails.value!.id
+      animal: animalDetails.value.id
     }
     closeDrawer()
   } catch (error) {
@@ -58,9 +57,9 @@ async function handleAddAppointment(closeDrawer: () => void) {
   }
 }
 
-async function handleDeleteAppointment(appointment: Appointment) {
+async function handleDeleteAppointment(appointmentId: string) {
   try {
-    await animalStore.deleteAppointment(appointment)
+    await animalStore.deleteAppointment(appointmentId)
     showSuccessNotification('Cita médica eliminada correctamente')
   } catch (error) {
     showErrorNotification('Ha ocurrido un error, prueba otra vez.')
@@ -68,14 +67,14 @@ async function handleDeleteAppointment(appointment: Appointment) {
 }
 
 onBeforeMount(async () => {
-  if (!animalDetails.value || animalDetails.value.id !== Number(id)) {
-    await animalStore.getAnimal(Number(id))
+  if (!animalDetails.value || animalDetails.value.id !== routeParams.value.id) {
+    await animalStore.fetchAnimal(routeParams.value.id)
   }
 
   newAppointment.value = {
     date: addDay(new Date()),
     description: '',
-    animalId: animalDetails.value!.id
+    animal: animalDetails.value!.id
   }
 })
 </script>
@@ -97,7 +96,7 @@ onBeforeMount(async () => {
             :items="sortedAppointments"
             delete-title="¿Estás seguro de que quieres borrar esta cita médica?"
             class="mx-5"
-            @delete="handleDeleteAppointment"
+            @delete="(appointment) => handleDeleteAppointment(appointment.id)"
           >
             <template #empty>
               <div class="mt-6 flex flex-col items-center">
