@@ -11,14 +11,14 @@ if TYPE_CHECKING:
 PhoneNumber.phone_format = 'E164'
 
 class BasePerson(GlobalBaseSQLModel):
-  name: str
-  first_surname: str
-  phone: PhoneNumber
-  second_surname: str | None = Field(default=None)
-  email: str | None = Field(default=None)
+    name: str
+    first_surname: str
+    phone: PhoneNumber
+    second_surname: str | None = Field(default=None)
+    email: str | None = Field(default=None)
 
 class Person(BasePerson, table=True):
-  id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
 
-  user: "User" = Relationship(back_populates="person")
-  adoptions: list["Adoption"] = Relationship(back_populates="person")
+    user: "User" = Relationship(back_populates="person")
+    adoptions: list["Adoption"] = Relationship(back_populates="person")

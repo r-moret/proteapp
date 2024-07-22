@@ -1,3 +1,4 @@
+import { first } from 'lodash'
 import { z } from 'zod'
 
 export const YardSchema = z.object({
@@ -41,8 +42,27 @@ export const AnimalSchema = z.object({
   appointments: z.array(AppointmentSchema).nullish()
 })
 
+export const AdoptionListSchema = z.object({
+  registerDate: z.coerce.date(),
+  kind: z.enum(['foster_home', 'permanente']),
+  revocationDate: z.coerce.date().nullish(),
+  animal: z.object({
+    id: z.number(),
+    name: z.string(),
+    image: z.string()
+  }),
+  person: z.object({
+    id: z.number(),
+    name: z.string(),
+    firstSurname: z.string()
+  })
+})
+
+// TODO: Crear un adoption_list_schema
+
 export type Yard = z.infer<typeof YardSchema>
 export type Treatment = z.infer<typeof TreatmentSchema>
 export type Appointment = z.infer<typeof AppointmentSchema>
 export type CreateAppointment = z.infer<typeof CreateAppointmentSchema>
 export type Animal = z.infer<typeof AnimalSchema>
+export type AdoptionList = z.infer<typeof AdoptionListSchema>

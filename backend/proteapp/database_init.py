@@ -6,11 +6,12 @@ from typing import cast
 
 from proteapp.models.treatments import Treatment
 from proteapp.models.appointments import Appointment
+from proteapp.models.adoptions import Adoption, AdoptionKind
 from proteapp.models.yards import Yard
 from proteapp.models.users import User
-from proteapp.models.adoptions import Adoption, AdoptionKind
 from proteapp.models.people import Person, PhoneNumber
-from proteapp.models.nosql.inform import Inform, Note, Arrival, TestedAnimal, Adoption, Loss
+from proteapp.models.nosql.inform import Inform, Note, Arrival, TestedAnimal, Loss
+from proteapp.models.nosql.inform import Adoption as AdoptionInform
 
 people = [
     Person(
@@ -155,16 +156,27 @@ animals = [
     ),
 ]
 
+adopcion_1 = Adoption(
+    animal=animals[0],
+    person=people[0],
+    kind=AdoptionKind.foster_home,
+    register_date=date(2021, 1, 8)
+    )
 
-def init_database_data():
+
+async def init_database_data():
     try:
         sql_session_generator = get_sql_session()
         sql_session = next(sql_session_generator)
 
         list(map(sql_session.add, animals))
         list(map(sql_session.add, people))
+        sql_session.add(adopcion_1)
 
         sql_session.commit()
+
+        list(map(sql_session.refresh, animals))
+        list(map(sql_session.refresh, people))
 
         next(sql_session_generator)
     except StopIteration:
@@ -229,7 +241,7 @@ def init_database_data():
                     compatible=False,
                 )
             ],
-            adoptions=[Adoption(animal=animal_3_id, foster=False)],
+            adoptions=[AdoptionInform(animal=animal_3_id, foster=False)],
             losses=[Loss(animal=animal_4_id)],
         ),
     ]
