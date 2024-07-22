@@ -15,7 +15,7 @@ const props = withDefaults(
   }
 )
 
-const { user, isLoading } = storeToRefs(useUserStore())
+const { loggedUser, isLoading } = storeToRefs(useUserStore())
 
 const router = useRouter()
 
@@ -28,8 +28,8 @@ const navigateBack = () => router.back()
     <div class="min-w-0 flex-1">
       <template v-if="props.left == 'profile'">
         <ProfileAvatar
-          v-if="!isLoading"
-          :user="user"
+          v-if="!isLoading && loggedUser"
+          :user="loggedUser"
           class="btn btn-circle btn-ghost btn-lg"
           @click="openProfile"
         />

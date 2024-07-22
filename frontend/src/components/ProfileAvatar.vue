@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { User } from '@/types'
+import type { User } from '@/modules/Inform/declarations'
 import { computed } from 'vue'
 
 const props = withDefaults(
@@ -15,8 +15,8 @@ const props = withDefaults(
 )
 
 const imageSrc = computed(() => {
-  const placeholder_url = `https://ui-avatars.com/api/?background=D6D6D6&color=1C1C1C&size=256&name=${props.user.name}+${props.user.surnames}`
-  return props.user.avatar || placeholder_url
+  const placeholder_url = `https://ui-avatars.com/api/?background=D6D6D6&color=1C1C1C&size=256&name=${props.user.person.name}+${props.user.person.firstSurname}`
+  return props.user.image || placeholder_url
 })
 </script>
 

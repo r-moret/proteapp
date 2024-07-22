@@ -3,6 +3,7 @@ from proteapp.models.nosql.inform import Inform
 from proteapp.models.sql.animals import Animal, Sex
 from datetime import datetime
 from typing import cast
+from ulid import ULID
 
 from proteapp.models.sql.treatments import Treatment
 from proteapp.models.sql.appointments import Appointment
@@ -16,7 +17,12 @@ people = [
         first_surname="Espejo",
         email="cris@espejo.com",
         phone=PhoneNumber("+34640040545"),
-        user=User(active=True, veteran=True, password="hola"),
+        user=User(
+            id=ULID.from_str("01J3DSAAMJCCXJNB7M2XZGVEPW"),  # Fixed, this is the fake logged user
+            active=True,
+            veteran=True,
+            password="hola",
+        ),
     ),
     Person(
         name="Rafael",

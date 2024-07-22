@@ -41,6 +41,16 @@ def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
     return user_db
 
 
+@router.get("/{id}", response_model=CompleteUser)
+def get_user(id: ULID, session: Session = Depends(get_sql_session)):
+    user_db = session.get(User, id)
+
+    if user_db is None:
+        raise HTTPException(404, "User not found")
+
+    return user_db
+
+
 @router.delete("/{id}")
 def delete_user(id: ULID, session: Session = Depends(get_sql_session)):
     user_db = session.get(User, id)

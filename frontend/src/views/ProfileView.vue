@@ -4,28 +4,33 @@ import AppHeader from '@/skeleton/AppHeader.vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/UserStore'
 
-const { user, fullname } = storeToRefs(useUserStore())
+const { loggedUser } = storeToRefs(useUserStore())
 </script>
 
 <template>
   <main class="flex flex-col items-start gap-6 text-base-content">
     <AppHeader left="back" />
     <div class="flex w-full flex-col gap-10 px-4">
-      <div class="flex w-full items-end gap-8 px-4">
-        <ProfileAvatar :user="user" size="large" :ring="true" />
+      <div v-if="loggedUser" class="flex w-full items-end gap-8 px-4">
+        <ProfileAvatar :user="loggedUser" size="large" :ring="true" />
         <div class="w-full">
-          <h2 class="text-2xl font-bold">{{ fullname }}</h2>
-          <p class="mb-2 text-sm font-semibold">{{ user.email }}</p>
+          <h2 class="text-2xl font-bold">
+            {{ loggedUser.person.name + ' ' + loggedUser.person.firstSurname }}
+          </h2>
+          <p class="mb-2 text-sm font-semibold">{{ loggedUser.person.email }}</p>
           <div
-            :class="[{ 'badge-outline': !user.isVeteran }, 'badge badge-secondary gap-2 px-2 py-3']"
+            :class="[
+              { 'badge-outline': !loggedUser.veteran },
+              'badge badge-secondary gap-2 px-2 py-3'
+            ]"
           >
             <span
               :class="[
                 'text-xl',
-                user.isVeteran ? 'i-mingcute-safe-lock-fill' : 'i-mingcute-shield-shape-line'
+                loggedUser.veteran ? 'i-mingcute-safe-lock-fill' : 'i-mingcute-shield-shape-line'
               ]"
             />
-            <p class="text-sm font-semibold">{{ user.isVeteran ? 'Veterano' : 'Novato' }}</p>
+            <p class="text-sm font-semibold">{{ loggedUser.veteran ? 'Veterano' : 'Novato' }}</p>
           </div>
         </div>
       </div>

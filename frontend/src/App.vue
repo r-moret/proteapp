@@ -2,12 +2,12 @@
 import NavigationBar from '@/skeleton/NavigationBar.vue'
 import { onBeforeMount } from 'vue'
 import { RouterView } from 'vue-router'
-import { useUserStore } from './store/UserStore'
+import { useUserStore } from '@/store/UserStore'
 
 const userStore = useUserStore()
 
 onBeforeMount(async () => {
-  Promise.allSettled([userStore.fetchUser()])
+  await userStore.loginUser()
 })
 </script>
 
