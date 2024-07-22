@@ -1,20 +1,16 @@
-from proteapp.models.yards import BaseYard
+from proteapp.models.base import ULIDSchema, BaseSchema
 
 
-class CreateYard(BaseYard): ...
+class EditableYard(BaseSchema):
+    name: str
 
 
-class UpdateYard(BaseYard): ...
+class ListedYard(ULIDSchema):
+    name: str
 
 
-class PublicYard(BaseYard):
-    id: int
+class CompleteYard(ListedYard):
+    class Animal(ULIDSchema):
+        name: str
 
-
-class PublicYardWithRelationships(PublicYard):
-    animals: list["PublicAnimal"] = []
-
-
-from proteapp.api.animals.schemas import PublicAnimal  # noqa: E402
-
-PublicYardWithRelationships.model_rebuild()
+    animals: list[Animal]

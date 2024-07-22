@@ -1,15 +1,15 @@
 from proteapp.api.deps import get_sql_session
-from proteapp.models.animals import Animal, Sex
+from proteapp.models.nosql.inform import Inform
+from proteapp.models.sql.animals import Animal, Sex
 from datetime import datetime, date
-
 from typing import cast
 
-from proteapp.models.treatments import Treatment
-from proteapp.models.appointments import Appointment
+from proteapp.models.sql.treatments import Treatment
+from proteapp.models.sql.appointments import Appointment
+from proteapp.models.sql.yards import Yard
+from proteapp.models.sql.users import User
+from proteapp.models.sql.people import Person, PhoneNumber
 from proteapp.models.adoptions import Adoption, AdoptionKind
-from proteapp.models.yards import Yard
-from proteapp.models.users import User
-from proteapp.models.people import Person, PhoneNumber
 from proteapp.models.nosql.inform import Inform, Note, Arrival, TestedAnimal, Loss
 from proteapp.models.nosql.inform import Adoption as AdoptionInform
 
@@ -18,13 +18,13 @@ people = [
         name="Cris",
         first_surname="Espejo",
         phone=PhoneNumber("+34640040545"),
-        user=User(active=True, password="hola"),
+        user=User(active=True, veteran=True, password="hola"),
     ),
     Person(
         name="Rafael",
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
-        user=User(active=True, password="adios"),
+        user=User(active=True, veteran=False, password="adios"),
     ),
 ]
 
@@ -178,74 +178,72 @@ async def init_database_data():
         list(map(sql_session.refresh, animals))
         list(map(sql_session.refresh, people))
 
+        informs = [
+            Inform.model_validate(
+                dict(
+                    creator=dict(people[0]),
+                    volunteers=[dict(people[1])],
+                    start_time=datetime(2024, 7, 15, 16, 30),
+                    end_time=datetime(2024, 7, 15, 20, 0),
+                    highlights=["Todo estaba muy ordenado"],
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[0].yard)),
+                            animal=dict(animals[0]),
+                            text="Estaba perfecta",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[1].yard)),
+                            animal=dict(animals[1]),
+                            text="Hoy ha sido probado con perros",
+                        ),
+                    ],
+                    arrivals=[dict(name="Lulu", description="Gata blanca con manchas marrones")],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[1]),
+                            compatible=False,
+                        )
+                    ],
+                )
+            ),
+            Inform.model_validate(
+                dict(
+                    creator=dict(people[1]),
+                    volunteers=[dict(people[0])],
+                    start_time=datetime(2024, 7, 16, 16, 30),
+                    end_time=datetime(2024, 7, 16, 20, 0),
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[2].yard)),
+                            animal=dict(animals[2]),
+                            text="Tenía un comportamiento normal",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[0].yard)),
+                            animal=dict(animals[0]),
+                            text="Se encontraba regular",
+                        ),
+                    ],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[2]),
+                            compatible=True,
+                        )
+                    ],
+                    adoptions=[
+                        dict(
+                            animal=dict(animals[3]),
+                            foster=False,
+                        )
+                    ],
+                    losses=[dict(animal=dict(animals[4]))],
+                )
+            ),
+        ]
+
+        await Inform.insert_many(informs)
+
         next(sql_session_generator)
     except StopIteration:
-        print("SQL data initialization is finished!")
-
-    animal_0_id = cast(int, animals[0].id)
-    animal_1_id = cast(int, animals[1].id)
-    animal_2_id = cast(int, animals[2].id)
-    animal_3_id = cast(int, animals[3].id)
-    animal_4_id = cast(int, animals[4].id)
-
-    person_0_id = cast(int, people[0].id)
-    person_1_id = cast(int, people[1].id)
-
-    informs = [
-        Inform(
-            creator=person_0_id,
-            volunteers=[person_1_id],
-            start_time=datetime(2024, 7, 15, 16, 30),
-            end_time=datetime(2024, 7, 15, 20, 0),
-            highlights=["Todo estaba muy ordenado"],
-            notes=[
-                Note(
-                    yard=animals[0].yard_id,
-                    animal=animal_0_id,
-                    text="Estaba perfecta",
-                ),
-                Note(
-                    yard=animals[1].yard_id,
-                    animal=animal_1_id,
-                    text="Hoy ha sido probado con perros",
-                ),
-            ],
-            arrivals=[Arrival(name="Lulu", description="Gata blanca con manchas marrones")],
-            tested_animals=[
-                TestedAnimal(
-                    animal=animal_1_id,
-                    compatible=False,
-                )
-            ],
-        ),
-        Inform(
-            creator=person_1_id,
-            volunteers=[person_0_id],
-            start_time=datetime(2024, 7, 16, 16, 30),
-            end_time=datetime(2024, 7, 16, 20, 0),
-            notes=[
-                Note(
-                    yard=animals[2].yard_id,
-                    animal=animal_2_id,
-                    text="Tenía un comportamiento normal",
-                ),
-                Note(
-                    yard=animals[0].yard_id,
-                    animal=animal_0_id,
-                    text="Se encontraba regular",
-                ),
-            ],
-            tested_animals=[
-                TestedAnimal(
-                    animal=animal_1_id,
-                    compatible=False,
-                )
-            ],
-            adoptions=[AdoptionInform(animal=animal_3_id, foster=False)],
-            losses=[Loss(animal=animal_4_id)],
-        ),
-    ]
-
-    await Inform.insert_many(informs)
-
-    print("NoSQL data initialization is finished!")
+        print("Data initialization is finished!")

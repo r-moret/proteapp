@@ -1,8 +1,24 @@
-from proteapp.models.treatments import BaseTreatment
+from proteapp.models.base import ULIDSchema, BaseSchema
+from datetime import datetime
+from ulid import ULID
 
 
-class CreateTreatment(BaseTreatment): ...
+class EditableTreatment(BaseSchema):
+    name: str
+    zone: str | None = None
+    frequency: int | None = None
+    end_date: datetime | None = None
+    amount: str | None = None
+    animal: ULID
 
 
-class PublicTreatment(BaseTreatment):
-    id: int
+class CompleteTreatment(ULIDSchema):
+    class Animal(ULIDSchema):
+        name: str
+
+    name: str
+    zone: str | None
+    frequency: int | None
+    end_date: datetime | None
+    amount: str | None
+    animal: Animal

@@ -1,27 +1,36 @@
 from fastapi import APIRouter, HTTPException
-from proteapp.api.informs.schemas import PublicInform, CreateInform, UpdateInform
+from proteapp.api.informs.schemas import (
+    CompleteInform,
+    ListedInform,
+    EditableInform,
+)
 from proteapp.models.nosql.inform import Inform
-from beanie import PydanticObjectId
+from ulid import ULID
+from proteapp.api.informs.adapters import to_inform
+from pydantic import ValidationError
 
 router = APIRouter(prefix="/inform", tags=["inform"])
 
 
-@router.get("/search", response_model=list[PublicInform])
+@router.get("/search", response_model=list[ListedInform])
 async def list_informs():
-    informs = await Inform.find_all().to_list()
-    return informs
+    informs_db = await Inform.find_all().to_list()
+    return informs_db
 
 
-@router.post("/", response_model=PublicInform, status_code=201)
-async def create_inform(inform: CreateInform):
-    inform_db = Inform(**inform.model_dump())
+@router.post("/", response_model=CompleteInform, status_code=201)
+async def create_inform(inform: EditableInform):
+    try:
+        inform_db = to_inform(inform)
+    except ValidationError:
+        raise HTTPException(422, "Unable to create a new inform with the data passed")
 
     await inform_db.insert()
     return inform_db
 
 
-@router.get("/{id}", response_model=PublicInform)
-async def get_inform(id: PydanticObjectId):
+@router.get("/{id}", response_model=CompleteInform)
+async def get_inform(id: ULID):
     inform_db = await Inform.get(id)
 
     if not inform_db:
@@ -30,23 +39,30 @@ async def get_inform(id: PydanticObjectId):
     return inform_db
 
 
-@router.put("/{id}", response_model=PublicInform)
-async def update_inform(id: PydanticObjectId, inform: UpdateInform):
+@router.put("/{id}", response_model=CompleteInform)
+async def update_inform(id: ULID, inform: EditableInform):
     inform_db = await Inform.get(id)
 
     if not inform_db:
         raise HTTPException(404, "Inform not found")
 
-    for prop, value in inform.model_dump().items():
+    try:
+        changed_inform = to_inform(inform)
+    except ValidationError:
+        raise HTTPException(422, "Unable to update the inform with the data passed")
+
+    for prop, value in dict(changed_inform).items():
+        if prop == "id":
+            continue
+
         setattr(inform_db, prop, value)
 
     await inform_db.replace()
-
     return inform_db
 
 
 @router.delete("/{id}")
-async def delete_inform(id: PydanticObjectId):
+async def delete_inform(id: ULID):
     inform_db = await Inform.get(id)
 
     if not inform_db:

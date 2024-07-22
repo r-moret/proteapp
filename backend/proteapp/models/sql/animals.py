@@ -1,23 +1,22 @@
 from sqlmodel import Field, Relationship
-from proteapp.models.globals import GlobalBaseSQLModel
 from datetime import date
 from enum import StrEnum
-from proteapp.models.adoptions import Adoption
-from typing import TYPE_CHECKING
+from proteapp.models.base import SQLULIDSchema, SQLAlchemyULIDType
+from typing import TYPE_CHECKING, Optional
+from ulid import ULID
 
 if TYPE_CHECKING:
-    from proteapp.models.treatments import Treatment
-    from proteapp.models.appointments import Appointment
-    from proteapp.models.yards import Yard
-    from proteapp.models.adoptions import Adoption
-    
+    from proteapp.models.sql.treatments import Treatment
+    from proteapp.models.sql.appointments import Appointment
+    from proteapp.models.sql.yards import Yard
+
 
 class Sex(StrEnum):
     male = "male"
     female = "female"
 
 
-class BaseAnimal(GlobalBaseSQLModel):
+class Animal(SQLULIDSchema, table=True):
     name: str
     sex: Sex
     personality: str | None = Field(default=None)
@@ -28,13 +27,8 @@ class BaseAnimal(GlobalBaseSQLModel):
     is_castrated: bool | None = Field(default=None)
     image: str | None = Field(default=None)
 
-    yard_id: int | None = Field(default=None, foreign_key="yard.id")
-
-
-class Animal(BaseAnimal, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    yard_id: ULID | None = Field(default=None, foreign_key="yard.id", sa_type=SQLAlchemyULIDType)
 
     treatments: list["Treatment"] = Relationship(back_populates="animal")
     appointments: list["Appointment"] = Relationship(back_populates="animal")
-    yard: "Yard" = Relationship(back_populates="animals")
-    adopters: list["Adoption"] = Relationship(back_populates="animal")
+    yard: Optional["Yard"] = Relationship(back_populates="animals")

@@ -1,43 +1,52 @@
 from fastapi import APIRouter, Depends, HTTPException
-from proteapp.models.people import Person
-from proteapp.api.users.schemas import PublicUser, CreateUser
-
-from proteapp.models.users import User
+from proteapp.api.users.schemas import ListedUser, CompleteUser, EditableUser
+from proteapp.exceptions import UnsavedDataError
+from pydantic import ValidationError
+from proteapp.models.sql.users import User
 from proteapp.api.deps import get_sql_session
 from sqlmodel import Session, select
+from ulid import ULID
+from proteapp.api.users.adapters import to_user
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.get("/search", response_model=list[PublicUser])
+@router.get("/search", response_model=list[ListedUser])
 def get_users(session: Session = Depends(get_sql_session)):
     return session.exec(select(User)).all()
 
 
-@router.post("/", response_model=PublicUser, status_code=201)
-def post_user(user: CreateUser, session: Session = Depends(get_sql_session)):
-    user_db = User.model_validate(user)
+@router.post("/", response_model=CompleteUser, status_code=201)
+def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
+    try:
+        user_db = to_user(user)
+    except UnsavedDataError as e:
+        raise HTTPException(
+            422, f"The field {e.field} makes reference to an entity that is not saved yet"
+        )
+    except ValidationError:
+        raise HTTPException(422, "Unable to create an user with the data passed")
 
-    person_db = session.get(Person, user.person_id)
+    try:
+        session.add(user_db)
+        session.commit()
+        session.refresh(user_db)
+    except IntegrityError as e:
+        if "UNIQUE" in str(e):
+            raise HTTPException(422, "The person specified already has an user")
 
-    if not person_db:
-        raise HTTPException(404, "No person found")
-
-    person_db.users.append(user_db)
-
-    session.add(person_db)
-    session.commit()
-    session.refresh(user_db)
+        raise e
 
     return user_db
 
 
 @router.delete("/{id}")
-def delete_user(id: int, session: Session = Depends(get_sql_session)):
+def delete_user(id: ULID, session: Session = Depends(get_sql_session)):
     user_db = session.get(User, id)
 
     if user_db is None:
-        raise HTTPException(404, "No user found")
+        raise HTTPException(404, "User not found")
 
     session.delete(user_db)
     session.commit()
