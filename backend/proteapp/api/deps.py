@@ -11,6 +11,7 @@ from proteapp.models.sql.treatments import Treatment  # noqa: F401
 from proteapp.models.sql.yards import Yard  # noqa: F401
 from proteapp.models.sql.people import Person  # noqa: F401
 from proteapp.models.sql.users import User  # noqa: F401
+from proteapp.models.sql.adoptions import Adoption  # noqa: F401
 
 from proteapp.models.nosql.inform import Inform
 

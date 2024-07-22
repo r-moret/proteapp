@@ -9,9 +9,7 @@ from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
 from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
-from proteapp.models.adoptions import Adoption, AdoptionKind
-from proteapp.models.nosql.inform import Inform, Note, Arrival, TestedAnimal, Loss
-from proteapp.models.nosql.inform import Adoption as AdoptionInform
+from proteapp.models.sql.adoptions import Adoption, AdoptionKind
 
 people = [
     Person(
@@ -160,8 +158,8 @@ adopcion_1 = Adoption(
     animal=animals[0],
     person=people[0],
     kind=AdoptionKind.foster_home,
-    register_date=date(2021, 1, 8)
-    )
+    register_date=date(2021, 1, 8),
+)
 
 
 async def init_database_data():
