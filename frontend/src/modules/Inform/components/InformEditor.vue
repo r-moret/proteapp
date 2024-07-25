@@ -8,6 +8,7 @@ import BottomDrawer from '@/components/BottomDrawer.vue'
 import ItemSelector from '@/components/ItemSelector.vue'
 import HoursInput from '@/components/HoursInput.vue'
 import DateInput from '@/components/DateInput.vue'
+import TextListInput from '@/components/TextListInput.vue'
 import { pick } from 'lodash'
 
 const { userList } = storeToRefs(useUserStore())
@@ -26,6 +27,7 @@ type EnrichedFields =
   | ['volunteers', UserInfo[]]
   | ['date', Date]
   | ['timeRange', TimeRange]
+  | ['highlights', string[] | undefined | null]
 type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
@@ -34,7 +36,8 @@ const enrichedInform = ref<EnrichedInform>({
     (vol) => userList.value.find((user) => user.id === vol)! // TODO
   ),
   date: props.modelValue.date,
-  timeRange: [props.modelValue.timeRange.start, props.modelValue.timeRange.end]
+  timeRange: [props.modelValue.timeRange.start, props.modelValue.timeRange.end],
+  highlights: props.modelValue.highlights
 })
 
 const volunteersDrawerOpen = ref(false)
@@ -58,6 +61,9 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
         start: pick(update[0], ['hours', 'minutes']),
         end: pick(update[1], ['hours', 'minutes'])
       }
+      break
+    case 'highlights':
+      modelUpdate = update
       break
     default:
       return
@@ -130,6 +136,17 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
             />
           </div>
         </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold">Destacado</h2>
+        <TextListInput
+          :model-value="enrichedInform.highlights"
+          placeholder="El turno de hoy fue..."
+          @update:model-value="(highlights) => handleFieldUpdate('highlights', highlights)"
+        >
+          <template #empty><p class="my-1 text-center italic">No hay notas destacadas</p></template>
+        </TextListInput>
       </div>
 
       <pre>{{ props.modelValue }}</pre>
