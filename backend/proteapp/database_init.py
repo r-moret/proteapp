@@ -1,7 +1,7 @@
 from proteapp.api.deps import get_sql_session
 from proteapp.models.nosql.inform import Inform
 from proteapp.models.sql.animals import Animal, Sex
-from datetime import datetime
+from datetime import datetime, date
 from typing import cast
 from ulid import ULID
 
@@ -180,8 +180,11 @@ async def init_database_data():
                 dict(
                     creator=dict(people[0]),
                     volunteers=[dict(people[1])],
-                    start_time=datetime(2024, 7, 15, 16, 30),
-                    end_time=datetime(2024, 7, 15, 20, 0),
+                    date=date(2024, 7, 15),
+                    time_range=dict(
+                        start=dict(hours=16, minutes=30),
+                        end=dict(hours=20, minutes=0),
+                    ),
                     highlights=["Todo estaba muy ordenado"],
                     notes=[
                         dict(
@@ -208,8 +211,11 @@ async def init_database_data():
                 dict(
                     creator=dict(people[1]),
                     volunteers=[dict(people[0])],
-                    start_time=datetime(2024, 7, 16, 16, 30),
-                    end_time=datetime(2024, 7, 16, 20, 0),
+                    date=date(2024, 7, 15),
+                    time_range=dict(
+                        start=dict(hours=16, minutes=30),
+                        end=dict(hours=20, minutes=0),
+                    ),
                     notes=[
                         dict(
                             yard=dict(cast(Yard, animals[2].yard)),

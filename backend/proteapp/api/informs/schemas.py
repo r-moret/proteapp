@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from typing import Optional
 from pydantic import Field
 from proteapp.models.base import ULIDSchema, BaseSchema
@@ -10,10 +10,18 @@ class ListedInform(ULIDSchema):
         first_surname: str
         second_surname: str | None
 
+    class TimeRange(BaseSchema):
+        class Time(BaseSchema):
+            hours: int
+            minutes: int
+
+        start: Time
+        end: Time
+
     creator: Person
     volunteers: list[Person]
-    start_time: datetime
-    end_time: datetime
+    date: date
+    time_range: TimeRange
 
 
 class CompleteInform(ListedInform):
@@ -80,10 +88,18 @@ class EditableInform(BaseSchema):
         animal: int
         compatible: bool
 
+    class TimeRange(BaseSchema):
+        class Time(BaseSchema):
+            hours: int
+            minutes: int
+
+        start: Time
+        end: Time
+
     creator: int
     volunteers: list[int]
-    start_time: datetime
-    end_time: datetime
+    date: date
+    time_range: TimeRange
     notes: list[Note]
     highlights: Optional[list[str]] = None
     visits: Optional[list[Visit]] = None
