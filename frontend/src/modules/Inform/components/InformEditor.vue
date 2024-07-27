@@ -2,6 +2,7 @@
 import type { EditInform, UserInfo } from '@/modules/Inform/declarations'
 import { ref } from 'vue'
 import { useUserStore } from '@/store/UserStore'
+import { useAnimalStore } from '@/store/AnimalStore'
 import { storeToRefs } from 'pinia'
 import UserCard from '@/modules/Inform/components/UserCard.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
@@ -10,8 +11,11 @@ import HoursInput from '@/components/HoursInput.vue'
 import DateInput from '@/components/DateInput.vue'
 import TextListInput from '@/components/TextListInput.vue'
 import { pick } from 'lodash'
+import type { AnimalInfo } from '@/modules/Animal/declarations'
+import AnimalNotesEditor from '@/components/AnimalNotesEditor.vue'
 
 const { userList } = storeToRefs(useUserStore())
+const { yardList, animalList } = storeToRefs(useAnimalStore())
 
 const props = defineProps<{
   modelValue: EditInform
@@ -28,6 +32,7 @@ type EnrichedFields =
   | ['date', Date]
   | ['timeRange', TimeRange]
   | ['highlights', string[] | undefined | null]
+  | ['notes', { info: AnimalInfo; note?: string }[]]
 type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
@@ -37,14 +42,14 @@ const enrichedInform = ref<EnrichedInform>({
   ),
   date: props.modelValue.date,
   timeRange: [props.modelValue.timeRange.start, props.modelValue.timeRange.end],
-  highlights: props.modelValue.highlights
+  highlights: props.modelValue.highlights,
+  notes: animalList.value.map((animal) => ({ info: animal }))
 })
 
 const volunteersDrawerOpen = ref(false)
 
 function handleFieldUpdate(...[field, update]: EnrichedFields) {
   let modelUpdate: EditInform[keyof EditInform]
-  Object.assign(enrichedInform.value)
 
   switch (field) {
     case 'creator':
@@ -65,15 +70,28 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
     case 'highlights':
       modelUpdate = update
       break
+    case 'notes':
+      modelUpdate = update
+        .filter((note) => note.note)
+        .map((note) => ({ animal: note.info.id, text: note.note }))
+      break
     default:
       return
   }
 
   enrichedInform.value = { ...enrichedInform.value, [field]: update }
+  console.log({
+    ...props.modelValue,
+    [field]: modelUpdate
+  })
   emit('update:model-value', {
     ...props.modelValue,
     [field]: modelUpdate
   })
+}
+
+function handleAddNoteInHighlights(highlight: string) {
+  handleFieldUpdate('highlights', [...(props.modelValue.highlights ?? []), highlight])
 }
 </script>
 
@@ -145,8 +163,20 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
           placeholder="El turno de hoy fue..."
           @update:model-value="(highlights) => handleFieldUpdate('highlights', highlights)"
         >
-          <template #empty><p class="my-1 text-center italic">No hay notas destacadas</p></template>
+          <template #empty>
+            <p class="my-1 text-center italic text-gray-400">No hay notas destacadas</p>
+          </template>
         </TextListInput>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold">Notas</h2>
+        <AnimalNotesEditor
+          :yards="yardList"
+          :model-value="enrichedInform.notes"
+          @add-highlight="handleAddNoteInHighlights"
+          @update:model-value="(notes) => handleFieldUpdate('notes', notes)"
+        />
       </div>
 
       <pre>{{ props.modelValue }}</pre>

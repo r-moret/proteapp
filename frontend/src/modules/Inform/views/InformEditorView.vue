@@ -5,9 +5,12 @@ import { useUserStore } from '@/store/UserStore'
 import InformEditor from '../components/InformEditor.vue'
 import { storeToRefs } from 'pinia'
 import type { EditInform } from '@/modules/Inform/declarations'
+import { useAnimalStore } from '@/store/AnimalStore'
 
 const userStore = useUserStore()
 const { loggedUser } = storeToRefs(userStore)
+
+const animalStore = useAnimalStore()
 
 const loading = ref(true)
 const inform = ref<EditInform>({
@@ -26,6 +29,7 @@ const inform = ref<EditInform>({
 
 onBeforeMount(async () => {
   await userStore.fetchUsers()
+  await animalStore.fetchAnimals()
   loading.value = false
 })
 </script>

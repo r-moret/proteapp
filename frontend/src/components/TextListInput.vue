@@ -16,7 +16,7 @@ function handleAddText() {
   if (!newText.value) return
 
   identifiedTexts.value?.push({ text: newText.value, id: uniqueId() })
-  model.value?.push(newText.value)
+  model.value = [...(model.value ?? []), newText.value]
   newText.value = undefined
 }
 
