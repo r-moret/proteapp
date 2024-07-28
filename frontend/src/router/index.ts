@@ -32,7 +32,12 @@ const router = createRouter({
     {
       path: '/adoptions',
       name: 'adoptions',
-      component: () => import('@/modules/Animal/views/AdoptionListView.vue')
+      component: () => import('@/modules/Adoption/views/AdoptionListView.vue')
+    },
+    {
+      path: '/adoptions/:id',
+      name: 'adoption',
+      component: () => import('@/modules/Adoption/views/AdoptionView.vue')
     },
     {
       path: '/shift',

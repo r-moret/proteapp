@@ -7,5 +7,3 @@ export const crudYard = 'yard'
 export const crudTreatment = 'treatment'
 
 export const crudAppointment = 'appointment'
-
-export const listAdoptions = 'adoptions/search'
