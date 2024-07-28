@@ -8,6 +8,7 @@ from ulid import ULID
 if TYPE_CHECKING:
     from proteapp.models.sql.animals import Animal
     from proteapp.models.sql.people import Person
+    from proteapp.models.sql.monitorings import Monitoring
 
 
 class AdoptionKind(StrEnum):
@@ -23,15 +24,16 @@ class Adoption(SQLULIDSchema, table=True):
     person_id: ULID = Field(
         default=None,
         foreign_key="person.id",
-        primary_key=True,
+        primary_key=False,
         sa_type=SQLAlchemyULIDType,
     )
     animal_id: ULID = Field(
         default=None,
         foreign_key="animal.id",
-        primary_key=True,
+        primary_key=False,
         sa_type=SQLAlchemyULIDType,
     )
 
     person: "Person" = Relationship(back_populates="adoptions")
     animal: "Animal" = Relationship(back_populates="adopters")
+    monitorings: list["Monitoring"] = Relationship(back_populates="adoption")

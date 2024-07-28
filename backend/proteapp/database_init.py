@@ -10,18 +10,21 @@ from proteapp.models.sql.yards import Yard
 from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
 from proteapp.models.sql.adoptions import Adoption, AdoptionKind
+from proteapp.models.sql.monitorings import Monitoring
 
 people = [
     Person(
         name="Cris",
         first_surname="Espejo",
         phone=PhoneNumber("+34640040545"),
+        email="cristinaespejo@gmail.com",
         user=User(active=True, veteran=True, password="hola"),
     ),
     Person(
         name="Rafael",
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
+        email="rafaelmoret@gmail.com",
         user=User(active=True, veteran=False, password="adios"),
     ),
 ]
@@ -154,12 +157,36 @@ animals = [
     ),
 ]
 
-adopcion_1 = Adoption(
-    animal=animals[0],
-    person=people[0],
-    kind=AdoptionKind.foster_home,
-    register_date=date(2021, 1, 8),
-)
+adoptions = [
+    Adoption(
+        animal=animals[0],
+        person=people[0],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2019, 9, 24),
+        monitorings=[
+            Monitoring(follow_date=date(2019, 10, 4), note="Va muy bien"),
+            Monitoring(follow_date=date(2029, 11, 4), note="Adaptado"),
+        ],
+    ),
+    Adoption(
+        animal=animals[1],
+        person=people[1],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2024, 2, 15),
+    ),
+    Adoption(
+        animal=animals[2],
+        person=people[0],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2021, 1, 8),
+    ),
+    Adoption(
+        animal=animals[3],
+        person=people[1],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2023, 5, 2),
+    ),
+]
 
 
 async def init_database_data():
@@ -169,7 +196,7 @@ async def init_database_data():
 
         list(map(sql_session.add, animals))
         list(map(sql_session.add, people))
-        sql_session.add(adopcion_1)
+        list(map(sql_session.add, adoptions))
 
         sql_session.commit()
 

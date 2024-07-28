@@ -1,4 +1,3 @@
-import { first } from 'lodash'
 import { z } from 'zod'
 
 const IdSchema = z.string().ulid()
@@ -78,26 +77,9 @@ export const EditAppointmentSchema = z.object({
   animal: IdSchema
 })
 
-export const AdoptionInfoSchema = z.object({
-  registerDate: z.coerce.date(),
-  kind: z.enum(['foster_home', 'permanente']),
-  revocationDate: z.coerce.date().nullish(),
-  animal: z.object({
-    id: z.number(),
-    name: z.string(),
-    image: z.string()
-  }),
-  person: z.object({
-    id: z.number(),
-    name: z.string(),
-    firstSurname: z.string()
-  })
-})
-
 export type YardInfo = z.infer<typeof YardInfoSchema>
 export type Yard = z.infer<typeof YardSchema>
 export type EditTreatment = z.infer<typeof EditTreatmentSchema>
 export type EditAppointment = z.infer<typeof EditAppointmentSchema>
 export type AnimalInfo = z.infer<typeof AnimalInfoSchema>
 export type Animal = z.infer<typeof AnimalSchema>
-export type AdoptionList = z.infer<typeof AdoptionInfoSchema>

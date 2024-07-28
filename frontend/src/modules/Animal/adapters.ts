@@ -2,13 +2,10 @@ import {
   AnimalSchema,
   AnimalInfoSchema,
   EditAppointmentSchema,
-  EditTreatmentSchema,
-  AdoptionInfoSchema
+  EditTreatmentSchema
 } from './declarations'
 
 export const EditAppointmentAdapter = (input: any) => EditAppointmentSchema.parse(input)
 export const EditTreatmentAdapter = (input: any) => EditTreatmentSchema.parse(input)
 export const AnimalInfoAdapter = (input: any) => AnimalInfoSchema.parse(input)
 export const AnimalAdapter = (input: any) => AnimalSchema.parse(input)
-
-export const AdoptionListAdapter = (input: any) => AdoptionInfoSchema.parse(input)

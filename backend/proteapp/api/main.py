@@ -8,6 +8,7 @@ from proteapp.api.people.routes import router as people_router
 from proteapp.api.users.routes import router as users_router
 from proteapp.api.informs.routes import router as informs_router
 from proteapp.api.adoptions.routes import router as adoptions_router
+from proteapp.api.monitorings.routes import router as monitorings_router
 from proteapp.database_init import init_database_data
 from contextlib import asynccontextmanager
 from proteapp.api.deps import connect_mongo
@@ -38,3 +39,4 @@ app.include_router(people_router)
 app.include_router(users_router)
 app.include_router(informs_router)
 app.include_router(adoptions_router)
+app.include_router(monitorings_router)
