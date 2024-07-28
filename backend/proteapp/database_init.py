@@ -1,7 +1,7 @@
 from proteapp.api.deps import get_sql_session
 from proteapp.models.nosql.inform import Inform
 from proteapp.models.sql.animals import Animal, Sex
-from datetime import datetime
+from datetime import datetime, date
 from typing import cast
 
 from proteapp.models.sql.treatments import Treatment
@@ -9,18 +9,22 @@ from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
 from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
+from proteapp.models.sql.adoptions import Adoption, AdoptionKind
+from proteapp.models.sql.monitorings import Monitoring
 
 people = [
     Person(
         name="Cris",
         first_surname="Espejo",
         phone=PhoneNumber("+34640040545"),
+        email="cristinaespejo@gmail.com",
         user=User(active=True, veteran=True, password="hola"),
     ),
     Person(
         name="Rafael",
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
+        email="rafaelmoret@gmail.com",
         user=User(active=True, veteran=False, password="adios"),
     ),
 ]
@@ -153,6 +157,37 @@ animals = [
     ),
 ]
 
+adoptions = [
+    Adoption(
+        animal=animals[0],
+        person=people[0],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2019, 9, 24),
+        monitorings=[
+            Monitoring(follow_date=date(2019, 10, 4), note="Va muy bien"),
+            Monitoring(follow_date=date(2029, 11, 4), note="Adaptado"),
+        ],
+    ),
+    Adoption(
+        animal=animals[1],
+        person=people[1],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2024, 2, 15),
+    ),
+    Adoption(
+        animal=animals[2],
+        person=people[0],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2021, 1, 8),
+    ),
+    Adoption(
+        animal=animals[3],
+        person=people[1],
+        kind=AdoptionKind.foster_home,
+        register_date=date(2023, 5, 2),
+    ),
+]
+
 
 async def init_database_data():
     try:
@@ -161,6 +196,7 @@ async def init_database_data():
 
         list(map(sql_session.add, animals))
         list(map(sql_session.add, people))
+        list(map(sql_session.add, adoptions))
 
         sql_session.commit()
 

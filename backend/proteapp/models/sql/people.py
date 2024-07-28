@@ -6,6 +6,7 @@ from typing import Optional
 
 if TYPE_CHECKING:
     from proteapp.models.sql.users import User
+    from proteapp.models.sql.adoptions import Adoption
 
 PhoneNumber.phone_format = "E164"
 
@@ -18,3 +19,4 @@ class Person(SQLULIDSchema, table=True):
     email: str | None = Field(default=None)
 
     user: Optional["User"] = Relationship(back_populates="person")
+    adoptions: list["Adoption"] = Relationship(back_populates="person")

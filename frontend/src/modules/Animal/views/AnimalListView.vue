@@ -66,6 +66,10 @@ const animalsByYard = computed(() => {
 
 const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
 
+function navigateAdoptions() {
+  router.push({ name: 'adoptions' })
+}
+
 const updateFilters = (newFilters: AnimalFilters) => {
   filters.value = newFilters
 }
@@ -105,7 +109,11 @@ onBeforeMount(async () => {
 
 <template>
   <main class="flex flex-col">
-    <AppHeader left="profile" title="Animales" />
+    <AppHeader left="profile" title="Animales">
+      <button class="btn btn-square btn-ghost" @click="navigateAdoptions">
+        <span class="i-mingcute-home-5-line text-3xl" />
+      </button>
+    </AppHeader>
     <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
       <span class="loading loading-spinner loading-lg text-secondary" />
     </div>

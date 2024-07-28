@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from proteapp.models.sql.treatments import Treatment
     from proteapp.models.sql.appointments import Appointment
     from proteapp.models.sql.yards import Yard
+    from proteapp.models.sql.adoptions import Adoption
 
 
 class Sex(StrEnum):
@@ -32,3 +33,4 @@ class Animal(SQLULIDSchema, table=True):
     treatments: list["Treatment"] = Relationship(back_populates="animal")
     appointments: list["Appointment"] = Relationship(back_populates="animal")
     yard: Optional["Yard"] = Relationship(back_populates="animals")
+    adopters: list["Adoption"] = Relationship(back_populates="animal")
