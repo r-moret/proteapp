@@ -2,7 +2,7 @@
 const model = defineModel<string | null>()
 
 const props = defineProps<{
-  name: string
+  name?: string
   placeholder?: string
 }>()
 </script>
@@ -17,12 +17,11 @@ const props = defineProps<{
     </template>
     <input
       type="text"
-      :name="props.name"
-      :id="props.name"
       :class="['h-full w-full px-4', $slots.icon ? 'rounded-r-lg' : 'rounded-lg']"
       :placeholder="props.placeholder"
       autocomplete="off"
       v-model="model"
+      v-bind="props.name ? { name: props.name, id: props.name } : null"
     />
   </div>
 </template>

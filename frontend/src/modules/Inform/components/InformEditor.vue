@@ -189,6 +189,11 @@ function handleAddNoteInHighlights(highlight: string) {
           <ItemSelector
             :items="userList"
             :model-value="enrichedInform.volunteers"
+            :include-search="true"
+            :search-fn="
+              (user) =>
+                `${user.person.name} ${user.person.firstSurname} ${user.person.secondSurname ?? ''}`
+            "
             @update:model-value="
               (selectedVolunteers: UserInfo[]) =>
                 handleFieldUpdate('volunteers', selectedVolunteers)
