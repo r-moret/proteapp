@@ -36,7 +36,7 @@ def delete_appointment(id: ULID, session: Session = Depends(get_sql_session)):
     appointment_db = session.get(Appointment, id)
 
     if appointment_db is None:
-        raise HTTPException(404, "No animal found")
+        raise HTTPException(404, "No appointment found")
 
     session.delete(appointment_db)
     session.commit()
