@@ -19,7 +19,7 @@ const { adoptionList } = storeToRefs(adoptionStore)
 const newAdoptionForm = ref<HTMLFormElement | null>(null)
 
 onBeforeMount(async () => {
-  await adoptionStore.fetchAdoptions('foster_home')
+  await adoptionStore.fetchAdoptions()
 })
 const newAdoptionOpen = ref(false)
 

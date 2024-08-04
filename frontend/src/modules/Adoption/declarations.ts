@@ -5,7 +5,7 @@ const IdSchema = z.string().ulid()
 export const AdoptionInfoSchema = z.object({
   id: IdSchema,
   registerDate: z.coerce.date(),
-  kind: z.enum(['foster_home', 'permanent']),
+  foster: z.boolean(),
   revocationDate: z.coerce.date().nullish(),
   animal: z.object({
     id: IdSchema,
@@ -22,7 +22,7 @@ export const AdoptionInfoSchema = z.object({
 export const AdoptionSchema = z.object({
   id: IdSchema,
   registerDate: z.coerce.date(),
-  kind: z.enum(['foster_home', 'permanent']),
+  foster: z.boolean(),
   revocationDate: z.coerce.date().nullish(),
   animal: z.object({
     id: IdSchema,
@@ -53,7 +53,7 @@ export const AdoptionSchema = z.object({
 
 export const EditAdoptionSchema = z.object({
   registerDate: z.coerce.date(),
-  kind: z.enum(['foster_home', 'permanent']),
+  foster: z.boolean(),
   animal: IdSchema,
   person: IdSchema
 })

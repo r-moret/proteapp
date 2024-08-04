@@ -21,7 +21,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
   const animalDetails = ref<Animal>()
   const isLoading = ref(false)
 
-  async function fetchAdoptions(kind: string) {
+  async function fetchAdoptions({ foster }: { foster?: boolean } = {}) {
     isLoading.value = true
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listAdoptionsApi}`)
       .then((res) => res.json())
@@ -29,7 +29,9 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       .then((adoption) => (adoptionList.value = adoption))
 
     isLoading.value = false
-    adoptionList.value = adoptionList.value.filter((adoption) => adoption.kind === kind)
+    adoptionList.value = adoptionList.value.filter(
+      (adoption) => foster === undefined || adoption.foster === foster
+    )
   }
 
   async function deleteAdoption(adoptionId: string) {

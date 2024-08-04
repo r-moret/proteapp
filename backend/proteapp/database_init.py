@@ -10,7 +10,7 @@ from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
 from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
-from proteapp.models.sql.adoptions import Adoption, AdoptionKind
+from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.monitorings import Monitoring
 
 people = [
@@ -167,7 +167,7 @@ adoptions = [
     Adoption(
         animal=animals[0],
         person=people[0],
-        kind=AdoptionKind.foster_home,
+        foster=True,
         register_date=date(2019, 9, 24),
         monitorings=[
             Monitoring(follow_date=date(2019, 10, 4), note="Va muy bien"),
@@ -177,19 +177,19 @@ adoptions = [
     Adoption(
         animal=animals[1],
         person=people[1],
-        kind=AdoptionKind.foster_home,
+        foster=True,
         register_date=date(2024, 2, 15),
     ),
     Adoption(
         animal=animals[2],
         person=people[0],
-        kind=AdoptionKind.foster_home,
+        foster=False,
         register_date=date(2021, 1, 8),
     ),
     Adoption(
         animal=animals[3],
         person=people[1],
-        kind=AdoptionKind.foster_home,
+        foster=True,
         register_date=date(2023, 5, 2),
     ),
 ]
