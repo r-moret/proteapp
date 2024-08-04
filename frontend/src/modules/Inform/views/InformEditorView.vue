@@ -35,9 +35,9 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <main class="flex flex-col items-end">
+  <main class="flex flex-col">
     <AppHeader title="Informe" />
-    <section class="min-h-0 w-full flex-grow px-6">
+    <section class="min-h-0 w-full flex-grow overflow-y-auto px-6">
       <InformEditor v-if="!loading" v-model="inform" />
     </section>
   </main>
