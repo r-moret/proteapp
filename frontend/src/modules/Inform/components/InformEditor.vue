@@ -13,6 +13,9 @@ import TextListInput from '@/components/TextListInput.vue'
 import { pick } from 'lodash'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
 import AnimalNotesEditor from '@/components/AnimalNotesEditor.vue'
+import AnimalSelector from './AnimalSelector.vue'
+import DropdownSelector from '@/components/DropdownSelector.vue'
+import AdoptionCard from '@/modules/Adoption/components/AdoptionCard.vue'
 
 const { userList } = storeToRefs(useUserStore())
 const { yardList, animalList } = storeToRefs(useAnimalStore())
@@ -33,6 +36,7 @@ type EnrichedFields =
   | ['timeRange', TimeRange]
   | ['highlights', string[] | undefined | null]
   | ['notes', { info: AnimalInfo; note?: string }[]]
+  | ['adoptions', { animal: AnimalInfo; foster: boolean }[]]
 type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
@@ -43,10 +47,23 @@ const enrichedInform = ref<EnrichedInform>({
   date: props.modelValue.date,
   timeRange: [props.modelValue.timeRange.start, props.modelValue.timeRange.end],
   highlights: props.modelValue.highlights,
-  notes: animalList.value.map((animal) => ({ info: animal }))
+  notes: animalList.value.map((animal) => ({ info: animal })),
+  adoptions: props.modelValue.adoptions.map((adop) => ({
+    animal: animalList.value.find((animal) => animal.id === adop.animal)!, // TODO
+    foster: adop.foster
+  }))
+})
+
+const newAdoption = ref<{
+  animal?: AnimalInfo
+  foster: boolean
+}>({
+  animal: undefined,
+  foster: false
 })
 
 const volunteersDrawerOpen = ref(false)
+const adoptionsDrawerOpen = ref(false)
 
 function handleFieldUpdate(...[field, update]: EnrichedFields) {
   let modelUpdate: EditInform[keyof EditInform]
@@ -75,6 +92,9 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
         .filter((note) => note.note)
         .map((note) => ({ animal: note.info.id, text: note.note }))
       break
+    case 'adoptions':
+      modelUpdate = update.map((adop) => ({ animal: adop.animal.id, foster: adop.foster }))
+      break
     default:
       return
   }
@@ -92,6 +112,31 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
 
 function handleAddNoteInHighlights(highlight: string) {
   handleFieldUpdate('highlights', [...(props.modelValue.highlights ?? []), highlight])
+}
+
+function handleAddAdoption(callback: () => void) {
+  if (
+    enrichedInform.value.adoptions.some(
+      (adoption) => adoption.animal.id === newAdoption.value.animal?.id
+    )
+  ) {
+    // Show notification: This animal is already noted as adopted!
+    return
+  }
+
+  handleFieldUpdate('adoptions', [
+    ...enrichedInform.value.adoptions,
+    { ...newAdoption.value, animal: newAdoption.value.animal! }
+  ])
+
+  callback()
+}
+
+function handleRemoveAdoption(adoption: { animal: AnimalInfo; foster: boolean }) {
+  const newAdoptions = enrichedInform.value.adoptions.filter(
+    (savedAdoption) => savedAdoption.animal.id !== adoption.animal.id
+  )
+  handleFieldUpdate('adoptions', newAdoptions)
 }
 </script>
 
@@ -179,6 +224,27 @@ function handleAddNoteInHighlights(highlight: string) {
         />
       </div>
 
+      <div class="flex flex-col gap-4">
+        <p class="text-xl font-semibold">Adopciones</p>
+        <p v-if="!enrichedInform.adoptions.length" class="text-center italic">No hay adopciones</p>
+        <ul v-else class="flex flex-col gap-2">
+          <li v-for="adoption in enrichedInform.adoptions" :key="adoption.animal.id">
+            <AdoptionCard :adoption size="compact">
+              <template #action>
+                <span class="i-mingcute-close-fill" @click="handleRemoveAdoption(adoption)" />
+              </template>
+            </AdoptionCard>
+          </li>
+        </ul>
+
+        <button
+          class="w-full rounded-xl bg-secondary py-2 font-semibold text-secondary-content"
+          @click="adoptionsDrawerOpen = true"
+        >
+          Añadir adopción
+        </button>
+      </div>
+
       <pre>{{ props.modelValue }}</pre>
     </div>
 
@@ -213,6 +279,55 @@ function handleAddNoteInHighlights(highlight: string) {
           </ItemSelector>
         </div>
       </div>
+    </BottomDrawer>
+
+    <BottomDrawer
+      class="bg-base-200"
+      size="small"
+      v-model="adoptionsDrawerOpen"
+      @close="newAdoption = { animal: undefined, foster: false }"
+    >
+      <template #default="{ close }">
+        <div class="flex h-full flex-col gap-5">
+          <h1 class="text-3xl font-semibold">Nueva adopción</h1>
+          <div class="flex flex-col gap-4">
+            <section class="flex flex-col gap-2">
+              <h2 class="text-xl font-semibold">Animal</h2>
+              <AnimalSelector v-model="newAdoption.animal" />
+            </section>
+            <section class="flex w-full flex-col gap-2">
+              <h2 class="text-xl font-semibold">Tipo de adopción</h2>
+              <DropdownSelector
+                :items="['Permanente', 'Casa de acogida']"
+                class="w-full"
+                @select="
+                  (adoptionType) => {
+                    newAdoption.foster = adoptionType === 'Casa de acogida'
+                  }
+                "
+              >
+                <template #button>
+                  <button
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary-content px-4 py-2 font-semibold text-neutral"
+                  >
+                    {{ newAdoption.foster ? 'Casa de acogida' : 'Permanente' }}
+                    <span class="i-mingcute-down-fill text-xl" />
+                  </button>
+                </template>
+              </DropdownSelector>
+            </section>
+            <div class="mt-10 flex justify-center">
+              <button
+                class="w-fit items-center justify-center rounded-lg bg-secondary px-10 py-2 font-semibold text-white"
+                :disabled="!newAdoption.animal"
+                @click="handleAddAdoption(close)"
+              >
+                Crear
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
     </BottomDrawer>
   </div>
 </template>
