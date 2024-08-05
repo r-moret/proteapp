@@ -63,7 +63,7 @@ export const EditInformSchema = z.object({
       foster: z.boolean()
     })
   ),
-  tested_animals: z.array(
+  testedAnimals: z.array(
     z.object({
       animal: IdSchema,
       compatible: z.boolean()

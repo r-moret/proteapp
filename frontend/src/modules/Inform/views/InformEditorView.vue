@@ -24,7 +24,7 @@ const inform = ref<EditInform>({
   arrivals: [],
   losses: [],
   adoptions: [],
-  tested_animals: []
+  testedAnimals: []
 })
 
 onBeforeMount(async () => {

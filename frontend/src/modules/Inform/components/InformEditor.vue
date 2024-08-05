@@ -16,6 +16,7 @@ import AnimalNotesEditor from '@/components/AnimalNotesEditor.vue'
 import AnimalSelector from './AnimalSelector.vue'
 import DropdownSelector from '@/components/DropdownSelector.vue'
 import AdoptionCard from '@/modules/Adoption/components/AdoptionCard.vue'
+import AnimalTestCard from '@/modules/Inform/components/AnimalTestCard.vue'
 
 const { userList } = storeToRefs(useUserStore())
 const { yardList, animalList } = storeToRefs(useAnimalStore())
@@ -37,6 +38,7 @@ type EnrichedFields =
   | ['highlights', string[] | undefined | null]
   | ['notes', { info: AnimalInfo; note?: string }[]]
   | ['adoptions', { animal: AnimalInfo; foster: boolean }[]]
+  | ['testedAnimals', { animal: AnimalInfo; compatible: boolean }[]]
 type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
@@ -51,6 +53,10 @@ const enrichedInform = ref<EnrichedInform>({
   adoptions: props.modelValue.adoptions.map((adop) => ({
     animal: animalList.value.find((animal) => animal.id === adop.animal)!, // TODO
     foster: adop.foster
+  })),
+  testedAnimals: props.modelValue.testedAnimals.map((test) => ({
+    animal: animalList.value.find((animal) => animal.id === test.animal)!, // TODO
+    compatible: test.compatible
   }))
 })
 
@@ -61,9 +67,17 @@ const newAdoption = ref<{
   animal: undefined,
   foster: false
 })
+const newAnimalTest = ref<{
+  animal?: AnimalInfo
+  compatible: boolean
+}>({
+  animal: undefined,
+  compatible: false
+})
 
 const volunteersDrawerOpen = ref(false)
 const adoptionsDrawerOpen = ref(false)
+const newAnimalTestDrawerOpen = ref(false)
 
 function handleFieldUpdate(...[field, update]: EnrichedFields) {
   let modelUpdate: EditInform[keyof EditInform]
@@ -95,6 +109,9 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
     case 'adoptions':
       modelUpdate = update.map((adop) => ({ animal: adop.animal.id, foster: adop.foster }))
       break
+    case 'testedAnimals':
+      modelUpdate = update.map((test) => ({ animal: test.animal.id, foster: test.compatible }))
+      break
     default:
       return
   }
@@ -114,35 +131,64 @@ function handleAddNoteInHighlights(highlight: string) {
   handleFieldUpdate('highlights', [...(props.modelValue.highlights ?? []), highlight])
 }
 
-function handleAddAdoption(callback: () => void) {
-  if (
-    enrichedInform.value.adoptions.some(
-      (adoption) => adoption.animal.id === newAdoption.value.animal?.id
-    )
-  ) {
-    // Show notification: This animal is already noted as adopted!
-    return
-  }
+function handleAddToAnimalListField(
+  listField: 'adoptions' | 'testedAnimals',
+  callback: () => void
+) {
+  const duplicatedAnimal = (newAnimal: AnimalInfo) =>
+    enrichedInform.value[listField].some((animalItem) => animalItem.animal.id === newAnimal.id)
 
-  handleFieldUpdate('adoptions', [
-    ...enrichedInform.value.adoptions,
-    { ...newAdoption.value, animal: newAdoption.value.animal! }
-  ])
+  switch (listField) {
+    case 'adoptions':
+      if (!newAdoption.value.animal) return // TODO: Notification
+      if (duplicatedAnimal(newAdoption.value.animal)) return // TODO: Notification
+      handleFieldUpdate('adoptions', [
+        ...enrichedInform.value[listField],
+        { ...newAdoption.value, animal: newAdoption.value.animal! }
+      ])
+      break
+    default:
+      if (!newAnimalTest.value.animal) return // TODO: Notification
+      if (duplicatedAnimal(newAnimalTest.value.animal)) return // TODO: Notification
+      handleFieldUpdate('testedAnimals', [
+        ...enrichedInform.value[listField],
+        { ...newAnimalTest.value, animal: newAnimalTest.value.animal! }
+      ])
+      break
+  }
 
   callback()
 }
 
-function handleRemoveAdoption(adoption: { animal: AnimalInfo; foster: boolean }) {
-  const newAdoptions = enrichedInform.value.adoptions.filter(
-    (savedAdoption) => savedAdoption.animal.id !== adoption.animal.id
-  )
-  handleFieldUpdate('adoptions', newAdoptions)
+function handleRemoveFromAnimalListField(
+  ...animalListItem:
+    | ['adoptions', { animal: AnimalInfo; foster: boolean }]
+    | ['testedAnimals', { animal: AnimalInfo; compatible: boolean }]
+) {
+  switch (animalListItem[0]) {
+    case 'adoptions':
+      handleFieldUpdate(
+        'adoptions',
+        enrichedInform.value.adoptions.filter(
+          (saved) => saved.animal.id !== animalListItem[1].animal.id
+        )
+      )
+      break
+    default:
+      handleFieldUpdate(
+        'testedAnimals',
+        enrichedInform.value.testedAnimals.filter(
+          (saved) => saved.animal.id !== animalListItem[1].animal.id
+        )
+      )
+      break
+  }
 }
 </script>
 
 <template>
   <div>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-8">
       <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold">Creador</h2>
         <UserCard size="compact" :user="enrichedInform.creator" />
@@ -231,7 +277,10 @@ function handleRemoveAdoption(adoption: { animal: AnimalInfo; foster: boolean })
           <li v-for="adoption in enrichedInform.adoptions" :key="adoption.animal.id">
             <AdoptionCard :adoption size="compact">
               <template #action>
-                <span class="i-mingcute-close-fill" @click="handleRemoveAdoption(adoption)" />
+                <span
+                  class="i-mingcute-close-fill"
+                  @click="handleRemoveFromAnimalListField('adoptions', adoption)"
+                />
               </template>
             </AdoptionCard>
           </li>
@@ -242,6 +291,44 @@ function handleRemoveAdoption(adoption: { animal: AnimalInfo; foster: boolean })
           @click="adoptionsDrawerOpen = true"
         >
           Añadir adopción
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="collapse collapse-arrow">
+          <input class="min-h-0" type="checkbox" />
+          <div class="collapse-title min-h-0 p-0 text-xl font-medium after:-mt-[1rem]">
+            <h2 class="flex items-center gap-4">
+              <p class="text-xl font-semibold">Pruebas de animales</p>
+              <p class="badge badge-secondary badge-lg">
+                {{ enrichedInform.testedAnimals.length }}
+              </p>
+            </h2>
+          </div>
+          <div class="collapse-content px-0 !pb-0">
+            <p v-if="!enrichedInform.testedAnimals.length" class="mt-4 text-center italic">
+              No hay pruebas de animales
+            </p>
+            <ul v-else class="mt-4 flex flex-col gap-2">
+              <li v-for="animalTest in enrichedInform.testedAnimals" :key="animalTest.animal.id">
+                <AnimalTestCard :animalTest>
+                  <template #action>
+                    <span
+                      class="i-mingcute-close-fill"
+                      @click="handleRemoveFromAnimalListField('testedAnimals', animalTest)"
+                    />
+                  </template>
+                </AnimalTestCard>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <button
+          class="w-full rounded-xl bg-secondary py-2 font-semibold text-secondary-content"
+          @click="newAnimalTestDrawerOpen = true"
+        >
+          Añadir prueba de animal
         </button>
       </div>
 
@@ -320,7 +407,56 @@ function handleRemoveAdoption(adoption: { animal: AnimalInfo; foster: boolean })
               <button
                 class="w-fit items-center justify-center rounded-lg bg-secondary px-10 py-2 font-semibold text-white"
                 :disabled="!newAdoption.animal"
-                @click="handleAddAdoption(close)"
+                @click="handleAddToAnimalListField('adoptions', close)"
+              >
+                Crear
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </BottomDrawer>
+
+    <BottomDrawer
+      class="bg-base-200"
+      size="small"
+      v-model="newAnimalTestDrawerOpen"
+      @close="newAnimalTest = { animal: undefined, compatible: false }"
+    >
+      <template #default="{ close }">
+        <div class="flex h-full flex-col gap-5">
+          <h1 class="text-3xl font-semibold">Nueva prueba de compatibilidad</h1>
+          <div class="flex flex-col gap-4">
+            <section class="flex flex-col gap-2">
+              <h2 class="text-xl font-semibold">Animal</h2>
+              <AnimalSelector v-model="newAnimalTest.animal" />
+            </section>
+            <section class="flex w-full flex-col gap-2">
+              <h2 class="text-xl font-semibold">Compatibilidad</h2>
+              <DropdownSelector
+                :items="['No es compatible', 'Es compatible']"
+                class="w-full"
+                @select="
+                  (compatibility) => {
+                    newAnimalTest.compatible = compatibility === 'Es compatible'
+                  }
+                "
+              >
+                <template #button>
+                  <button
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary-content px-4 py-2 font-semibold text-neutral"
+                  >
+                    {{ newAnimalTest.compatible ? 'Es compatible' : 'No es compatible' }}
+                    <span class="i-mingcute-down-fill text-xl" />
+                  </button>
+                </template>
+              </DropdownSelector>
+            </section>
+            <div class="mt-10 flex justify-center">
+              <button
+                class="w-fit items-center justify-center rounded-lg bg-secondary px-10 py-2 font-semibold text-white"
+                :disabled="!newAnimalTest.animal"
+                @click="handleAddToAnimalListField('testedAnimals', close)"
               >
                 Crear
               </button>
