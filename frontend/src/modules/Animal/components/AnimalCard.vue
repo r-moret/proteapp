@@ -42,7 +42,10 @@ const age = computed(() => {
           <p class="text-xl font-semibold">{{ props.animal.name }}</p>
           <span
             v-if="props.size === 'regular'"
-            class="i-mingcute-male-line text-2xl text-secondary"
+            :class="[
+              'text-2xl text-secondary',
+              props.animal.sex === 'male' ? 'i-mingcute-male-line' : 'i-mingcute-female-line'
+            ]"
           />
         </header>
 
