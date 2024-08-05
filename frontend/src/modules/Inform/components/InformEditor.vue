@@ -17,6 +17,7 @@ import AnimalSelector from './AnimalSelector.vue'
 import DropdownSelector from '@/components/DropdownSelector.vue'
 import AdoptionCard from '@/modules/Adoption/components/AdoptionCard.vue'
 import AnimalTestCard from '@/modules/Inform/components/AnimalTestCard.vue'
+import AnimalCard from '@/modules/Animal/components/AnimalCard.vue'
 
 const { userList } = storeToRefs(useUserStore())
 const { yardList, animalList } = storeToRefs(useAnimalStore())
@@ -39,6 +40,7 @@ type EnrichedFields =
   | ['notes', { info: AnimalInfo; note?: string }[]]
   | ['adoptions', { animal: AnimalInfo; foster: boolean }[]]
   | ['testedAnimals', { animal: AnimalInfo; compatible: boolean }[]]
+  | ['losses', { animal: AnimalInfo }[]]
 type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
@@ -57,6 +59,9 @@ const enrichedInform = ref<EnrichedInform>({
   testedAnimals: props.modelValue.testedAnimals.map((test) => ({
     animal: animalList.value.find((animal) => animal.id === test.animal)!, // TODO
     compatible: test.compatible
+  })),
+  losses: props.modelValue.losses.map((loss) => ({
+    animal: animalList.value.find((animal) => animal.id === loss.animal)! // TODO
   }))
 })
 
@@ -74,10 +79,16 @@ const newAnimalTest = ref<{
   animal: undefined,
   compatible: false
 })
+const newLoss = ref<{
+  animal?: AnimalInfo
+}>({
+  animal: undefined
+})
 
 const volunteersDrawerOpen = ref(false)
 const adoptionsDrawerOpen = ref(false)
 const newAnimalTestDrawerOpen = ref(false)
+const newLossDrawerOpen = ref(false)
 
 function handleFieldUpdate(...[field, update]: EnrichedFields) {
   let modelUpdate: EditInform[keyof EditInform]
@@ -112,6 +123,9 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
     case 'testedAnimals':
       modelUpdate = update.map((test) => ({ animal: test.animal.id, foster: test.compatible }))
       break
+    case 'losses':
+      modelUpdate = update.map((test) => ({ animal: test.animal.id }))
+      break
     default:
       return
   }
@@ -132,7 +146,7 @@ function handleAddNoteInHighlights(highlight: string) {
 }
 
 function handleAddToAnimalListField(
-  listField: 'adoptions' | 'testedAnimals',
+  listField: 'adoptions' | 'testedAnimals' | 'losses',
   callback: () => void
 ) {
   const duplicatedAnimal = (newAnimal: AnimalInfo) =>
@@ -147,12 +161,20 @@ function handleAddToAnimalListField(
         { ...newAdoption.value, animal: newAdoption.value.animal! }
       ])
       break
-    default:
+    case 'testedAnimals':
       if (!newAnimalTest.value.animal) return // TODO: Notification
       if (duplicatedAnimal(newAnimalTest.value.animal)) return // TODO: Notification
       handleFieldUpdate('testedAnimals', [
         ...enrichedInform.value[listField],
         { ...newAnimalTest.value, animal: newAnimalTest.value.animal! }
+      ])
+      break
+    default:
+      if (!newLoss.value.animal) return // TODO: Notification
+      if (duplicatedAnimal(newLoss.value.animal)) return // TODO: Notification
+      handleFieldUpdate('losses', [
+        ...enrichedInform.value[listField],
+        { ...newLoss.value, animal: newLoss.value.animal! }
       ])
       break
   }
@@ -164,6 +186,7 @@ function handleRemoveFromAnimalListField(
   ...animalListItem:
     | ['adoptions', { animal: AnimalInfo; foster: boolean }]
     | ['testedAnimals', { animal: AnimalInfo; compatible: boolean }]
+    | ['losses', { animal: AnimalInfo }]
 ) {
   switch (animalListItem[0]) {
     case 'adoptions':
@@ -174,10 +197,18 @@ function handleRemoveFromAnimalListField(
         )
       )
       break
-    default:
+    case 'testedAnimals':
       handleFieldUpdate(
         'testedAnimals',
         enrichedInform.value.testedAnimals.filter(
+          (saved) => saved.animal.id !== animalListItem[1].animal.id
+        )
+      )
+      break
+    default:
+      handleFieldUpdate(
+        'losses',
+        enrichedInform.value.losses.filter(
           (saved) => saved.animal.id !== animalListItem[1].animal.id
         )
       )
@@ -346,6 +377,44 @@ function handleRemoveFromAnimalListField(
         </button>
       </div>
 
+      <div class="flex flex-col gap-4">
+        <div class="collapse collapse-arrow">
+          <input class="min-h-0" type="checkbox" />
+          <div class="collapse-title min-h-0 p-0 text-xl font-medium after:-mt-[1rem]">
+            <h2 class="flex items-center gap-4">
+              <p class="text-xl font-semibold">Pérdidas</p>
+              <p class="badge badge-secondary badge-lg">
+                {{ enrichedInform.losses.length }}
+              </p>
+            </h2>
+          </div>
+          <div class="collapse-content px-0 !pb-0">
+            <p v-if="!enrichedInform.losses.length" class="mt-4 text-center italic">
+              No hay pérdidas
+            </p>
+            <ul v-else class="mt-4 flex flex-col gap-2">
+              <li v-for="loss in enrichedInform.losses" :key="loss.animal.id">
+                <AnimalCard :animal="loss.animal" size="compact">
+                  <template #action>
+                    <span
+                      class="i-mingcute-close-fill"
+                      @click="handleRemoveFromAnimalListField('losses', loss)"
+                    />
+                  </template>
+                </AnimalCard>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <button
+          class="w-full rounded-xl bg-secondary py-2 font-semibold text-secondary-content"
+          @click="newLossDrawerOpen = true"
+        >
+          Añadir pérdida
+        </button>
+      </div>
+
       <pre>{{ props.modelValue }}</pre>
     </div>
 
@@ -471,6 +540,34 @@ function handleRemoveFromAnimalListField(
                 class="w-fit items-center justify-center rounded-lg bg-secondary px-10 py-2 font-semibold text-white"
                 :disabled="!newAnimalTest.animal"
                 @click="handleAddToAnimalListField('testedAnimals', close)"
+              >
+                Crear
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </BottomDrawer>
+
+    <BottomDrawer
+      class="bg-base-200"
+      size="tiny"
+      v-model="newLossDrawerOpen"
+      @close="newLoss = { animal: undefined }"
+    >
+      <template #default="{ close }">
+        <div class="flex h-full flex-col gap-5">
+          <h1 class="text-3xl font-semibold">Nueva pérdida</h1>
+          <div class="flex flex-col gap-4">
+            <section class="flex flex-col gap-2">
+              <h2 class="text-xl font-semibold">Animal</h2>
+              <AnimalSelector v-model="newLoss.animal" />
+            </section>
+            <div class="mt-8 flex justify-center">
+              <button
+                class="w-fit items-center justify-center rounded-lg bg-secondary px-10 py-2 font-semibold text-white"
+                :disabled="!newLoss.animal"
+                @click="handleAddToAnimalListField('losses', close)"
               >
                 Crear
               </button>
