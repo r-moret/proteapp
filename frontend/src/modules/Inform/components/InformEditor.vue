@@ -271,20 +271,34 @@ function handleRemoveFromAnimalListField(
       </div>
 
       <div class="flex flex-col gap-4">
-        <p class="text-xl font-semibold">Adopciones</p>
-        <p v-if="!enrichedInform.adoptions.length" class="text-center italic">No hay adopciones</p>
-        <ul v-else class="flex flex-col gap-2">
-          <li v-for="adoption in enrichedInform.adoptions" :key="adoption.animal.id">
-            <AdoptionCard :adoption size="compact">
-              <template #action>
-                <span
-                  class="i-mingcute-close-fill"
-                  @click="handleRemoveFromAnimalListField('adoptions', adoption)"
-                />
-              </template>
-            </AdoptionCard>
-          </li>
-        </ul>
+        <div class="collapse collapse-arrow">
+          <input class="min-h-0" type="checkbox" />
+          <div class="collapse-title min-h-0 p-0 text-xl font-medium after:-mt-[1rem]">
+            <h2 class="flex items-center gap-4">
+              <p class="text-xl font-semibold">Adopciones</p>
+              <p class="badge badge-secondary badge-lg">
+                {{ enrichedInform.adoptions.length }}
+              </p>
+            </h2>
+          </div>
+          <div class="collapse-content px-0 !pb-0">
+            <p v-if="!enrichedInform.adoptions.length" class="mt-4 text-center italic">
+              No hay adopciones
+            </p>
+            <ul v-else class="mt-4 flex flex-col gap-2">
+              <li v-for="adoption in enrichedInform.adoptions" :key="adoption.animal.id">
+                <AdoptionCard :adoption size="compact">
+                  <template #action>
+                    <span
+                      class="i-mingcute-close-fill"
+                      @click="handleRemoveFromAnimalListField('adoptions', adoption)"
+                    />
+                  </template>
+                </AdoptionCard>
+              </li>
+            </ul>
+          </div>
+        </div>
 
         <button
           class="w-full rounded-xl bg-secondary py-2 font-semibold text-secondary-content"
