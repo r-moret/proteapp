@@ -32,6 +32,7 @@ const emit = defineEmits<{
   'update:model-value': [payload: EditInform]
 }>()
 
+type Arrival = { name: string; description?: string | null }
 type Visit = { visitor: string; description: string }
 type TimeRange = [{ hours: number; minutes: number }, { hours: number; minutes: number }]
 type EnrichedFields =
@@ -44,7 +45,8 @@ type EnrichedFields =
   | ['adoptions', { animal: AnimalInfo; foster: boolean }[]]
   | ['testedAnimals', { animal: AnimalInfo; compatible: boolean }[]]
   | ['losses', { animal: AnimalInfo }[]]
-  | ['visits', { visitor: string; description: string }[]]
+  | ['visits', Visit[]]
+  | ['arrivals', Arrival[]]
 type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
@@ -67,7 +69,8 @@ const enrichedInform = ref<EnrichedInform>({
   losses: props.modelValue.losses.map((loss) => ({
     animal: animalList.value.find((animal) => animal.id === loss.animal)! // TODO
   })),
-  visits: props.modelValue.visits
+  visits: props.modelValue.visits,
+  arrivals: props.modelValue.arrivals
 })
 
 const newAdoption = ref<{
@@ -89,11 +92,12 @@ const newLoss = ref<{
 }>({
   animal: undefined
 })
-const newVisit = ref<{
-  visitor?: string
-  description?: string
-}>({
+const newVisit = ref<Partial<Visit>>({
   visitor: undefined,
+  description: undefined
+})
+const newArrival = ref<Partial<Arrival>>({
+  name: undefined,
   description: undefined
 })
 
@@ -102,6 +106,7 @@ const adoptionsDrawerOpen = ref(false)
 const newAnimalTestDrawerOpen = ref(false)
 const newLossDrawerOpen = ref(false)
 const newVisitDrawerOpen = ref(false)
+const newArrivalDrawerOpen = ref(false)
 
 function handleFieldUpdate(...[field, update]: EnrichedFields) {
   let modelUpdate: EditInform[keyof EditInform]
@@ -140,6 +145,9 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
       modelUpdate = update.map((test) => ({ animal: test.animal.id }))
       break
     case 'visits':
+      modelUpdate = update
+      break
+    case 'arrivals':
       modelUpdate = update
       break
     default:
@@ -235,6 +243,11 @@ function handleRemoveFromAnimalListField(
 function handleCreateVisit(visitor: string) {
   newVisit.value = { visitor, description: undefined }
   newVisitDrawerOpen.value = true
+}
+
+function handleCreateArrival(name: string) {
+  newArrival.value = { name, description: undefined }
+  newArrivalDrawerOpen.value = true
 }
 </script>
 
@@ -419,6 +432,29 @@ function handleCreateVisit(visitor: string) {
         >
           Añadir prueba de animal
         </button>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <h2 class="text-xl font-semibold">Entradas</h2>
+        <MultipleTextListInput
+          :model-value="enrichedInform.arrivals"
+          placeholder="Ej. Zelda"
+          @add="handleCreateArrival"
+          @update:model-value="(arrivals: Arrival[]) => handleFieldUpdate('arrivals', arrivals)"
+        >
+          <template #inputIcon>
+            <span class="i-mingcute-cat-fill text-2xl text-secondary" />
+          </template>
+          <template #empty>
+            <p class="my-1 text-center italic text-gray-400">No hay entradas</p>
+          </template>
+          <template #item="{ item }">
+            <div class="flex flex-col gap-1">
+              <p class="font-semibold">{{ item.name }}</p>
+              <p class="italic">{{ item.description }}</p>
+            </div>
+          </template>
+        </MultipleTextListInput>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -651,6 +687,49 @@ function handleCreateVisit(visitor: string) {
                     handleFieldUpdate('visits', [
                       ...enrichedInform.visits,
                       { visitor: newVisit.visitor!, description: newVisit.description! }
+                    ])
+                    close()
+                  }
+                "
+              >
+                Crear
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </BottomDrawer>
+
+    <BottomDrawer
+      class="bg-base-200"
+      size="small"
+      v-model="newArrivalDrawerOpen"
+      @close="newArrival = { name: undefined, description: undefined }"
+    >
+      <template #default="{ close }">
+        <div class="flex h-full flex-col gap-5">
+          <h1 class="text-3xl font-semibold">Nueva entrada</h1>
+          <div class="flex flex-col gap-4">
+            <section class="flex flex-col gap-2">
+              <h2 class="text-xl font-semibold">Animal</h2>
+              <TextInput v-model="newArrival.name" />
+            </section>
+            <section class="flex w-full flex-col gap-2">
+              <h2 class="text-xl font-semibold">Descripción del animal</h2>
+              <TextInput
+                v-model="newArrival.description"
+                placeholder="Ej. Gatito de unos dos meses con el pelo naranja"
+              />
+            </section>
+            <div class="mt-10 flex justify-center">
+              <button
+                class="w-fit items-center justify-center rounded-lg bg-secondary px-10 py-2 font-semibold text-white"
+                :disabled="!newArrival.name"
+                @click="
+                  () => {
+                    handleFieldUpdate('arrivals', [
+                      ...enrichedInform.arrivals,
+                      { name: newArrival.name!, description: newArrival.description! }
                     ])
                     close()
                   }

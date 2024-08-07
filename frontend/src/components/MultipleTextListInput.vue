@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends Record<string, string>">
+<script setup lang="ts" generic="T extends Record<string, string | null | undefined>">
 import TextInput from './TextInput.vue'
 import { ref } from 'vue'
 import { isEqual } from 'lodash'
