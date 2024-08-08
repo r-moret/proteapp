@@ -1,5 +1,4 @@
 from proteapp.api.deps import get_sql_session
-from proteapp.models.nosql.inform import Inform
 from proteapp.models.sql.animals import Animal, Sex
 from datetime import datetime, date
 from typing import cast
@@ -12,6 +11,7 @@ from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
 from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.monitorings import Monitoring
+from proteapp.models.nosql.inform import Inform
 
 people = [
     Person(
@@ -212,8 +212,8 @@ async def init_database_data():
         informs = [
             Inform.model_validate(
                 dict(
-                    creator=dict(people[0]),
-                    volunteers=[dict(people[1])],
+                    creator=dict(cast(User, people[0].user)) | dict(person=dict(people[0])),
+                    volunteers=[dict(cast(User, people[1].user)) | dict(person=dict(people[1]))],
                     date=date(2024, 7, 15),
                     time_range=dict(
                         start=dict(hours=16, minutes=30),
@@ -243,8 +243,8 @@ async def init_database_data():
             ),
             Inform.model_validate(
                 dict(
-                    creator=dict(people[1]),
-                    volunteers=[dict(people[0])],
+                    creator=dict(cast(User, people[1].user)) | dict(person=dict(people[1])),
+                    volunteers=[dict(cast(User, people[0].user)) | dict(person=dict(people[0]))],
                     date=date(2024, 7, 15),
                     time_range=dict(
                         start=dict(hours=16, minutes=30),

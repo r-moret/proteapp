@@ -5,10 +5,13 @@ from proteapp.models.base import ULIDSchema, BaseSchema, NoSQLULIDSchema
 
 
 class Inform(NoSQLULIDSchema):
-    class Person(ULIDSchema):
-        name: str
-        first_surname: str
-        second_surname: Optional[str] = None
+    class User(ULIDSchema):
+        class Person(BaseSchema):
+            name: str
+            first_surname: str
+            second_surname: Optional[str] = None
+
+        person: Person
 
     class Animal(ULIDSchema):
         name: str
@@ -48,8 +51,8 @@ class Inform(NoSQLULIDSchema):
         start: Time
         end: Time
 
-    creator: Person
-    volunteers: list[Person]
+    creator: User
+    volunteers: list[User]
     date: date
     time_range: TimeRange
     notes: list[Note]
