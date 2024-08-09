@@ -75,16 +75,20 @@ export const InformInfoSchema = z.object({
   id: IdSchema,
   creator: z.object({
     id: IdSchema,
-    name: z.string(),
-    firstSurname: z.string(),
-    secondSurname: z.string().nullish()
+    person: z.object({
+      name: z.string(),
+      firstSurname: z.string(),
+      secondSurname: z.string().nullish()
+    })
   }),
   volunteers: z.array(
     z.object({
       id: IdSchema,
-      name: z.string(),
-      firstSurname: z.string(),
-      secondSurname: z.string().nullish()
+      person: z.object({
+        name: z.string(),
+        firstSurname: z.string(),
+        secondSurname: z.string().nullish()
+      })
     })
   ),
   date: z.coerce.date(),
