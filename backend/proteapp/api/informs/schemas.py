@@ -1,7 +1,8 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Optional
 from pydantic import Field
 from proteapp.models.base import ULIDSchema, BaseSchema
+from proteapp.models.time import UTCSchema
 from ulid import ULID
 
 
@@ -14,13 +15,9 @@ class ListedInform(ULIDSchema):
 
         person: Person
 
-    class TimeRange(BaseSchema):
-        class Time(BaseSchema):
-            hours: int
-            minutes: int
-
-        start: Time
-        end: Time
+    class TimeRange(UTCSchema, BaseSchema):
+        start: time
+        end: time
 
     creator: User
     volunteers: list[User]
@@ -92,13 +89,9 @@ class EditableInform(BaseSchema):
         animal: ULID
         compatible: bool
 
-    class TimeRange(BaseSchema):
-        class Time(BaseSchema):
-            hours: int
-            minutes: int
-
-        start: Time
-        end: Time
+    class TimeRange(UTCSchema, BaseSchema):
+        start: time
+        end: time
 
     creator: ULID
     volunteers: list[ULID]

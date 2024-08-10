@@ -1,6 +1,7 @@
 from proteapp.api.deps import get_sql_session
 from proteapp.models.sql.animals import Animal, Sex
-from datetime import datetime, date
+from datetime import datetime, date, time
+from zoneinfo import ZoneInfo
 from typing import cast
 from ulid import ULID
 
@@ -216,8 +217,8 @@ async def init_database_data():
                     volunteers=[dict(cast(User, people[1].user)) | dict(person=dict(people[1]))],
                     date=date(2024, 7, 15),
                     time_range=dict(
-                        start=dict(hours=16, minutes=30),
-                        end=dict(hours=20, minutes=0),
+                        start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     highlights=["Todo estaba muy ordenado"],
                     notes=[
@@ -247,8 +248,8 @@ async def init_database_data():
                     volunteers=[dict(cast(User, people[0].user)) | dict(person=dict(people[0]))],
                     date=date(2024, 7, 15),
                     time_range=dict(
-                        start=dict(hours=16, minutes=30),
-                        end=dict(hours=20, minutes=0),
+                        start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     notes=[
                         dict(

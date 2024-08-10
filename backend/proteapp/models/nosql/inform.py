@@ -1,7 +1,8 @@
-from datetime import date
+from datetime import date, time
 from typing import Optional
 from pydantic import Field
 from proteapp.models.base import ULIDSchema, BaseSchema, NoSQLULIDSchema
+from proteapp.models.time import UTCSchema
 
 
 class Inform(NoSQLULIDSchema):
@@ -43,13 +44,9 @@ class Inform(NoSQLULIDSchema):
         animal: "Inform.Animal"
         compatible: bool
 
-    class TimeRange(BaseSchema):
-        class Time(BaseSchema):
-            hours: int
-            minutes: int
-
-        start: Time
-        end: Time
+    class TimeRange(UTCSchema, BaseSchema):
+        start: time
+        end: time
 
     creator: User
     volunteers: list[User]
