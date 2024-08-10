@@ -155,10 +155,6 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
   }
 
   enrichedInform.value = { ...enrichedInform.value, [field]: update }
-  console.log({
-    ...props.modelValue,
-    [field]: modelUpdate
-  })
   emit('update:model-value', {
     ...props.modelValue,
     [field]: modelUpdate
@@ -494,8 +490,6 @@ function handleCreateArrival(name: string) {
           Añadir pérdida
         </button>
       </div>
-
-      <pre>{{ props.modelValue }}</pre>
     </div>
 
     <BottomDrawer class="bg-base-200" size="medium" v-model="volunteersDrawerOpen">
