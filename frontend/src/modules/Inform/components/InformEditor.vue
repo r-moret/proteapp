@@ -156,7 +156,7 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
       modelUpdate = update.map((adop) => ({ animal: adop.animal.id, foster: adop.foster }))
       break
     case 'testedAnimals':
-      modelUpdate = update.map((test) => ({ animal: test.animal.id, foster: test.compatible }))
+      modelUpdate = update.map((test) => ({ animal: test.animal.id, compatible: test.compatible }))
       break
     case 'losses':
       modelUpdate = update.map((test) => ({ animal: test.animal.id }))
