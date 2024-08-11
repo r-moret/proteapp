@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { format, parse } from '@formkit/tempo'
+import { format, parse, sameDay } from '@formkit/tempo'
 
 import { useInformStore } from '@/store/InformStore'
 import { shiftType } from '@/utils'
@@ -19,7 +19,13 @@ const router = useRouter()
 const informStore = useInformStore()
 const { informList } = storeToRefs(informStore)
 
-const date = ref()
+const filterDate = ref<Date>()
+
+const filteredInforms = computed(() =>
+  filterDate.value
+    ? informList.value.filter((inform) => sameDay(inform.date, filterDate.value!))
+    : informList.value
+)
 
 async function handleDeleteInform(inform: InformInfo) {
   await informStore.deleteInform(inform.id)
@@ -42,13 +48,23 @@ onBeforeMount(async () => {
       </button>
     </AppHeader>
     <section class="min-h-0 w-full flex-grow overflow-y-auto px-4">
-      <DateInput class="mb-4 mt-2" v-model="date" :include-time="false" />
+      <DateInput
+        class="mb-6 mt-2"
+        v-model="filterDate"
+        :include-time="false"
+        placeholder="Buscar por fecha"
+      />
       <ItemList
-        :items="informList"
+        :items="filteredInforms"
         delete-title="¿Estás seguro de que quieres borrar este informe?"
         @delete="handleDeleteInform"
       >
-        <template #empty>No hay informes</template>
+        <template #empty>
+          <div class="mt-4 flex flex-col items-center gap-2">
+            <span class="i-mingcute-file-unknown-line text-6xl" />
+            <p class="text-gray-500">No hay informes</p>
+          </div>
+        </template>
         <template #item="{ item, openConfirm }">
           <InformCard :inform="item">
             <template #action>

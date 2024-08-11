@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { InformInfo } from '../declarations'
-import { format, isAfter, parse } from '@formkit/tempo'
+import { format, parse } from '@formkit/tempo'
 import { shiftType } from '@/utils'
 
 const props = defineProps<{
