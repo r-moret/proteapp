@@ -10,7 +10,6 @@ import ItemSelector from '@/components/ItemSelector.vue'
 import HoursInput from '@/components/HoursInput.vue'
 import DateInput from '@/components/DateInput.vue'
 import TextListInput from '@/components/TextListInput.vue'
-import { pick } from 'lodash'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
 import AnimalNotesEditor from '@/components/AnimalNotesEditor.vue'
 import AnimalSelector from './AnimalSelector.vue'
@@ -20,6 +19,8 @@ import AnimalTestCard from '@/modules/Inform/components/AnimalTestCard.vue'
 import AnimalCard from '@/modules/Animal/components/AnimalCard.vue'
 import MultipleTextListInput from '@/components/MultipleTextListInput.vue'
 import TextInput from '@/components/TextInput.vue'
+import { toLocal } from '@/utils'
+import { format } from '@formkit/tempo'
 
 const { userList } = storeToRefs(useUserStore())
 const { yardList, animalList } = storeToRefs(useAnimalStore())
@@ -55,7 +56,16 @@ const enrichedInform = ref<EnrichedInform>({
     (vol) => userList.value.find((user) => user.id === vol)! // TODO
   ),
   date: props.modelValue.date,
-  timeRange: [props.modelValue.timeRange.start, props.modelValue.timeRange.end],
+  timeRange: [
+    {
+      hours: toLocal(props.modelValue.timeRange.start).getHours(),
+      minutes: toLocal(props.modelValue.timeRange.start).getMinutes()
+    },
+    {
+      hours: toLocal(props.modelValue.timeRange.end).getHours(),
+      minutes: toLocal(props.modelValue.timeRange.end).getMinutes()
+    }
+  ],
   highlights: props.modelValue.highlights,
   notes: animalList.value.map((animal) => ({ info: animal })),
   adoptions: props.modelValue.adoptions.map((adop) => ({
@@ -121,12 +131,19 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
     case 'date':
       modelUpdate = update
       break
-    case 'timeRange':
+    case 'timeRange': {
+      const start = new Date()
+      const end = new Date()
+
+      start.setHours(update[0].hours, update[0].minutes, 0)
+      end.setHours(update[1].hours, update[1].minutes, 0)
+
       modelUpdate = {
-        start: pick(update[0], ['hours', 'minutes']),
-        end: pick(update[1], ['hours', 'minutes'])
+        start: format(start, 'HH:mm:ssZ'),
+        end: format(end, 'HH:mm:ssZ')
       }
       break
+    }
     case 'highlights':
       modelUpdate = update
       break
@@ -249,7 +266,7 @@ function handleCreateArrival(name: string) {
 
 <template>
   <div>
-    <div class="flex flex-col gap-8">
+    <div class="flex flex-col gap-8 pb-8">
       <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold">Creador</h2>
         <UserCard size="compact" :user="enrichedInform.creator" />

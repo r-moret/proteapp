@@ -5,7 +5,7 @@ import { useUserStore } from '@/store/UserStore'
 import InformEditor from '../components/InformEditor.vue'
 import { storeToRefs } from 'pinia'
 import type { EditInform } from '@/modules/Inform/declarations'
-import { useAnimalStore } from '@/store/AnimalStore'
+import { parse, format } from '@formkit/tempo'
 
 const userStore = useUserStore()
 const { loggedUser } = storeToRefs(userStore)
@@ -17,7 +17,10 @@ const inform = ref<EditInform>({
   creator: loggedUser.value!.id,
   volunteers: [],
   date: new Date(),
-  timeRange: { start: { hours: 16, minutes: 0 }, end: { hours: 20, minutes: 0 } },
+  timeRange: {
+    start: format(parse('16:00', 'HH:mm'), 'HH:mm:ssZ'),
+    end: format(parse('20:00', 'HH:mm'), 'HH:mm:ssZ')
+  },
   notes: [],
   highlights: [],
   visits: [],
