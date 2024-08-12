@@ -3,10 +3,10 @@ import type { NavigationBarConfig } from '@/types.ts'
 export const navigationBarConfig: NavigationBarConfig = {
   items: [
     {
-      name: 'home',
-      label: 'Inicio',
-      icon: 'i-mingcute-home-3-line',
-      activeIcon: 'i-mingcute-home-3-fill'
+      name: 'people',
+      label: 'Personas',
+      icon: 'i-mingcute-user-2-fill',
+      activeIcon: 'i-mingcute-user-2-fill'
     },
     {
       name: 'animals',
