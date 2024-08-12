@@ -1,64 +1,53 @@
 <script setup lang="ts">
 import Datepicker from '@vuepic/vue-datepicker'
 
-import { format } from '@formkit/tempo'
+type Time = { hours: number; minutes: number }
 
-const model = defineModel<Date | null>()
+const model = defineModel<[Time, Time]>({ required: true })
 
 const props = withDefaults(
   defineProps<{
-    includeTime: boolean
-    placeholder?: string
-    dateFormat?: 'short' | 'long'
     clearable?: boolean
     includeIcon?: boolean
   }>(),
   {
-    dateFormat: 'long',
-    clearable: true,
     includeIcon: true
   }
 )
-
-const dateFormatter = (date: Date) => {
-  return format(date, { date: props.dateFormat, time: props.includeTime ? 'short' : undefined })
-}
 </script>
 
 <template>
   <div class="flex h-12 w-full">
     <template v-if="props.includeIcon">
       <div class="flex items-center justify-center rounded-l-lg bg-white px-3">
-        <span class="i-mingcute-calendar-2-line text-2xl text-secondary" />
+        <span class="i-mingcute-time-fill text-2xl text-secondary" />
       </div>
       <div class="divider divider-horizontal mx-0 w-fit bg-white py-2" />
     </template>
     <Datepicker
-      class="w-full rounded-r-lg"
+      class="w-full"
       v-model="model"
       auto-apply
-      no-today
       hide-input-icon
-      :enable-time-picker="props.includeTime"
+      time-picker
+      :range="true"
       locale="es-ES"
-      :placeholder="props.placeholder"
       :clearable="props.clearable"
-      :format="dateFormatter"
       :ui="{
-        menu: 'calendar-menu',
-        input: 'calendar-input'
+        menu: 'hours-menu',
+        input: 'hours-input'
       }"
     />
   </div>
 </template>
 
 <style>
-.calendar-menu {
+.hours-menu {
   border-radius: 1.5rem;
   overflow: hidden;
 }
 
-.calendar-input {
+.hours-input {
   height: 3rem;
   border: none;
   border-radius: v-bind('props.includeIcon ? "0 0.5rem 0.5rem 0" : "0.5rem"');

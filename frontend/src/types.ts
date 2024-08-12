@@ -1,3 +1,8 @@
+export type ObjectWithId = {
+  id: string
+  [key: string]: any
+}
+
 export type NavigationBarConfig = {
   items: {
     name: string

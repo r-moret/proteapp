@@ -2,16 +2,18 @@
 import NavigationBar from '@/skeleton/NavigationBar.vue'
 import { onBeforeMount } from 'vue'
 import { RouterView } from 'vue-router'
-import { useUserStore } from './store/UserStore'
+import { useUserStore } from '@/store/UserStore'
+import { storeToRefs } from 'pinia'
 
 const userStore = useUserStore()
+const { loggedUser } = storeToRefs(userStore)
 
 onBeforeMount(async () => {
-  Promise.allSettled([userStore.fetchUser()])
+  await userStore.loginUser()
 })
 </script>
 
 <template>
-  <RouterView class="h-screen bg-base-200 pb-16" />
+  <RouterView v-if="loggedUser" class="h-screen bg-base-200 pb-16" />
   <NavigationBar class="h-16" />
 </template>
