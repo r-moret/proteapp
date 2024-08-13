@@ -16,6 +16,10 @@ export const YardSchema = YardInfoSchema.extend({
   )
 })
 
+export const EditYardSchema = z.object({
+  name: z.string().min(1)
+})
+
 export const AnimalInfoSchema = z.object({
   id: IdSchema,
   name: z.string(),
@@ -79,6 +83,7 @@ export const EditAppointmentSchema = z.object({
 
 export type YardInfo = z.infer<typeof YardInfoSchema>
 export type Yard = z.infer<typeof YardSchema>
+export type EditYard = z.infer<typeof EditYardSchema>
 export type EditTreatment = z.infer<typeof EditTreatmentSchema>
 export type EditAppointment = z.infer<typeof EditAppointmentSchema>
 export type AnimalInfo = z.infer<typeof AnimalInfoSchema>

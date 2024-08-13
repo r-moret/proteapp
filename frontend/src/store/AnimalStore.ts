@@ -5,14 +5,16 @@ import type {
   Animal,
   AnimalInfo,
   EditAppointment,
-  EditTreatment
+  EditTreatment,
+  EditYard
 } from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
   listYards as listYardApi,
   crudAnimal as crudAnimalApi,
   crudTreatment as crudTreatmentApi,
-  crudAppointment as crudAppointmentApi
+  crudAppointment as crudAppointmentApi,
+  crudYard as crudYardApi
 } from '@/modules/Animal/api'
 import { AnimalAdapter, AnimalInfoAdapter } from '@/modules/Animal/adapters'
 
@@ -125,6 +127,44 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     )
   }
 
+  async function deleteYard(yardId: string) {
+    if (!yardList.value || !yardList.value.map((yard) => yard.id).includes(yardId)) {
+      throw Error(
+        'Cannot delete a yard that belongs to a yard different than the one that is loaded'
+      )
+    }
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}/${yardId}`, {
+      method: 'delete'
+    })
+    yardList.value = yardList.value.filter((yard) => yard.id !== yardId)
+  }
+
+  async function fetchYards() {
+    isLoading.value = true
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
+      .then((res) => res.json())
+      .then((json: Yard[]) => (yardList.value = json))
+
+    isLoading.value = false
+  }
+
+  async function createYard(yard: EditYard) {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}`, {
+      method: 'post',
+      body: JSON.stringify(yard),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(async (data) => {
+      if (!data.ok) {
+        throw Error(`Error backend response: ${await data.json()}`)
+      }
+    })
+    await fetchYards()
+  }
+
   return {
     animalList,
     animalDetails,
@@ -135,6 +175,9 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     createTreatment,
     deleteTreatment,
     createAppointment,
-    deleteAppointment
+    deleteAppointment,
+    deleteYard,
+    fetchYards,
+    createYard
   }
 })
