@@ -12,6 +12,7 @@ const { showErrorNotification, showSuccessNotification } = useToastNotifications
 import { ZodError } from 'zod'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { addDay } from '@formkit/tempo'
+import BottomDrawer from '@/components/BottomDrawer.vue'
 
 const adoptionStore = useAdoptionStore()
 const newAdoption = ref<EditAdoption>()
@@ -20,6 +21,12 @@ const newAdoptionForm = ref<HTMLFormElement | null>(null)
 
 onBeforeMount(async () => {
   await adoptionStore.fetchAdoptions()
+  newAdoption.value = {
+    person: '',
+    animal: '',
+    registerDate: addDay(new Date()),
+    foster: false
+  }
 })
 const newAdoptionOpen = ref(false)
 
@@ -32,16 +39,15 @@ async function handleAddAdoption(closeDrawer: () => void) {
       newAdoption.value.registerDate.getMonth(),
       newAdoption.value.registerDate.getDate()
     )
-    console.log(newAdoption.value)
     EditAdoptionAdapter(newAdoption.value)
 
     await adoptionStore.createAdoption(newAdoption.value)
-    showSuccessNotification('Seguimiento añadido correctamente.')
+    showSuccessNotification('Adopción añadida correctamente.')
 
     newAdoptionForm.value?.reset()
     newAdoption.value = {
       registerDate: addDay(new Date()),
-      kind: 'permanent',
+      foster: false,
       animal: '',
       person: ''
     }
@@ -65,7 +71,7 @@ async function handleAddAdoption(closeDrawer: () => void) {
     </AppHeader>
 
     <AdoptionList :adoption-list="adoptionList"></AdoptionList>
-    <!-- <BottomDrawer class="bg-base-200" size="small" v-model="newAdoptionOpen" v-slot="{ close }">
+    <BottomDrawer class="bg-base-200" size="small" v-model="newAdoptionOpen" v-slot="{ close }">
       <div class="flex h-full flex-col gap-5">
         <h1 class="text-3xl font-semibold">Nuevo seguimiento</h1>
         <form
@@ -74,26 +80,22 @@ async function handleAddAdoption(closeDrawer: () => void) {
           class="flex h-full flex-col gap-6 pb-10"
           @submit.prevent="handleAddAdoption(close)"
         >
-          <div class="flex flex-col gap-2">
-            <label class="font-semibold" for="new-adoption-description">
-              Descripción del seguimiento
-            </label>
+          <di v class="flex flex-col gap-2">
+            <label class="font-semibold" for="new-adoption-description"> Animal a adoptar </label>
             <TextInput
               name="new-monitoring-description"
               placeholder="ej. Adaptado correctamente"
-              v-model="newAdoption.note"
+              v-model="newAdoption.animal"
             />
-          </div>
-
+          </di>
           <div class="flex flex-col gap-2">
             <label class="font-semibold" for="">Fecha de adopción</label>
-            <DateInput
+            <DateInputS
               :include-time="false"
               placeholder="ej. 23 de mayo de 2023"
               v-model="newAdoption.registerDate"
             />
           </div>
-
           <button
             class="mt-auto w-fit self-center rounded-lg bg-secondary px-10 py-3 text-xl font-semibold text-white"
           >
@@ -101,6 +103,6 @@ async function handleAddAdoption(closeDrawer: () => void) {
           </button>
         </form>
       </div>
-    </BottomDrawer> -->
+    </BottomDrawer>
   </main>
 </template>
