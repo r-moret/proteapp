@@ -20,12 +20,12 @@ const { adoptionList } = storeToRefs(adoptionStore)
 const newAdoptionForm = ref<HTMLFormElement | null>(null)
 
 onBeforeMount(async () => {
-  await adoptionStore.fetchAdoptions('foster_home')
+  await adoptionStore.fetchAdoptions()
   newAdoption.value = {
     person: '',
     animal: '',
     registerDate: addDay(new Date()),
-    kind: 'permanent'
+    foster: false
   }
 })
 const newAdoptionOpen = ref(false)
@@ -47,7 +47,7 @@ async function handleAddAdoption(closeDrawer: () => void) {
     newAdoptionForm.value?.reset()
     newAdoption.value = {
       registerDate: addDay(new Date()),
-      kind: 'permanent',
+      foster: false,
       animal: '',
       person: ''
     }

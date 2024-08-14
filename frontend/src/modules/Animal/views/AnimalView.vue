@@ -42,13 +42,13 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="min-h-0 flex-grow overflow-y-auto">
     <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
       <span class="loading loading-spinner loading-lg text-secondary" />
     </div>
 
     <template v-else-if="animalDetails">
-      <div class="relative h-1/2 w-screen overflow-hidden shadow-2xl">
+      <div class="relative h-[50vh] w-screen overflow-hidden shadow-2xl">
         <div
           class="absolute left-0 top-0 mx-3 mt-4 flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 backdrop-blur-lg"
           @click="navigateBack"

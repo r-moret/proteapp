@@ -1,9 +1,10 @@
 from proteapp.api.informs.schemas import EditableInform
 from proteapp.models.nosql.inform import Inform
-from proteapp.models.sql.people import Person
+from proteapp.models.sql.users import User
 from proteapp.models.sql.animals import Animal
 from proteapp.api.deps import sql_engine
 from sqlmodel import Session
+from datetime import datetime
 
 
 def to_inform(data: EditableInform) -> Inform:
@@ -11,11 +12,22 @@ def to_inform(data: EditableInform) -> Inform:
         return Inform.model_validate(
             {
                 **data.model_dump(),
+                "date": data.date if not isinstance(data.date, datetime) else data.date.date(),
                 "creator": (
-                    person.model_dump() if (person := session.get(Person, data.creator)) else None
+                    {
+                        **user.model_dump(),
+                        "person": user.person.model_dump(),
+                    }
+                    if (user := session.get(User, data.creator))
+                    else None
                 ),
                 "volunteers": [
-                    person.model_dump() if (person := session.get(Person, vol)) else None
+                    {
+                        **user.model_dump(),
+                        "person": user.person.model_dump(),
+                    }
+                    if (user := session.get(User, vol))
+                    else None
                     for vol in data.volunteers
                 ],
                 "notes": [

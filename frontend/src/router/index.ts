@@ -47,7 +47,7 @@ const router = createRouter({
     {
       path: '/inform',
       name: 'inform',
-      component: () => import('../views/InformView.vue')
+      component: () => import('@/modules/Inform/views/InformListView.vue')
     },
     {
       path: '/profile',
