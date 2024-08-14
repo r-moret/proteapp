@@ -56,9 +56,9 @@ onBeforeMount(() => {
   <div class="flex-1 overflow-y-auto">
     <slot v-if="!items || !items.length" name="empty" />
 
-    <ul v-else class="space-y-2">
+    <ul v-else>
       <li v-for="(item, index) in props.items" :key="index">
-        <span v-if="index != 0" class="divider my-0" />
+        <span v-if="index != 0" class="divider my-2" />
         <slot name="item" :item="item" :open-confirm="handleConfirmDeleteItem">
           <div class="flex flex-row justify-between px-4 py-2">
             <div class="flex flex-col">

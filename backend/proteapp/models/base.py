@@ -5,6 +5,7 @@ from sqlalchemy.types import String, TypeDecorator
 from sqlalchemy.engine import Dialect
 from ulid import ULID
 from beanie import Document
+from datetime import time
 
 
 class BaseSchema(BaseModel):
@@ -36,4 +37,4 @@ class NoSQLULIDSchema(ULIDSchema, Document):
 
     class Settings:
         validate_on_save = True
-        bson_encoders = {ULID: str}
+        bson_encoders = {ULID: str, time: time.isoformat}

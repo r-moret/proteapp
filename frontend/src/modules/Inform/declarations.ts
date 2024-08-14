@@ -25,13 +25,21 @@ export const UserSchema = UserInfoSchema.extend({
   })
 })
 
+const TimeSchema = z
+  .string()
+  .refine((val) =>
+    /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(Z|[+-](?:2[0-3]|[01][0-9])(?::(?:[0-5][0-9]))?)$/.test(
+      val
+    )
+  )
+
 export const EditInformSchema = z.object({
   creator: IdSchema,
   volunteers: z.array(IdSchema),
   date: z.coerce.date(),
   timeRange: z.object({
-    start: z.object({ hours: z.number(), minutes: z.number() }),
-    end: z.object({ hours: z.number(), minutes: z.number() })
+    start: TimeSchema,
+    end: TimeSchema
   }),
   notes: z.array(
     z.object({
@@ -63,7 +71,7 @@ export const EditInformSchema = z.object({
       foster: z.boolean()
     })
   ),
-  tested_animals: z.array(
+  testedAnimals: z.array(
     z.object({
       animal: IdSchema,
       compatible: z.boolean()
@@ -75,22 +83,26 @@ export const InformInfoSchema = z.object({
   id: IdSchema,
   creator: z.object({
     id: IdSchema,
-    name: z.string(),
-    firstSurname: z.string(),
-    secondSurname: z.string().nullish()
-  }),
-  volunteers: z.array(
-    z.object({
-      id: IdSchema,
+    person: z.object({
       name: z.string(),
       firstSurname: z.string(),
       secondSurname: z.string().nullish()
     })
+  }),
+  volunteers: z.array(
+    z.object({
+      id: IdSchema,
+      person: z.object({
+        name: z.string(),
+        firstSurname: z.string(),
+        secondSurname: z.string().nullish()
+      })
+    })
   ),
   date: z.coerce.date(),
   timeRange: z.object({
-    start: z.object({ hours: z.number(), minutes: z.number() }),
-    end: z.object({ hours: z.number(), minutes: z.number() })
+    start: TimeSchema,
+    end: TimeSchema
   })
 })
 

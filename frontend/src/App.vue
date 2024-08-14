@@ -14,6 +14,8 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <RouterView v-if="loggedUser" class="h-screen bg-base-200 pb-16" />
+  <div class="h-full min-h-screen bg-base-200">
+    <RouterView v-if="loggedUser" class="h-screen pb-16" />
+  </div>
   <NavigationBar class="h-16" />
 </template>

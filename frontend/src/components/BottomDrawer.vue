@@ -25,6 +25,10 @@ const props = withDefaults(
   }
 )
 
+const emit = defineEmits<{
+  close: []
+}>()
+
 const isClosing = ref(false)
 
 const handleCloseSlide = () => {
@@ -32,6 +36,7 @@ const handleCloseSlide = () => {
 
   isClosing.value = false
   isOpen.value = false
+  emit('close')
 }
 </script>
 
