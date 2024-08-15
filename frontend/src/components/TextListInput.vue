@@ -7,6 +7,7 @@ const model = defineModel<string[] | null>()
 
 const props = defineProps<{
   placeholder?: string
+  editable?: boolean
 }>()
 
 const newText = ref<string>()
@@ -28,7 +29,7 @@ function handleRemoveText(id: string) {
 
 <template>
   <div class="flex flex-col gap-3">
-    <div class="flex gap-2">
+    <div v-if="props.editable" class="flex gap-2">
       <TextInput
         v-model="newText"
         name="inform-new-highlight"
@@ -51,7 +52,11 @@ function handleRemoveText(id: string) {
         <li v-for="(idText, index) in identifiedTexts" :key="index">
           <div class="flex h-8 items-center justify-between">
             <p>{{ idText.text }}</p>
-            <button class="flex items-center" @click="handleRemoveText(idText.id)">
+            <button
+              v-if="props.editable"
+              class="flex items-center"
+              @click="handleRemoveText(idText.id)"
+            >
               <span class="i-mingcute-close-line" />
             </button>
           </div>

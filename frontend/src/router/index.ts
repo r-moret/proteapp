@@ -58,6 +58,11 @@ const router = createRouter({
       path: '/inform/edit',
       name: 'inform.edit',
       component: () => import('@/modules/Inform/views/InformEditorView.vue')
+    },
+    {
+      path: '/inform/:id',
+      name: 'inform.view',
+      component: () => import('@/modules/Inform/views/InformViewerView.vue')
     }
   ]
 })
