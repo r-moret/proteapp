@@ -4,15 +4,32 @@ import { computed, ref } from 'vue'
 import BottomDrawer from './BottomDrawer.vue'
 import TextInput from './TextInput.vue'
 
-const model = defineModel<{ info: AnimalInfo; note?: string }[]>({ required: true })
+const model = defineModel<{ info: AnimalInfo; note?: string }[] | null>()
 
 const props = defineProps<{
   yards: YardInfo[]
+  editable?: boolean
 }>()
 
+const newNoteDrawerOpen = ref(false)
+const viewNoteDrawerOpen = ref(false)
+const newNote = ref<{
+  animal?: AnimalInfo
+  isOverwritting: boolean
+  text: string
+}>()
+const selectedNote = ref<{
+  animal: AnimalInfo
+  text: string
+}>()
+const selectedYard = ref(props.yards[0].id)
+
+const selectedYardAnimals = computed(
+  () => model.value?.filter((animal) => animal.info.yard?.id === selectedYard.value) ?? []
+)
 const yardNumNotes = computed(() => {
   return props.yards.map((yard) => {
-    return model.value
+    return (model.value ?? [])
       .filter((animal) => animal.info.yard?.id === yard.id)
       .reduce((sum, animal) => {
         return sum + (animal.note ? 1 : 0)
@@ -20,27 +37,22 @@ const yardNumNotes = computed(() => {
   })
 })
 
-const newNoteDrawerOpen = ref(false)
-const newNote = ref<{
-  animal?: AnimalInfo
-  isOverwritting: boolean
-  text: string
-  highlight: boolean
-}>()
-const selectedYard = ref(props.yards[0].id)
-
 function handleSelectAnimal(animal: { info: AnimalInfo; note?: string }) {
-  newNoteDrawerOpen.value = true
-  newNote.value = {
-    animal: animal.info,
-    isOverwritting: !!animal.note,
-    text: animal.note ?? '',
-    highlight: false
+  if (props.editable) {
+    newNoteDrawerOpen.value = true
+    newNote.value = {
+      animal: animal.info,
+      isOverwritting: !!animal.note,
+      text: animal.note ?? ''
+    }
+  } else {
+    viewNoteDrawerOpen.value = true
+    selectedNote.value = { animal: animal.info, text: animal.note ?? '' }
   }
 }
 
 function handleAddNote({ clear } = { clear: false }) {
-  if (!newNote.value || !newNote.value.animal) return
+  if (!newNote.value || !newNote.value.animal || !model.value) return
 
   if (clear) {
     newNote.value.text = ''
@@ -80,9 +92,12 @@ function handleAddNote({ clear } = { clear: false }) {
         </li>
       </ul>
     </div>
-    <div class="grid grid-cols-3 gap-y-4">
+    <p v-if="selectedYardAnimals.length == 0" class="text-center italic text-gray-400">
+      {{ props.editable ? 'Este patio está vacío' : 'No hay notas para animales de este patio' }}
+    </p>
+    <div v-else class="grid grid-cols-3 gap-y-4">
       <div
-        v-for="animal in model.filter((animal) => animal.info.yard?.id === selectedYard)"
+        v-for="animal in selectedYardAnimals"
         :class="[
           'mx-auto flex h-[4.5rem] w-[5.5rem] flex-col items-center justify-center rounded-xl border-2 bg-base-100 p-2',
           animal.note ? 'border-secondary shadow-sm shadow-secondary' : 'border-base-300'
@@ -145,6 +160,18 @@ function handleAddNote({ clear } = { clear: false }) {
               Añadir
             </button>
           </div>
+        </div>
+      </div>
+    </template>
+  </BottomDrawer>
+
+  <BottomDrawer v-if="selectedNote" class="bg-base-200" size="tiny" v-model="viewNoteDrawerOpen">
+    <template #default>
+      <div class="flex h-full w-full flex-col gap-5">
+        <h1 class="text-3xl font-semibold">Nota de {{ selectedNote.animal.name }}</h1>
+        <div class="mb-4 flex gap-3 rounded-xl bg-white p-2">
+          <span class="mt-4 font-serif text-7xl italic leading-10 text-gray-600">“</span>
+          <p class="mt-3 text-lg italic">{{ selectedNote.text }}</p>
         </div>
       </div>
     </template>
