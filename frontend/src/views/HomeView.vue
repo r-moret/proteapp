@@ -4,6 +4,6 @@ import AppHeader from '@/skeleton/AppHeader.vue'
 
 <template>
   <main>
-    <AppHeader title="Inicio" />
+    <AppHeader title="Personas" />
   </main>
 </template>
