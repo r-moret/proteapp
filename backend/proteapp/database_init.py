@@ -23,7 +23,7 @@ people = [
         user=User(
             id=ULID.from_str("01J3DSAAMJCCXJNB7M2XZGVEPW"),  # Fixed, this is the fake logged user
             active=True,
-            veteran=True,
+            veteran=False,
             password="hola",
         ),
     ),
@@ -32,7 +32,14 @@ people = [
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
         email="rafaelmoret@gmail.com",
-        user=User(active=True, veteran=False, password="adios"),
+        user=User(active=True, veteran=True, password="adios"),
+    ),
+    Person(
+        name="Obi Wan",
+        first_surname="Kenobi",
+        phone=PhoneNumber("+34640564432"),
+        email="obisw@gmail.com",
+        user=User(active=True, veteran=False, password="sw"),
     ),
 ]
 
