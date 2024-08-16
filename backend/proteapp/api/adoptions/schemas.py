@@ -1,6 +1,6 @@
 from proteapp.models.base import ULIDSchema, BaseSchema
 from pydantic_extra_types.phone_numbers import PhoneNumber
-from datetime import date
+from datetime import date, datetime
 
 from ulid import ULID
 
@@ -14,7 +14,7 @@ class ListedAdoption(ULIDSchema):
         name: str
         first_surname: str
 
-    register_date: date
+    register_date: date | datetime
     foster: bool
     revocation_date: date | None = None
     animal: Animal
@@ -39,10 +39,10 @@ class CompleteAdoption(ULIDSchema):
         email: str | None = None
 
     class Monitoring(ULIDSchema):
-        follow_date: date
+        follow_date: date | datetime
         note: str
 
-    register_date: date
+    register_date: date | datetime
     foster: bool
     revocation_date: date | None = None
     animal: Animal
@@ -51,7 +51,7 @@ class CompleteAdoption(ULIDSchema):
 
 
 class EditableAdoption(BaseSchema):
-    register_date: date
+    register_date: date | datetime
     foster: bool
     animal: ULID
     person: ULID

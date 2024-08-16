@@ -21,6 +21,16 @@ import MultipleTextListInput from '@/components/MultipleTextListInput.vue'
 import TextInput from '@/components/TextInput.vue'
 import { toLocal } from '@/utils'
 import { format } from '@formkit/tempo'
+import type { Optional } from '@/types'
+import type {
+  EnrichedInform,
+  EnrichedFields,
+  Visit,
+  Arrival,
+  Adoption,
+  AnimalTest,
+  Loss
+} from '@/modules/Inform/declarations'
 
 const { userList } = storeToRefs(useUserStore())
 const { yardList, animalList } = storeToRefs(useAnimalStore())
@@ -32,23 +42,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:model-value': [payload: EditInform]
 }>()
-
-type Arrival = { name: string; description?: string | null }
-type Visit = { visitor: string; description: string }
-type TimeRange = [{ hours: number; minutes: number }, { hours: number; minutes: number }]
-type EnrichedFields =
-  | ['creator', UserInfo]
-  | ['volunteers', UserInfo[]]
-  | ['date', Date]
-  | ['timeRange', TimeRange]
-  | ['highlights', string[] | undefined | null]
-  | ['notes', { info: AnimalInfo; note?: string }[]]
-  | ['adoptions', { animal: AnimalInfo; foster: boolean }[]]
-  | ['testedAnimals', { animal: AnimalInfo; compatible: boolean }[]]
-  | ['losses', { animal: AnimalInfo }[]]
-  | ['visits', Visit[]]
-  | ['arrivals', Arrival[]]
-type EnrichedInform = { [key in EnrichedFields[0]]: Extract<EnrichedFields, [key, any]>[1] }
 
 const enrichedInform = ref<EnrichedInform>({
   creator: userList.value.find((user) => user.id === props.modelValue.creator)!, // TODO
@@ -83,23 +76,15 @@ const enrichedInform = ref<EnrichedInform>({
   arrivals: props.modelValue.arrivals
 })
 
-const newAdoption = ref<{
-  animal?: AnimalInfo
-  foster: boolean
-}>({
+const newAdoption = ref<Optional<Adoption, 'animal'>>({
   animal: undefined,
   foster: false
 })
-const newAnimalTest = ref<{
-  animal?: AnimalInfo
-  compatible: boolean
-}>({
+const newAnimalTest = ref<Optional<AnimalTest, 'animal'>>({
   animal: undefined,
   compatible: false
 })
-const newLoss = ref<{
-  animal?: AnimalInfo
-}>({
+const newLoss = ref<Partial<Loss>>({
   animal: undefined
 })
 const newVisit = ref<Partial<Visit>>({
@@ -149,17 +134,17 @@ function handleFieldUpdate(...[field, update]: EnrichedFields) {
       break
     case 'notes':
       modelUpdate = update
-        .filter((note) => note.note)
+        ?.filter((note) => note.note)
         .map((note) => ({ animal: note.info.id, text: note.note }))
       break
     case 'adoptions':
-      modelUpdate = update.map((adop) => ({ animal: adop.animal.id, foster: adop.foster }))
+      modelUpdate = update?.map((adop) => ({ animal: adop.animal.id, foster: adop.foster }))
       break
     case 'testedAnimals':
-      modelUpdate = update.map((test) => ({ animal: test.animal.id, compatible: test.compatible }))
+      modelUpdate = update?.map((test) => ({ animal: test.animal.id, compatible: test.compatible }))
       break
     case 'losses':
-      modelUpdate = update.map((test) => ({ animal: test.animal.id }))
+      modelUpdate = update?.map((test) => ({ animal: test.animal.id }))
       break
     case 'visits':
       modelUpdate = update
@@ -187,14 +172,14 @@ function handleAddToAnimalListField(
   callback: () => void
 ) {
   const duplicatedAnimal = (newAnimal: AnimalInfo) =>
-    enrichedInform.value[listField].some((animalItem) => animalItem.animal.id === newAnimal.id)
+    !!enrichedInform.value[listField]?.some((animalItem) => animalItem.animal.id === newAnimal.id)
 
   switch (listField) {
     case 'adoptions':
       if (!newAdoption.value.animal) return // TODO: Notification
       if (duplicatedAnimal(newAdoption.value.animal)) return // TODO: Notification
       handleFieldUpdate('adoptions', [
-        ...enrichedInform.value[listField],
+        ...(enrichedInform.value[listField] ?? []),
         { ...newAdoption.value, animal: newAdoption.value.animal! }
       ])
       break
@@ -202,7 +187,7 @@ function handleAddToAnimalListField(
       if (!newAnimalTest.value.animal) return // TODO: Notification
       if (duplicatedAnimal(newAnimalTest.value.animal)) return // TODO: Notification
       handleFieldUpdate('testedAnimals', [
-        ...enrichedInform.value[listField],
+        ...(enrichedInform.value[listField] ?? []),
         { ...newAnimalTest.value, animal: newAnimalTest.value.animal! }
       ])
       break
@@ -210,7 +195,7 @@ function handleAddToAnimalListField(
       if (!newLoss.value.animal) return // TODO: Notification
       if (duplicatedAnimal(newLoss.value.animal)) return // TODO: Notification
       handleFieldUpdate('losses', [
-        ...enrichedInform.value[listField],
+        ...(enrichedInform.value[listField] ?? []),
         { ...newLoss.value, animal: newLoss.value.animal! }
       ])
       break
@@ -229,7 +214,7 @@ function handleRemoveFromAnimalListField(
     case 'adoptions':
       handleFieldUpdate(
         'adoptions',
-        enrichedInform.value.adoptions.filter(
+        (enrichedInform.value.adoptions ?? []).filter(
           (saved) => saved.animal.id !== animalListItem[1].animal.id
         )
       )
@@ -237,7 +222,7 @@ function handleRemoveFromAnimalListField(
     case 'testedAnimals':
       handleFieldUpdate(
         'testedAnimals',
-        enrichedInform.value.testedAnimals.filter(
+        (enrichedInform.value.testedAnimals ?? []).filter(
           (saved) => saved.animal.id !== animalListItem[1].animal.id
         )
       )
@@ -245,7 +230,7 @@ function handleRemoveFromAnimalListField(
     default:
       handleFieldUpdate(
         'losses',
-        enrichedInform.value.losses.filter(
+        (enrichedInform.value.losses ?? []).filter(
           (saved) => saved.animal.id !== animalListItem[1].animal.id
         )
       )
@@ -329,6 +314,7 @@ function handleCreateArrival(name: string) {
         <h2 class="text-xl font-semibold">Destacado</h2>
         <TextListInput
           :model-value="enrichedInform.highlights"
+          :editable="true"
           placeholder="El turno de hoy fue..."
           @update:model-value="(highlights) => handleFieldUpdate('highlights', highlights)"
         >
@@ -343,6 +329,7 @@ function handleCreateArrival(name: string) {
         <AnimalNotesEditor
           :yards="yardList"
           :model-value="enrichedInform.notes"
+          :editable="true"
           @add-highlight="handleAddNoteInHighlights"
           @update:model-value="(notes) => handleFieldUpdate('notes', notes)"
         />
@@ -355,12 +342,12 @@ function handleCreateArrival(name: string) {
             <h2 class="flex items-center gap-4">
               <p class="text-xl font-semibold">Adopciones</p>
               <p class="badge badge-secondary badge-lg">
-                {{ enrichedInform.adoptions.length }}
+                {{ enrichedInform.adoptions?.length ?? 0 }}
               </p>
             </h2>
           </div>
           <div class="collapse-content px-0 !pb-0">
-            <p v-if="!enrichedInform.adoptions.length" class="mt-4 text-center italic">
+            <p v-if="!enrichedInform.adoptions?.length" class="mt-4 text-center italic">
               No hay adopciones
             </p>
             <ul v-else class="mt-4 flex flex-col gap-2">
@@ -390,6 +377,7 @@ function handleCreateArrival(name: string) {
         <h2 class="text-xl font-semibold">Visitas</h2>
         <MultipleTextListInput
           :model-value="enrichedInform.visits"
+          :editable="true"
           placeholder="Ej. Una pareja joven de veintipico años"
           @add="handleCreateVisit"
           @update:model-value="(visits: Visit[]) => handleFieldUpdate('visits', visits)"
@@ -416,12 +404,12 @@ function handleCreateArrival(name: string) {
             <h2 class="flex items-center gap-4">
               <p class="text-xl font-semibold">Pruebas de animales</p>
               <p class="badge badge-secondary badge-lg">
-                {{ enrichedInform.testedAnimals.length }}
+                {{ enrichedInform.testedAnimals?.length ?? 0 }}
               </p>
             </h2>
           </div>
           <div class="collapse-content px-0 !pb-0">
-            <p v-if="!enrichedInform.testedAnimals.length" class="mt-4 text-center italic">
+            <p v-if="!enrichedInform.testedAnimals?.length" class="mt-4 text-center italic">
               No hay pruebas de animales
             </p>
             <ul v-else class="mt-4 flex flex-col gap-2">
@@ -451,6 +439,7 @@ function handleCreateArrival(name: string) {
         <h2 class="text-xl font-semibold">Entradas</h2>
         <MultipleTextListInput
           :model-value="enrichedInform.arrivals"
+          :editable="true"
           placeholder="Ej. Zelda"
           @add="handleCreateArrival"
           @update:model-value="(arrivals: Arrival[]) => handleFieldUpdate('arrivals', arrivals)"
@@ -477,12 +466,12 @@ function handleCreateArrival(name: string) {
             <h2 class="flex items-center gap-4">
               <p class="text-xl font-semibold">Pérdidas</p>
               <p class="badge badge-secondary badge-lg">
-                {{ enrichedInform.losses.length }}
+                {{ enrichedInform.losses?.length ?? 0 }}
               </p>
             </h2>
           </div>
           <div class="collapse-content px-0 !pb-0">
-            <p v-if="!enrichedInform.losses.length" class="mt-4 text-center italic">
+            <p v-if="!enrichedInform.losses?.length" class="mt-4 text-center italic">
               No hay pérdidas
             </p>
             <ul v-else class="mt-4 flex flex-col gap-2">
@@ -696,7 +685,7 @@ function handleCreateArrival(name: string) {
                 @click="
                   () => {
                     handleFieldUpdate('visits', [
-                      ...enrichedInform.visits,
+                      ...(enrichedInform.visits ?? []),
                       { visitor: newVisit.visitor!, description: newVisit.description! }
                     ])
                     close()
@@ -739,7 +728,7 @@ function handleCreateArrival(name: string) {
                 @click="
                   () => {
                     handleFieldUpdate('arrivals', [
-                      ...enrichedInform.arrivals,
+                      ...(enrichedInform.arrivals ?? []),
                       { name: newArrival.name!, description: newArrival.description! }
                     ])
                     close()

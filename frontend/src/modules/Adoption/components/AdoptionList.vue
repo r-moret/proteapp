@@ -30,7 +30,8 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex h-3/4 w-full flex-col">
+  <div>
+    <ToastNotifications ref="notificationsRef" />
     <ItemList
       :items="props.adoptionList"
       delete-title="¿Estás seguro de que quieres borrar esta adopción?"

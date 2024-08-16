@@ -35,6 +35,10 @@ function handleNewInform() {
   router.push({ name: 'inform.edit' })
 }
 
+function handleViewInform(informId: string) {
+  router.push({ name: 'inform.view', params: { id: informId } })
+}
+
 onBeforeMount(async () => {
   await informStore.fetchInforms()
 })
@@ -66,9 +70,9 @@ onBeforeMount(async () => {
           </div>
         </template>
         <template #item="{ item, openConfirm }">
-          <InformCard :inform="item">
+          <InformCard :inform="item" @click="handleViewInform(item.id)">
             <template #action>
-              <button type="button" @click="openConfirm(item)">
+              <button type="button" @click.stop="openConfirm(item)">
                 <span class="i-mingcute-close-fill" />
               </button>
             </template>
