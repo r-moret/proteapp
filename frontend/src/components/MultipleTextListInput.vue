@@ -6,6 +6,7 @@ import { isEqual } from 'lodash'
 const props = defineProps<{
   modelValue?: T[] | null
   placeholder?: string
+  editable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -31,7 +32,7 @@ function handleCreateNewItem() {
 
 <template>
   <div class="flex flex-col gap-3">
-    <div class="flex gap-2">
+    <div v-if="props.editable" class="flex gap-2">
       <TextInput
         v-model="newText"
         :placeholder="props.placeholder"
@@ -55,7 +56,7 @@ function handleCreateNewItem() {
         <li v-for="(item, index) in props.modelValue" :key="index">
           <div class="flex items-start justify-between">
             <slot name="item" :item="item" />
-            <button class="flex items-center" @click="handleRemoveItem(item)">
+            <button v-if="props.editable" class="flex items-center" @click="handleRemoveItem(item)">
               <span class="i-mingcute-close-line" />
             </button>
           </div>
