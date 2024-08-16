@@ -18,7 +18,6 @@ import { AdoptionInfoAdapter, AdoptionAdapter } from '@/modules/Adoption/adapter
 export const useAdoptionStore = defineStore('AdoptionStore', () => {
   const adoptionList = ref<AdoptionInfo[]>([])
   const adoptionDetails = ref<Adoption>()
-  const animalDetails = ref<Animal>()
   const isLoading = ref(false)
 
   async function fetchAdoptions({ foster }: { foster?: boolean } = {}) {
@@ -62,14 +61,6 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
   }
 
   async function createAdoption(adoption: EditAdoption) {
-    if (
-      !adoptionDetails.value ||
-      !animalDetails.value ||
-      adoption.animal !== animalDetails.value.id
-    ) {
-      throw Error('Cannot create an adoption for an animal different than the one that is loaded')
-    }
-
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}`, {
       method: 'post',
       body: JSON.stringify(adoption),
@@ -82,7 +73,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       }
     })
 
-    await fetchAdoption(adoptionDetails.value.id)
+    await fetchAdoptions()
   }
 
   async function createMonitoring(monitoring: EditMonitoring) {
