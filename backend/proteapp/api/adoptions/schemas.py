@@ -39,7 +39,7 @@ class CompleteAdoption(ULIDSchema):
         email: str | None = None
 
     class Monitoring(ULIDSchema):
-        follow_date: date
+        follow_date: date | datetime
         note: str
 
     register_date: date | datetime
