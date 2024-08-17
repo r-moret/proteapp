@@ -9,15 +9,19 @@ from proteapp.api.users.routes import router as users_router
 from proteapp.api.informs.routes import router as informs_router
 from proteapp.api.adoptions.routes import router as adoptions_router
 from proteapp.api.monitorings.routes import router as monitorings_router
+from proteapp.api.shifts.routes import router as shifts_router
 from proteapp.database_init import init_database_data
 from contextlib import asynccontextmanager
-from proteapp.api.deps import connect_mongo
+from proteapp.api.deps import connect_mongo, init_shift
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect_mongo()
     await init_database_data()
+
+    app.state.shift = await init_shift()
+
     yield
 
 
@@ -40,3 +44,4 @@ app.include_router(users_router)
 app.include_router(informs_router)
 app.include_router(adoptions_router)
 app.include_router(monitorings_router)
+app.include_router(shifts_router)
