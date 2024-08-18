@@ -20,11 +20,15 @@ async def post_status(request: Request, body: ShiftStatus):
 
 @router.websocket("/status")
 async def status_ws(websocket: WebSocket):
+    shift: Shift = websocket.app.state.shift
+
     await status_ws_manager.connect(websocket)
 
     try:
+        await status_ws_manager.send(ShiftStatus(status=shift.status).model_dump(), websocket)
+
         while True:
-            await websocket.receive()
+            await websocket.receive_json()
 
     except WebSocketDisconnect:
         status_ws_manager.disconnect(websocket)
@@ -33,13 +37,13 @@ async def status_ws(websocket: WebSocket):
 @router.websocket("/")
 async def websocket(websocket: WebSocket):
     # TODO: Save shift on DB
+    shift: Shift = websocket.app.state.shift
 
     await shift_ws_manager.connect(websocket)
 
-    shift: Shift = websocket.app.state.shift
-    await shift_ws_manager.send(shift.timetable.model_dump(), websocket)
-
     try:
+        await shift_ws_manager.send(shift.timetable.model_dump(), websocket)
+
         while True:
             data = await websocket.receive_json()
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, computed } from 'vue'
+import { onBeforeMount, ref, computed, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/UserStore'
+import { useShiftStore } from '@/store/ShiftStore'
 import { storeToRefs } from 'pinia'
 
 import AppHeader from '@/skeleton/AppHeader.vue'
@@ -12,6 +13,9 @@ import type { EnrichedShift, ShiftTime, WeekDay } from '@/modules/Shift/declarat
 
 const userStore = useUserStore()
 const { userList, loggedUser } = storeToRefs(userStore)
+
+const shiftStore = useShiftStore()
+const { status, isConnecting } = storeToRefs(shiftStore)
 
 const isLoading = ref(false)
 const shift = ref<EnrichedShift>()
@@ -65,7 +69,10 @@ function handleRemoveUserShift(userId: string, oldShift: { day: WeekDay; time: S
 
 onBeforeMount(async () => {
   isLoading.value = true
+
+  shiftStore.startConnection()
   await userStore.fetchUsers()
+
   shift.value = {
     monday: { morning: [userList.value[0], userList.value[0]], afternoon: [] },
     thursday: {
@@ -87,7 +94,12 @@ onBeforeMount(async () => {
       afternoon: [userList.value[0]]
     }
   }
+
   isLoading.value = false
+})
+
+onBeforeUnmount(() => {
+  shiftStore.finishConnection()
 })
 </script>
 
@@ -101,7 +113,12 @@ onBeforeMount(async () => {
         <span class="i-mingcute-add-line text-3xl" />
       </button>
     </AppHeader>
-    <section class="min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
+
+    <div v-if="isLoading || isConnecting" class="flex h-full w-full items-center justify-center">
+      <span class="loading loading-spinner loading-lg text-secondary" />
+    </div>
+
+    <section v-else class="min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
       <div class="mb-3 flex justify-between px-1">
         <div class="flex flex-col justify-between">
           <p class="font-semibold">Conectados</p>
@@ -109,15 +126,13 @@ onBeforeMount(async () => {
           <UserGroup :users="userList" :max="2" />
         </div>
 
-        <div class="flex flex-col justify-between pb-1">
+        <div class="flex min-w-28 flex-col justify-between pb-1">
           <p class="font-semibold">Estado</p>
-          <!-- open is a placeholder -->
-          <ShiftStatus status="open" />
+          <ShiftStatus :status="status ?? 'open'" class="w-full" />
         </div>
       </div>
 
       <ShiftPicker
-        v-if="!isLoading"
         :weekly-shift="shift!"
         :picked-shifts="pickedShifts"
         @select-shift="handleShiftSelect"

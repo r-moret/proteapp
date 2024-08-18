@@ -26,3 +26,9 @@ export type EnrichedShiftDay = {
 }
 
 export type EnrichedShift = Record<WeekDay, EnrichedShiftDay>
+
+export const ShiftStatusSchema = z.object({
+  status: z.enum(['open', 'closed'])
+})
+
+export type ShiftStauts = z.infer<typeof ShiftStatusSchema>
