@@ -83,14 +83,7 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="flex flex-col">
-    <AppHeader title="Cuadrante de turnos">
-      <button class="btn btn-square btn-ghost">
-        <span class="i-mingcute-more-1-line text-3xl" />
-      </button>
-      <button class="btn btn-square btn-ghost">
-        <span class="i-mingcute-add-line text-3xl" />
-      </button>
-    </AppHeader>
+    <AppHeader title="Cuadrante de turnos"> </AppHeader>
 
     <div
       v-if="isLoading || isConnecting || !enrichedShift || !status"

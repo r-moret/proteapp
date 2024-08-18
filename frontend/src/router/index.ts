@@ -42,7 +42,7 @@ const router = createRouter({
     {
       path: '/shift',
       name: 'shift',
-      component: () => import('../views/ShiftView.vue')
+      component: () => import('@/modules/Shift/views/ShiftView.vue')
     },
     {
       path: '/inform',
