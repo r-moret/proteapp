@@ -7,15 +7,14 @@ import { storeToRefs } from 'pinia'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import ShiftPicker from '@/modules/Shift/components/ShiftPicker.vue'
 import ShiftStatus from '@/modules/Shift/components/ShiftStatus.vue'
-import UserGroup from '@/components/UserGroup.vue'
 
-import type { EnrichedShift, ShiftTime, WeekDay } from '@/modules/Shift/declarations'
+import type { EnrichedShift, ShiftSelection } from '@/modules/Shift/declarations'
 
 const userStore = useUserStore()
 const { userList, loggedUser } = storeToRefs(userStore)
 
 const shiftStore = useShiftStore()
-const { status, shift, isConnecting } = storeToRefs(shiftStore)
+const { status, shift, connections, isConnecting } = storeToRefs(shiftStore)
 
 const isLoading = ref(false)
 
@@ -43,17 +42,17 @@ const pickedShifts = computed(() =>
     (acc, [day, times]) => [
       ...acc,
       ...(times.morning.some((user) => user.id === loggedUser.value?.id)
-        ? [{ day, time: 'morning' } as { day: WeekDay; time: ShiftTime }]
+        ? [{ day, time: 'morning' } as ShiftSelection]
         : []),
       ...(times.afternoon.some((user) => user.id === loggedUser.value?.id)
-        ? [{ day, time: 'afternoon' } as { day: WeekDay; time: ShiftTime }]
+        ? [{ day, time: 'afternoon' } as ShiftSelection]
         : [])
     ],
-    [] as { day: WeekDay; time: ShiftTime }[]
+    [] as ShiftSelection[]
   )
 )
 
-function handleShiftSelect(selectedShift: { day: WeekDay; time: ShiftTime }) {
+function handleShiftSelect(selectedShift: ShiftSelection) {
   if (!loggedUser.value) return
 
   if (
@@ -102,13 +101,12 @@ onBeforeUnmount(() => {
 
     <section v-else class="min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
       <div class="mb-3 flex justify-between px-1">
-        <div class="flex flex-col justify-between">
-          <p class="font-semibold">Conectados</p>
-          <!-- userList is a placeholder -->
-          <UserGroup :users="userList" :max="2" />
+        <div class="flex items-center gap-2">
+          <span class="i-mingcute-group-fill text-2xl text-secondary" />
+          <p class="font-semibold">{{ connections }}</p>
         </div>
 
-        <div class="flex min-w-28 flex-col justify-between pb-1">
+        <div class="flex min-w-28 items-center gap-2">
           <p class="font-semibold">Estado</p>
           <ShiftStatus :status="status" class="w-full" />
         </div>

@@ -13,6 +13,7 @@ from proteapp.models.sql.people import Person, PhoneNumber
 from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.monitorings import Monitoring
 from proteapp.models.nosql.inform import Inform
+from proteapp.models.nosql.shift import Shift
 
 people = [
     Person(
@@ -287,7 +288,61 @@ async def init_database_data():
             ),
         ]
 
+        shift = Shift.model_validate(
+            dict(
+                status="open",
+                timetable=dict(
+                    monday=dict(
+                        morning=[cast(User, people[2].user).id],
+                        afternoon=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                        ],
+                    ),
+                    thursday=dict(
+                        morning=[cast(User, people[0].user).id],
+                        afternoon=[
+                            cast(User, people[1].user).id,
+                            cast(User, people[2].user).id,
+                        ],
+                    ),
+                    wednesday=dict(
+                        morning=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                            cast(User, people[2].user).id,
+                        ],
+                        afternoon=[],
+                    ),
+                    tuesday=dict(
+                        morning=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                        ],
+                        afternoon=[],
+                    ),
+                    friday=dict(
+                        morning=[],
+                        afternoon=[],
+                    ),
+                    saturday=dict(
+                        morning=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                            cast(User, people[2].user).id,
+                        ],
+                        afternoon=[],
+                    ),
+                    sunday=dict(
+                        morning=[],
+                        afternoon=[],
+                    ),
+                ),
+            )
+        )
+
         await Inform.insert_many(informs)
+        await Shift.insert_one(shift)
 
         next(sql_session_generator)
     except StopIteration:

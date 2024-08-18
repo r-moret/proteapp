@@ -2,7 +2,7 @@ import { computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useWebSocket } from '@vueuse/core'
 import { ShiftStatusAdapter, ShiftAdapter, ShiftActionAdapter } from '@/modules/Shift/adapters'
-import type { ShiftAction, WeekDay, ShiftTime } from '@/modules/Shift/declarations'
+import type { ShiftAction, ShiftSelection } from '@/modules/Shift/declarations'
 
 export const useShiftStore = defineStore('ShiftStore', () => {
   const {
@@ -35,7 +35,12 @@ export const useShiftStore = defineStore('ShiftStore', () => {
 
   const shift = computed(() => {
     if (!shiftData.value) return undefined
-    return ShiftAdapter(JSON.parse(shiftData.value))
+    return ShiftAdapter(JSON.parse(shiftData.value)).timetable
+  })
+
+  const connections = computed(() => {
+    if (!shiftData.value) return undefined
+    return ShiftAdapter(JSON.parse(shiftData.value)).connected
   })
 
   function startConnection() {
@@ -48,11 +53,7 @@ export const useShiftStore = defineStore('ShiftStore', () => {
     shiftClose()
   }
 
-  function sendShiftAction(
-    type: ShiftAction['type'],
-    user: string,
-    shift: { day: WeekDay; time: ShiftTime }
-  ) {
+  function sendShiftAction(type: ShiftAction['type'], user: string, shift: ShiftSelection) {
     const action = ShiftActionAdapter({ type, user, shift })
     shiftSend(JSON.stringify(action))
   }
@@ -60,6 +61,7 @@ export const useShiftStore = defineStore('ShiftStore', () => {
   return {
     status,
     shift,
+    connections,
     isConnecting,
 
     sendShiftAction,

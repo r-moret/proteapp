@@ -1,4 +1,5 @@
 from proteapp.models.base import BaseSchema
+from proteapp.models.nosql.shift import TimeTable
 from typing import Literal
 from ulid import ULID
 from enum import StrEnum
@@ -8,17 +9,20 @@ class ShiftStatus(BaseSchema):
     status: Literal["open", "closed"]
 
 
-class ShiftActionType(StrEnum):
-    ADD_USER = "add_user"
-    REMOVE_USER = "remove_user"
-
-
 class ShiftData(BaseSchema):
-    day: Literal["monday", "thursday", "wednesday", "tuesday", "friday", "saturday", "sunday"]
-    time: Literal["morning", "afternoon"]
+    connected: int
+    timetable: TimeTable
 
 
 class ShiftAction(BaseSchema):
-    type: ShiftActionType
+    class ActionType(StrEnum):
+        ADD_USER = "add_user"
+        REMOVE_USER = "remove_user"
+
+    class Selection(BaseSchema):
+        day: Literal["monday", "thursday", "wednesday", "tuesday", "friday", "saturday", "sunday"]
+        time: Literal["morning", "afternoon"]
+
+    type: ActionType
     user: ULID
-    shift: ShiftData
+    shift: Selection

@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import type { EnrichedShift, WeekDay, ShiftTime } from '../declarations'
+import type { EnrichedShift, ShiftSelection, WeekDay } from '../declarations'
 import ShiftSigner from './ShiftSigner.vue'
-
-type PickedShift = { day: WeekDay; time: ShiftTime }
 
 const TIMES = ['morning', 'afternoon'] as const
 const DAYS: Record<WeekDay, string> = {
@@ -17,11 +15,11 @@ const DAYS: Record<WeekDay, string> = {
 
 const props = defineProps<{
   weeklyShift: EnrichedShift
-  pickedShifts: PickedShift[]
+  pickedShifts: ShiftSelection[]
 }>()
 
 const emit = defineEmits<{
-  selectShift: [payload: PickedShift]
+  selectShift: [payload: ShiftSelection]
 }>()
 </script>
 

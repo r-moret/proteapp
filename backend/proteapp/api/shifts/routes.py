@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from proteapp.websockets import WSConnectionManager
-from proteapp.api.shifts.schemas import ShiftAction, ShiftActionType, ShiftStatus
+from proteapp.api.shifts.schemas import ShiftAction, ShiftStatus, ShiftData
 from proteapp.models.nosql.shift import Shift
 from operator import attrgetter
 
@@ -36,13 +36,17 @@ async def status_ws(websocket: WebSocket):
 
 @router.websocket("/shift")
 async def websocket(websocket: WebSocket):
-    # TODO: Save shift on DB
     shift: Shift = websocket.app.state.shift
 
     await shift_ws_manager.connect(websocket)
 
     try:
-        await shift_ws_manager.send(shift.timetable.model_dump(), websocket)
+        await shift_ws_manager.broadcast(
+            ShiftData(
+                timetable=shift.timetable,
+                connected=len(shift_ws_manager.active_connections),
+            ).model_dump(),
+        )
 
         while True:
             data = await websocket.receive_json()
@@ -56,13 +60,26 @@ async def websocket(websocket: WebSocket):
             users: list[str] = get_users(shift.timetable)
 
             match action.type:
-                case ShiftActionType.ADD_USER:
+                case ShiftAction.ActionType.ADD_USER:
                     users.append(str(action.user))
 
-                case ShiftActionType.REMOVE_USER:
+                case ShiftAction.ActionType.REMOVE_USER:
                     users.remove(str(action.user))
 
-            await shift_ws_manager.broadcast(shift.timetable.model_dump())
+            await shift_ws_manager.broadcast(
+                ShiftData(
+                    timetable=shift.timetable,
+                    connected=len(shift_ws_manager.active_connections),
+                ).model_dump(),
+            )
+
+            await shift.save()
 
     except WebSocketDisconnect:
         shift_ws_manager.disconnect(websocket)
+        await shift_ws_manager.broadcast(
+            ShiftData(
+                timetable=shift.timetable,
+                connected=len(shift_ws_manager.active_connections),
+            ).model_dump(),
+        )
