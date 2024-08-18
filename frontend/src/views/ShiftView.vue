@@ -15,13 +15,31 @@ const userStore = useUserStore()
 const { userList, loggedUser } = storeToRefs(userStore)
 
 const shiftStore = useShiftStore()
-const { status, isConnecting } = storeToRefs(shiftStore)
+const { status, shift, isConnecting } = storeToRefs(shiftStore)
 
 const isLoading = ref(false)
-const shift = ref<EnrichedShift>()
 
+const enrichedShift = computed<EnrichedShift | undefined>(() =>
+  !shift.value
+    ? undefined
+    : Object.entries(shift.value).reduce(
+        (enriched, [dayName, dayTimes]) => ({
+          ...enriched,
+          [dayName]: Object.entries(dayTimes).reduce(
+            (times, [timeName, timeUsers]) => ({
+              ...times,
+              [timeName]: timeUsers.map((userId) =>
+                userList.value.find((user) => user.id === userId)
+              )
+            }),
+            {}
+          )
+        }),
+        {} as EnrichedShift
+      )
+)
 const pickedShifts = computed(() =>
-  Object.entries(shift.value ?? {}).reduce(
+  Object.entries(enrichedShift.value ?? {}).reduce(
     (acc, [day, times]) => [
       ...acc,
       ...(times.morning.some((user) => user.id === loggedUser.value?.id)
@@ -39,61 +57,22 @@ function handleShiftSelect(selectedShift: { day: WeekDay; time: ShiftTime }) {
   if (!loggedUser.value) return
 
   if (
-    shift.value?.[selectedShift.day][selectedShift.time]
+    enrichedShift.value?.[selectedShift.day][selectedShift.time]
       .map((user) => user.id)
       .includes(loggedUser.value.id)
   ) {
-    handleRemoveUserShift(loggedUser.value.id, selectedShift)
+    shiftStore.sendShiftAction('remove_user', loggedUser.value.id, selectedShift)
     return
   }
 
-  handleAddUserShift(loggedUser.value.id, selectedShift)
-}
-
-function handleAddUserShift(userId: string, newShift: { day: WeekDay; time: ShiftTime }) {
-  if (!shift.value) return
-
-  const userInfo = userList.value.find((savedUser) => savedUser.id === userId)
-  if (!userInfo) return // TODO
-
-  shift.value[newShift.day][newShift.time].push(userInfo)
-}
-
-function handleRemoveUserShift(userId: string, oldShift: { day: WeekDay; time: ShiftTime }) {
-  if (!shift.value) return
-
-  shift.value[oldShift.day][oldShift.time] = shift.value[oldShift.day][oldShift.time].filter(
-    (user) => user.id !== userId
-  )
+  shiftStore.sendShiftAction('add_user', loggedUser.value.id, selectedShift)
 }
 
 onBeforeMount(async () => {
   isLoading.value = true
 
-  shiftStore.startConnection()
   await userStore.fetchUsers()
-
-  shift.value = {
-    monday: { morning: [userList.value[0], userList.value[0]], afternoon: [] },
-    thursday: {
-      morning: [userList.value[0], userList.value[1], userList.value[0], userList.value[1]],
-      afternoon: [userList.value[0], userList.value[0]]
-    },
-    wednesday: {
-      morning: [],
-      afternoon: [userList.value[0], userList.value[1], userList.value[1]]
-    },
-    tuesday: { morning: [userList.value[1], userList.value[1]], afternoon: [] },
-    friday: { morning: [userList.value[1]], afternoon: [userList.value[0], userList.value[1]] },
-    saturday: {
-      morning: [userList.value[0], userList.value[1]],
-      afternoon: [userList.value[2], userList.value[2]]
-    },
-    sunday: {
-      morning: [userList.value[2], userList.value[2], userList.value[2], userList.value[0]],
-      afternoon: [userList.value[0]]
-    }
-  }
+  shiftStore.startConnection()
 
   isLoading.value = false
 })
@@ -114,7 +93,10 @@ onBeforeUnmount(() => {
       </button>
     </AppHeader>
 
-    <div v-if="isLoading || isConnecting" class="flex h-full w-full items-center justify-center">
+    <div
+      v-if="isLoading || isConnecting || !enrichedShift || !status"
+      class="flex h-full w-full items-center justify-center"
+    >
       <span class="loading loading-spinner loading-lg text-secondary" />
     </div>
 
@@ -128,12 +110,12 @@ onBeforeUnmount(() => {
 
         <div class="flex min-w-28 flex-col justify-between pb-1">
           <p class="font-semibold">Estado</p>
-          <ShiftStatus :status="status ?? 'open'" class="w-full" />
+          <ShiftStatus :status="status" class="w-full" />
         </div>
       </div>
 
       <ShiftPicker
-        :weekly-shift="shift!"
+        :weekly-shift="enrichedShift"
         :picked-shifts="pickedShifts"
         @select-shift="handleShiftSelect"
       />

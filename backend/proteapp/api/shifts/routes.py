@@ -4,13 +4,13 @@ from proteapp.api.shifts.schemas import ShiftAction, ShiftActionType, ShiftStatu
 from proteapp.models.nosql.shift import Shift
 from operator import attrgetter
 
-router = APIRouter(prefix="/shift", tags=["shift"])
+router = APIRouter(tags=["shift"])
 
 shift_ws_manager = WSConnectionManager()
 status_ws_manager = WSConnectionManager()
 
 
-@router.post("/status", status_code=204)
+@router.post("/shift/status", status_code=204)
 async def post_status(request: Request, body: ShiftStatus):
     shift: Shift = request.app.state.shift
     shift.status = body.status
@@ -18,7 +18,7 @@ async def post_status(request: Request, body: ShiftStatus):
     await status_ws_manager.broadcast(ShiftStatus(status=shift.status).model_dump())
 
 
-@router.websocket("/status")
+@router.websocket("/shift/status")
 async def status_ws(websocket: WebSocket):
     shift: Shift = websocket.app.state.shift
 
@@ -34,7 +34,7 @@ async def status_ws(websocket: WebSocket):
         status_ws_manager.disconnect(websocket)
 
 
-@router.websocket("/")
+@router.websocket("/shift")
 async def websocket(websocket: WebSocket):
     # TODO: Save shift on DB
     shift: Shift = websocket.app.state.shift
