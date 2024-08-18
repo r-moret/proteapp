@@ -38,19 +38,20 @@ def get_sql_session():
 
 
 async def init_shift():
-    shifts = await Shift.find_all().to_list()
+    shift = await Shift.find_one()
 
-    if len(shifts) != 0:
-        return shifts[-1]
+    if not shift:
+        shift = Shift(
+            status="open",
+            timetable=TimeTable(
+                monday=DayTime(morning=[], afternoon=[]),
+                thursday=DayTime(morning=[], afternoon=[]),
+                wednesday=DayTime(morning=[], afternoon=[]),
+                tuesday=DayTime(morning=[], afternoon=[]),
+                friday=DayTime(morning=[], afternoon=[]),
+                saturday=DayTime(morning=[], afternoon=[]),
+                sunday=DayTime(morning=[], afternoon=[]),
+            ),
+        )
 
-    empty_timetable = TimeTable(
-        monday=DayTime(morning=[], afternoon=[]),
-        thursday=DayTime(morning=[], afternoon=[]),
-        wednesday=DayTime(morning=[], afternoon=[]),
-        tuesday=DayTime(morning=[], afternoon=[]),
-        friday=DayTime(morning=[], afternoon=[]),
-        saturday=DayTime(morning=[], afternoon=[]),
-        sunday=DayTime(morning=[], afternoon=[]),
-    )
-
-    return Shift(status="open", timetable=empty_timetable)
+        await shift.save()

@@ -19,8 +19,7 @@ from proteapp.api.deps import connect_mongo, init_shift
 async def lifespan(app: FastAPI):
     await connect_mongo()
     await init_database_data()
-
-    app.state.shift = await init_shift()
+    await init_shift()
 
     yield
 
