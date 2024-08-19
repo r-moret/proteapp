@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 from pydantic.alias_generators import to_camel
 from sqlmodel import Field as SQLField, SQLModel
 from sqlalchemy.types import String, TypeDecorator
@@ -34,6 +34,10 @@ class SQLULIDSchema(ULIDSchema, SQLModel):
 
 class NoSQLULIDSchema(ULIDSchema, Document):
     id: ULID = Field(default_factory=ULID)
+
+    @field_serializer("id")
+    def serialize_ulid(self, id: ULID):
+        return str(id)
 
     class Settings:
         validate_on_save = True

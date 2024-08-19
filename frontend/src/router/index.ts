@@ -1,9 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'users',
+      component: () => import('@/modules/User/views/UserListView.vue')
+    },
     {
       path: '/',
       name: 'people',
@@ -42,7 +46,7 @@ const router = createRouter({
     {
       path: '/shift',
       name: 'shift',
-      component: () => import('../views/ShiftView.vue')
+      component: () => import('@/modules/Shift/views/ShiftView.vue')
     },
     {
       path: '/inform',
