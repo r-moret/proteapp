@@ -10,6 +10,7 @@ from proteapp.api.informs.routes import router as informs_router
 from proteapp.api.adoptions.routes import router as adoptions_router
 from proteapp.api.monitorings.routes import router as monitorings_router
 from proteapp.api.shifts.routes import router as shifts_router
+from proteapp.api.auth.routes import router as auth_router
 from proteapp.database_init import init_database_data
 from contextlib import asynccontextmanager
 from proteapp.api.deps import connect_mongo, init_shift
@@ -44,3 +45,4 @@ app.include_router(informs_router)
 app.include_router(adoptions_router)
 app.include_router(monitorings_router)
 app.include_router(shifts_router)
+app.include_router(auth_router)

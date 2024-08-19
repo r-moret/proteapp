@@ -15,6 +15,8 @@ docker = "^7.1.0"
 beanie = "^1.26.0"
 python-ulid = {extras = ["pydantic"], version = "^2.7.0"}
 websockets = "^12.0"
+pyjwt = "^2.9.0"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.scripts]
 start = "proteapp.__main__:start"

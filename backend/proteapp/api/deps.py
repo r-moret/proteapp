@@ -2,6 +2,9 @@ from sqlmodel import create_engine, SQLModel, Session
 from sqlmodel.pool import StaticPool
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated
+from fastapi import Depends, HTTPException, status
 
 # These imports are mandatory to ensure that once the SQL database
 # is created, all models are registered
@@ -16,6 +19,10 @@ from proteapp.models.sql.monitorings import Monitoring  # noqa: F401
 
 from proteapp.models.nosql.inform import Inform
 from proteapp.models.nosql.shift import Shift, TimeTable, DayTime
+
+from proteapp.api.auth.token import decode_token
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 async def connect_mongo():
@@ -55,3 +62,19 @@ async def init_shift():
         )
 
         await shift.save()
+
+
+def get_logged_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+    token_data = decode_token(token)
+
+    with Session(sql_engine) as session:
+        user = session.get(User, token_data.user_id)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    return user
