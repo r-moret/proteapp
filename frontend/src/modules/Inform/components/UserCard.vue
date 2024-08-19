@@ -35,7 +35,7 @@ const fullName = computed(
       :src="props.user.image ?? placerholderImage"
       alt="User profile avatar image"
     />
-    <section>
+    <section class="flex-grow">
       <header class="flex items-center gap-3">
         <p class="text-lg font-semibold">{{ fullName }}</p>
         <span
@@ -43,10 +43,15 @@ const fullName = computed(
           class="i-mingcute-user-star-fill text-2xl text-secondary"
         />
       </header>
-      <div v-if="props.size === 'regular'" class="italic">{{ props.user.person.email }}</div>
+      <div v-if="props.size === 'regular'" class="truncate italic">
+        {{ props.user.person.email }}
+      </div>
       <div v-if="!props.user.active" class="badge badge-secondary font-semibold uppercase">
         INACTIVE
       </div>
     </section>
+    <div class="self-start">
+      <slot name="action" />
+    </div>
   </article>
 </template>

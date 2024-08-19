@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { crudUser as crudUserApi, listUser as listUserApi } from '@/modules/Inform/api'
 import type { UserInfo, User } from '@/modules/Inform/declarations'
 import { UserInfoAdapter, UserAdapter } from '@/modules/Inform/adapters'
+import type { EditUser } from '@/modules/User/declarations'
 
 export const useUserStore = defineStore('UserStore', () => {
   const loggedUser = ref<User>()
@@ -41,6 +42,34 @@ export const useUserStore = defineStore('UserStore', () => {
     isLoading.value = false
   }
 
+  async function deleteUser(userId: string) {
+    if (!userList.value || !userList.value.map((user) => user.id).includes(userId)) {
+      throw Error(
+        'Cannot delete an user that belongs to an user different than the one that is loaded'
+      )
+    }
+
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}/${userId}`, {
+      method: 'delete'
+    })
+    userList.value = userList.value.filter((user) => user.id !== userId)
+  }
+
+  async function createUser(user: EditUser) {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}`, {
+      method: 'post',
+      body: JSON.stringify(user),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(async (data) => {
+      if (!data.ok) {
+        throw Error(`Error backend response: ${await data.json()}`)
+      }
+    })
+    await fetchUsers()
+  }
+
   return {
     loggedUser,
     userDetails,
@@ -48,6 +77,8 @@ export const useUserStore = defineStore('UserStore', () => {
     isLoading,
     loginUser,
     fetchUser,
-    fetchUsers
+    fetchUsers,
+    deleteUser,
+    createUser
   }
 })

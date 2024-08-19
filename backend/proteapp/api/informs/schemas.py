@@ -1,25 +1,26 @@
-from datetime import date
+from datetime import date, datetime, time
 from typing import Optional
 from pydantic import Field
 from proteapp.models.base import ULIDSchema, BaseSchema
+from proteapp.models.time import UTCSchema
+from ulid import ULID
 
 
 class ListedInform(ULIDSchema):
-    class Person(ULIDSchema):
-        name: str
-        first_surname: str
-        second_surname: str | None
+    class User(ULIDSchema):
+        class Person(BaseSchema):
+            name: str
+            first_surname: str
+            second_surname: str | None
 
-    class TimeRange(BaseSchema):
-        class Time(BaseSchema):
-            hours: int
-            minutes: int
+        person: Person
 
-        start: Time
-        end: Time
+    class TimeRange(UTCSchema, BaseSchema):
+        start: time
+        end: time
 
-    creator: Person
-    volunteers: list[Person]
+    creator: User
+    volunteers: list[User]
     date: date
     time_range: TimeRange
 
@@ -66,7 +67,7 @@ class CompleteInform(ListedInform):
 
 class EditableInform(BaseSchema):
     class Note(BaseSchema):
-        animal: int
+        animal: ULID
         text: str = Field(min_length=1)
 
     class Visit(BaseSchema):
@@ -78,27 +79,23 @@ class EditableInform(BaseSchema):
         description: Optional[str] = Field(default=None, min_length=1)
 
     class Loss(BaseSchema):
-        animal: int
+        animal: ULID
 
     class Adoption(BaseSchema):
-        animal: int
+        animal: ULID
         foster: bool
 
     class TestedAnimal(BaseSchema):
-        animal: int
+        animal: ULID
         compatible: bool
 
-    class TimeRange(BaseSchema):
-        class Time(BaseSchema):
-            hours: int
-            minutes: int
+    class TimeRange(UTCSchema, BaseSchema):
+        start: time
+        end: time
 
-        start: Time
-        end: Time
-
-    creator: int
-    volunteers: list[int]
-    date: date
+    creator: ULID
+    volunteers: list[ULID]
+    date: date | datetime
     time_range: TimeRange
     notes: list[Note]
     highlights: Optional[list[str]] = None

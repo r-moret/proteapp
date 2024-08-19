@@ -18,10 +18,9 @@ import { AdoptionInfoAdapter, AdoptionAdapter } from '@/modules/Adoption/adapter
 export const useAdoptionStore = defineStore('AdoptionStore', () => {
   const adoptionList = ref<AdoptionInfo[]>([])
   const adoptionDetails = ref<Adoption>()
-  const animalDetails = ref<Animal>()
   const isLoading = ref(false)
 
-  async function fetchAdoptions(kind: string) {
+  async function fetchAdoptions({ foster }: { foster?: boolean } = {}) {
     isLoading.value = true
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listAdoptionsApi}`)
       .then((res) => res.json())
@@ -29,7 +28,9 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       .then((adoption) => (adoptionList.value = adoption))
 
     isLoading.value = false
-    adoptionList.value = adoptionList.value.filter((adoption) => adoption.kind === kind)
+    adoptionList.value = adoptionList.value.filter(
+      (adoption) => foster === undefined || adoption.foster === foster
+    )
   }
 
   async function deleteAdoption(adoptionId: string) {
@@ -60,14 +61,6 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
   }
 
   async function createAdoption(adoption: EditAdoption) {
-    if (
-      !adoptionDetails.value ||
-      !animalDetails.value ||
-      adoption.animal !== animalDetails.value.id
-    ) {
-      throw Error('Cannot create an adoption for an animal different than the one that is loaded')
-    }
-
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}`, {
       method: 'post',
       body: JSON.stringify(adoption),
@@ -80,7 +73,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       }
     })
 
-    await fetchAdoption(adoptionDetails.value.id)
+    await fetchAdoptions()
   }
 
   async function createMonitoring(monitoring: EditMonitoring) {

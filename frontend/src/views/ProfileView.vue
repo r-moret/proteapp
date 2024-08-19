@@ -3,8 +3,13 @@ import ProfileAvatar from '@/components/ProfileAvatar.vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/UserStore'
+import { useRouter } from 'vue-router'
 
 const { loggedUser } = storeToRefs(useUserStore())
+const router = useRouter()
+function navigateUsers() {
+  router.push({ name: 'users' })
+}
 </script>
 
 <template>
@@ -36,9 +41,9 @@ const { loggedUser } = storeToRefs(useUserStore())
       </div>
       <ul class="menu w-full gap-1 rounded-box">
         <li>
-          <a>
-            <span class="i-mingcute-tool-line text-3xl" />
-            <p class="px-2 text-xl font-semibold">Opción 1</p>
+          <a @click="navigateUsers()">
+            <span class="i-mingcute-contacts-line text-3xl" />
+            <p class="px-2 text-xl font-semibold">Usuarios</p>
           </a>
         </li>
         <li>

@@ -1,7 +1,7 @@
 from proteapp.api.deps import get_sql_session
-from proteapp.models.nosql.inform import Inform
 from proteapp.models.sql.animals import Animal, Sex
-from datetime import datetime, date
+from datetime import datetime, date, time
+from zoneinfo import ZoneInfo
 from typing import cast
 from ulid import ULID
 
@@ -10,8 +10,10 @@ from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
 from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
-from proteapp.models.sql.adoptions import Adoption, AdoptionKind
+from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.monitorings import Monitoring
+from proteapp.models.nosql.inform import Inform
+from proteapp.models.nosql.shift import Shift
 
 people = [
     Person(
@@ -22,7 +24,7 @@ people = [
         user=User(
             id=ULID.from_str("01J3DSAAMJCCXJNB7M2XZGVEPW"),  # Fixed, this is the fake logged user
             active=True,
-            veteran=True,
+            veteran=False,
             password="hola",
         ),
     ),
@@ -31,7 +33,14 @@ people = [
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
         email="rafaelmoret@gmail.com",
-        user=User(active=True, veteran=False, password="adios"),
+        user=User(active=True, veteran=True, password="adios"),
+    ),
+    Person(
+        name="Obi Wan",
+        first_surname="Kenobi",
+        phone=PhoneNumber("+34640564432"),
+        email="obisw@gmail.com",
+        user=User(active=True, veteran=False, password="sw"),
     ),
 ]
 
@@ -167,7 +176,7 @@ adoptions = [
     Adoption(
         animal=animals[0],
         person=people[0],
-        kind=AdoptionKind.foster_home,
+        foster=True,
         register_date=date(2019, 9, 24),
         monitorings=[
             Monitoring(follow_date=date(2019, 10, 4), note="Va muy bien"),
@@ -177,19 +186,19 @@ adoptions = [
     Adoption(
         animal=animals[1],
         person=people[1],
-        kind=AdoptionKind.foster_home,
+        foster=True,
         register_date=date(2024, 2, 15),
     ),
     Adoption(
         animal=animals[2],
         person=people[0],
-        kind=AdoptionKind.foster_home,
+        foster=False,
         register_date=date(2021, 1, 8),
     ),
     Adoption(
         animal=animals[3],
         person=people[1],
-        kind=AdoptionKind.foster_home,
+        foster=True,
         register_date=date(2023, 5, 2),
     ),
 ]
@@ -212,12 +221,12 @@ async def init_database_data():
         informs = [
             Inform.model_validate(
                 dict(
-                    creator=dict(people[0]),
-                    volunteers=[dict(people[1])],
+                    creator=dict(cast(User, people[0].user)) | dict(person=dict(people[0])),
+                    volunteers=[dict(cast(User, people[1].user)) | dict(person=dict(people[1]))],
                     date=date(2024, 7, 15),
                     time_range=dict(
-                        start=dict(hours=16, minutes=30),
-                        end=dict(hours=20, minutes=0),
+                        start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     highlights=["Todo estaba muy ordenado"],
                     notes=[
@@ -243,12 +252,12 @@ async def init_database_data():
             ),
             Inform.model_validate(
                 dict(
-                    creator=dict(people[1]),
-                    volunteers=[dict(people[0])],
+                    creator=dict(cast(User, people[1].user)) | dict(person=dict(people[1])),
+                    volunteers=[dict(cast(User, people[0].user)) | dict(person=dict(people[0]))],
                     date=date(2024, 7, 15),
                     time_range=dict(
-                        start=dict(hours=16, minutes=30),
-                        end=dict(hours=20, minutes=0),
+                        start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     notes=[
                         dict(
@@ -279,7 +288,61 @@ async def init_database_data():
             ),
         ]
 
+        shift = Shift.model_validate(
+            dict(
+                status="open",
+                timetable=dict(
+                    monday=dict(
+                        morning=[cast(User, people[2].user).id],
+                        afternoon=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                        ],
+                    ),
+                    thursday=dict(
+                        morning=[cast(User, people[0].user).id],
+                        afternoon=[
+                            cast(User, people[1].user).id,
+                            cast(User, people[2].user).id,
+                        ],
+                    ),
+                    wednesday=dict(
+                        morning=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                            cast(User, people[2].user).id,
+                        ],
+                        afternoon=[],
+                    ),
+                    tuesday=dict(
+                        morning=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                        ],
+                        afternoon=[],
+                    ),
+                    friday=dict(
+                        morning=[],
+                        afternoon=[],
+                    ),
+                    saturday=dict(
+                        morning=[
+                            cast(User, people[0].user).id,
+                            cast(User, people[1].user).id,
+                            cast(User, people[2].user).id,
+                        ],
+                        afternoon=[],
+                    ),
+                    sunday=dict(
+                        morning=[],
+                        afternoon=[],
+                    ),
+                ),
+            )
+        )
+
         await Inform.insert_many(informs)
+        await Shift.insert_one(shift)
 
         next(sql_session_generator)
     except StopIteration:

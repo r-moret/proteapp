@@ -1,4 +1,3 @@
-from enum import StrEnum
 from datetime import date
 from typing import TYPE_CHECKING
 from proteapp.models.base import SQLAlchemyULIDType, SQLULIDSchema
@@ -11,14 +10,9 @@ if TYPE_CHECKING:
     from proteapp.models.sql.monitorings import Monitoring
 
 
-class AdoptionKind(StrEnum):
-    permanent = "permanent"
-    foster_home = "foster_home"
-
-
 class Adoption(SQLULIDSchema, table=True):
     register_date: date
-    kind: AdoptionKind
+    foster: bool
     revocation_date: date | None = Field(default=None)
 
     person_id: ULID = Field(

@@ -1,9 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'users',
+      component: () => import('@/modules/User/views/UserListView.vue')
+    },
     {
       path: '/',
       name: 'people',
@@ -47,12 +51,12 @@ const router = createRouter({
     {
       path: '/shift',
       name: 'shift',
-      component: () => import('../views/ShiftView.vue')
+      component: () => import('@/modules/Shift/views/ShiftView.vue')
     },
     {
       path: '/inform',
       name: 'inform',
-      component: () => import('../views/InformView.vue')
+      component: () => import('@/modules/Inform/views/InformListView.vue')
     },
     {
       path: '/profile',
@@ -63,6 +67,11 @@ const router = createRouter({
       path: '/inform/edit',
       name: 'inform.edit',
       component: () => import('@/modules/Inform/views/InformEditorView.vue')
+    },
+    {
+      path: '/inform/:id',
+      name: 'inform.view',
+      component: () => import('@/modules/Inform/views/InformViewerView.vue')
     }
   ]
 })

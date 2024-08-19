@@ -22,6 +22,7 @@ const emit = defineEmits<{
   select: [payload: T]
 }>()
 
+const visible = ref(true)
 const dropdownContent = ref(null)
 const searchFilter = ref('')
 const identifiedItems = ref(props.items.map((item) => ({ id: uniqueId(), item }))) as Ref<
@@ -36,6 +37,7 @@ const searchResults = computed(() => {
 
 function handleSelect(item: T) {
   emit('select', item)
+  visible.value = false
 }
 
 onClickOutside(dropdownContent, () => (searchFilter.value = ''))
@@ -43,11 +45,14 @@ onClickOutside(dropdownContent, () => (searchFilter.value = ''))
 
 <template>
   <div class="dropdown">
-    <div tabindex="0" role="button">
+    <div tabindex="0" role="button" @click="visible = true">
       <slot name="button" />
     </div>
-    <div class="dropdown-content z-[1]" ref="dropdownContent">
-      <ul tabindex="0" :class="['rounded-xl bg-base-100 p-2 shadow', props.contentSize]">
+    <div class="dropdown-content z-[1] mt-1" ref="dropdownContent">
+      <ul
+        tabindex="0"
+        :class="['rounded-xl bg-base-100 p-2 shadow', props.contentSize, { hidden: !visible }]"
+      >
         <li v-if="props.includeSearch">
           <TextInput v-model="searchFilter" name="search-item-input" placeholder="Buscar..." />
           <div class="divider m-0 px-2" />

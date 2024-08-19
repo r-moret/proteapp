@@ -3,6 +3,7 @@ from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.animals import Animal
 from proteapp.models.sql.people import Person
 from proteapp.api.deps import sql_engine
+from datetime import datetime
 from sqlmodel import Session
 from proteapp.exceptions import UnsavedDataError
 
@@ -23,6 +24,15 @@ def to_adoption(data: EditableAdoption) -> Adoption:
                 field="person",
             )
 
+        valid_date = data.register_date
+        if isinstance(valid_date, datetime):
+            valid_date = valid_date.date()
+
         return Adoption.model_validate(
-            {**dict(data), "animal_id": adoption_animal.id, "person_id": adoption_person.id}
+            {
+                **dict(data),
+                "animal_id": adoption_animal.id,
+                "person_id": adoption_person.id,
+                "register_date": valid_date,
+            }
         )

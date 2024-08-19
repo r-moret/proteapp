@@ -31,6 +31,8 @@ function getFullName(name: String, firstSurname: String, secondSurname: String |
 </script>
 
 <template>
+  <ToastNotifications ref="notificationsRef" />
+
   <div class="flex w-full flex-col">
     <ItemList
       :items="props.personList"
