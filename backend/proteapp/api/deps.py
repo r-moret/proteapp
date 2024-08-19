@@ -15,11 +15,12 @@ from proteapp.models.sql.adoptions import Adoption  # noqa: F401
 from proteapp.models.sql.monitorings import Monitoring  # noqa: F401
 
 from proteapp.models.nosql.inform import Inform
+from proteapp.models.nosql.shift import Shift, TimeTable, DayTime
 
 
 async def connect_mongo():
     nosql_client = AsyncIOMotorClient()
-    await init_beanie(database=nosql_client.db_name, document_models=[Inform])
+    await init_beanie(database=nosql_client.db_name, document_models=[Inform, Shift])
 
 
 sql_engine = create_engine(
@@ -34,3 +35,23 @@ SQLModel.metadata.create_all(sql_engine)
 def get_sql_session():
     with Session(sql_engine) as session:
         yield session
+
+
+async def init_shift():
+    shift = await Shift.find_one()
+
+    if not shift:
+        shift = Shift(
+            status="open",
+            timetable=TimeTable(
+                monday=DayTime(morning=[], afternoon=[]),
+                thursday=DayTime(morning=[], afternoon=[]),
+                wednesday=DayTime(morning=[], afternoon=[]),
+                tuesday=DayTime(morning=[], afternoon=[]),
+                friday=DayTime(morning=[], afternoon=[]),
+                saturday=DayTime(morning=[], afternoon=[]),
+                sunday=DayTime(morning=[], afternoon=[]),
+            ),
+        )
+
+        await shift.save()

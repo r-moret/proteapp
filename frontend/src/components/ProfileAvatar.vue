@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import type { User } from '@/modules/Inform/declarations'
 import { computed } from 'vue'
+
+import type { UserInfo } from '@/modules/Inform/declarations'
+
+const SIZES = {
+  tiny: 'w-8',
+  normal: 'w-10',
+  large: 'w-28'
+}
 
 const props = withDefaults(
   defineProps<{
-    user: User
-    size?: 'normal' | 'large'
+    user: UserInfo
+    size?: 'tiny' | 'normal' | 'large'
     ring?: boolean
   }>(),
   {
@@ -21,11 +28,11 @@ const imageSrc = computed(() => {
 </script>
 
 <template>
-  <div class="avatar">
+  <div class="avatar border-transparent">
     <div
       :class="[
         'rounded-full',
-        props.size == 'large' ? 'w-28' : 'w-10',
+        SIZES[props.size],
         { 'ring-4 ring-secondary ring-offset-2 ring-offset-base-300': props.ring }
       ]"
     >
