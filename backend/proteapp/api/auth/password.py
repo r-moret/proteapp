@@ -12,6 +12,10 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return context.verify(password, hashed_password)
 
 
+def hash_password(password: str) -> str:
+    return context.hash(password)
+
+
 def authenticate(username: str, password: str) -> User | Literal[False]:
     with Session(sql_engine) as session:
         results = session.exec(select(User).join(Person).where(Person.email == username))
