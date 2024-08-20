@@ -3,6 +3,7 @@ import type { EditPerson, Person } from '@/modules/Person/declarations'
 import { ref } from 'vue'
 import { PersonAdapter } from '@/modules/Person/adapters'
 import { listPeople as listPeopleApi, crudPerson as crudPersonApi } from '@/modules/Person/api'
+import { authFetch } from '@/composable/useAuthFetch'
 
 export const usePersonStore = defineStore('PersonStore', () => {
   const personList = ref<Person[]>([])
@@ -12,7 +13,7 @@ export const usePersonStore = defineStore('PersonStore', () => {
   async function fetchPerson(id: string) {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}/${id}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}/${id}`)
       .then((res) => res.json())
       .then(PersonAdapter)
       .then((person) => (personDetails.value = person))
@@ -22,7 +23,7 @@ export const usePersonStore = defineStore('PersonStore', () => {
 
   async function fetchPeople() {
     isLoading.value = true
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listPeopleApi}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listPeopleApi}`)
       .then((res) => res.json())
       .then((json) => json.map(PersonAdapter))
       .then((person) => (personList.value = person))
@@ -37,14 +38,14 @@ export const usePersonStore = defineStore('PersonStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}/${personId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}/${personId}`, {
       method: 'delete'
     })
     personList.value = personList.value.filter((person) => person.id !== personId)
   }
 
   async function createPerson(person: EditPerson) {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}`, {
       method: 'post',
       body: JSON.stringify(person),
       headers: {

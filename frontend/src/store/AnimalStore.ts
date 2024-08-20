@@ -15,6 +15,7 @@ import {
   crudAppointment as crudAppointmentApi
 } from '@/modules/Animal/api'
 import { AnimalAdapter, AnimalInfoAdapter } from '@/modules/Animal/adapters'
+import { authFetch } from '@/composable/useAuthFetch'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<AnimalInfo[]>([])
@@ -27,12 +28,12 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
   async function fetchAnimals() {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listAnimalApi}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listAnimalApi}`)
       .then((res) => res.json())
       .then((json) => json.map(AnimalInfoAdapter))
       .then((animals) => (animalList.value = animals))
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
       .then((res) => res.json())
       .then((json: Yard[]) => (yardList.value = json))
 
@@ -42,7 +43,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
   async function fetchAnimal(id: string) {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${id}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${id}`)
       .then((res) => res.json())
       .then(AnimalAdapter)
       .then((animal) => (animalDetails.value = animal))
@@ -55,7 +56,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       throw Error('Cannot create a treatment for an animal different than the one that is loaded')
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}`, {
       method: 'post',
       body: JSON.stringify(treatment),
       headers: {
@@ -78,7 +79,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}/${treatmentId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudTreatmentApi}/${treatmentId}`, {
       method: 'delete'
     })
 
@@ -94,7 +95,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}`, {
       method: 'post',
       body: JSON.stringify(appointment),
       headers: {
@@ -116,7 +117,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}/${appointmentId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAppointmentApi}/${appointmentId}`, {
       method: 'delete'
     })
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, computed, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/UserStore'
+import { useAuthStore } from '@/store/AuthStore'
 import { useShiftStore } from '@/store/ShiftStore'
 import { storeToRefs } from 'pinia'
 
@@ -11,7 +12,9 @@ import ShiftStatus from '@/modules/Shift/components/ShiftStatus.vue'
 import type { EnrichedShift, ShiftSelection } from '@/modules/Shift/declarations'
 
 const userStore = useUserStore()
-const { userList, loggedUser } = storeToRefs(userStore)
+const { userList } = storeToRefs(userStore)
+
+const { loggedUser } = storeToRefs(useAuthStore())
 
 const shiftStore = useShiftStore()
 const { status, shift, connections, isConnecting } = storeToRefs(shiftStore)

@@ -2,7 +2,7 @@
 import ProfileAvatar from '@/components/ProfileAvatar.vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/UserStore'
+import { useAuthStore } from '@/store/AuthStore'
 
 const props = withDefaults(
   defineProps<{
@@ -15,7 +15,7 @@ const props = withDefaults(
   }
 )
 
-const { loggedUser, isLoading } = storeToRefs(useUserStore())
+const { loggedUser } = storeToRefs(useAuthStore())
 
 const router = useRouter()
 
@@ -28,7 +28,7 @@ const navigateBack = () => router.back()
     <div class="min-w-0 flex-1">
       <template v-if="props.left == 'profile'">
         <ProfileAvatar
-          v-if="!isLoading && loggedUser"
+          v-if="loggedUser"
           :user="loggedUser"
           class="btn btn-circle btn-ghost btn-lg"
           @click="openProfile"

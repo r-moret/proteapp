@@ -6,7 +6,6 @@ import type {
   EditMonitoring,
   EditAdoption
 } from '@/modules/Adoption/declarations'
-import type { Animal } from '@/modules/Animal/declarations'
 import {
   crudAdoption as crudAdoptionApi,
   listAdoptions as listAdoptionsApi,
@@ -14,6 +13,7 @@ import {
 } from '@/modules/Adoption/api'
 
 import { AdoptionInfoAdapter, AdoptionAdapter } from '@/modules/Adoption/adapters'
+import { authFetch } from '@/composable/useAuthFetch'
 
 export const useAdoptionStore = defineStore('AdoptionStore', () => {
   const adoptionList = ref<AdoptionInfo[]>([])
@@ -22,7 +22,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
 
   async function fetchAdoptions({ foster }: { foster?: boolean } = {}) {
     isLoading.value = true
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listAdoptionsApi}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listAdoptionsApi}`)
       .then((res) => res.json())
       .then((json) => json.map(AdoptionInfoAdapter))
       .then((adoption) => (adoptionList.value = adoption))
@@ -43,7 +43,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}/${adoptionId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}/${adoptionId}`, {
       method: 'delete'
     })
     adoptionList.value = adoptionList.value.filter((adoption) => adoption.id !== adoptionId)
@@ -52,7 +52,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
   async function fetchAdoption(id: string) {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}/${id}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}/${id}`)
       .then((res) => res.json())
       .then(AdoptionAdapter)
       .then((adoption) => (adoptionDetails.value = adoption))
@@ -61,7 +61,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
   }
 
   async function createAdoption(adoption: EditAdoption) {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAdoptionApi}`, {
       method: 'post',
       body: JSON.stringify(adoption),
       headers: {
@@ -83,7 +83,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudMonitoringApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudMonitoringApi}`, {
       method: 'post',
       body: JSON.stringify(monitoring),
       headers: {
@@ -109,7 +109,7 @@ export const useAdoptionStore = defineStore('AdoptionStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudMonitoringApi}/${monitoringId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudMonitoringApi}/${monitoringId}`, {
       method: 'delete'
     })
 
