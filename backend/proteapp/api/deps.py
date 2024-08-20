@@ -4,7 +4,7 @@ from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query, WebSocketException
 
 # These imports are mandatory to ensure that once the SQL database
 # is created, all models are registered
@@ -64,7 +64,7 @@ async def init_shift():
         await shift.save()
 
 
-def get_logged_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+def get_logged_user_http(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
     token_data = decode_token(token)
 
     with Session(sql_engine) as session:
@@ -75,6 +75,21 @@ def get_logged_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    return user
+
+
+def get_logged_user_ws(token: Annotated[str, Query()]):
+    token_data = decode_token(token)
+
+    with Session(sql_engine) as session:
+        user = session.get(User, token_data.user_id)
+
+        if not user:
+            raise WebSocketException(
+                code=status.WS_1003_UNSUPPORTED_DATA,
+                reason="Unauthorized",
             )
 
     return user

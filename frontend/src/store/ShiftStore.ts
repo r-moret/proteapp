@@ -1,8 +1,11 @@
 import { computed } from 'vue'
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { useWebSocket } from '@vueuse/core'
+import { useAuthStore } from '@/store/AuthStore'
 import { ShiftStatusAdapter, ShiftAdapter, ShiftActionAdapter } from '@/modules/Shift/adapters'
 import type { ShiftAction, ShiftSelection } from '@/modules/Shift/declarations'
+
+const { token } = storeToRefs(useAuthStore())
 
 export const useShiftStore = defineStore('ShiftStore', () => {
   const {
@@ -10,9 +13,12 @@ export const useShiftStore = defineStore('ShiftStore', () => {
     status: statusConnection,
     close: statusClose,
     open: statusOpen
-  } = useWebSocket<string>(`${import.meta.env.VITE_BACKEND_URL}/shift/status`, {
-    immediate: false
-  })
+  } = useWebSocket<string>(
+    `${import.meta.env.VITE_BACKEND_URL}/shift/status?token=${token.value}`,
+    {
+      immediate: false
+    }
+  )
 
   const {
     data: shiftData,
@@ -20,7 +26,7 @@ export const useShiftStore = defineStore('ShiftStore', () => {
     close: shiftClose,
     open: shiftOpen,
     send: shiftSend
-  } = useWebSocket<string>(`${import.meta.env.VITE_BACKEND_URL}/shift`, {
+  } = useWebSocket<string>(`${import.meta.env.VITE_BACKEND_URL}/shift?token=${token.value}`, {
     immediate: false
   })
 
