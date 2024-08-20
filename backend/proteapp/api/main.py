@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from proteapp.api.animals.routes import router as animals_router
 from proteapp.api.treatments.routes import router as treatments_router
@@ -12,8 +12,8 @@ from proteapp.api.monitorings.routes import router as monitorings_router
 from proteapp.api.shifts.routes import router as shifts_router
 from proteapp.api.auth.routes import router as auth_router
 from proteapp.database_init import init_database_data
+from proteapp.api.deps import connect_mongo, init_shift, get_logged_user
 from contextlib import asynccontextmanager
-from proteapp.api.deps import connect_mongo, init_shift
 
 
 @asynccontextmanager
@@ -35,14 +35,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(animals_router)
-app.include_router(treatments_router)
-app.include_router(appointment_router)
-app.include_router(yards_router)
-app.include_router(people_router)
-app.include_router(users_router)
-app.include_router(informs_router)
-app.include_router(adoptions_router)
-app.include_router(monitorings_router)
-app.include_router(shifts_router)
+
+app.include_router(animals_router, dependencies=[Depends(get_logged_user)])
+app.include_router(treatments_router, dependencies=[Depends(get_logged_user)])
+app.include_router(appointment_router, dependencies=[Depends(get_logged_user)])
+app.include_router(yards_router, dependencies=[Depends(get_logged_user)])
+app.include_router(people_router, dependencies=[Depends(get_logged_user)])
+app.include_router(users_router, dependencies=[Depends(get_logged_user)])
+app.include_router(informs_router, dependencies=[Depends(get_logged_user)])
+app.include_router(adoptions_router, dependencies=[Depends(get_logged_user)])
+app.include_router(monitorings_router, dependencies=[Depends(get_logged_user)])
+app.include_router(shifts_router, dependencies=[Depends(get_logged_user)])
 app.include_router(auth_router)
