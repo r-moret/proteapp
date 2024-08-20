@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue'
 import { useUserStore } from '@/store/UserStore'
+import { useAuthStore } from '@/store/AuthStore'
 import { storeToRefs } from 'pinia'
 import { useAnimalStore } from '@/store/AnimalStore'
 import { useInformStore } from '@/store/InformStore'
@@ -18,7 +19,7 @@ const userStore = useUserStore()
 const animalStore = useAnimalStore()
 const informStore = useInformStore()
 
-const { loggedUser } = storeToRefs(userStore)
+const { loggedUser } = storeToRefs(useAuthStore())
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)

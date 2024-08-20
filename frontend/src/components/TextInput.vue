@@ -4,7 +4,7 @@ const model = defineModel<string | null>()
 const props = defineProps<{
   name?: string
   placeholder?: string
-  req?: boolean
+  type?: string
 }>()
 </script>
 
@@ -17,10 +17,9 @@ const props = defineProps<{
       <div class="divider divider-horizontal mx-0 w-fit bg-white py-2" />
     </template>
     <input
-      type="text"
+      :type="props.type ?? 'text'"
       :class="['h-full w-full px-4', $slots.icon ? 'rounded-r-lg' : 'rounded-lg']"
       :placeholder="props.placeholder"
-      :required="props.req"
       autocomplete="off"
       v-model="model"
       v-bind="props.name ? { name: props.name, id: props.name } : null"

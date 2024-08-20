@@ -2,10 +2,10 @@
 import ProfileAvatar from '@/components/ProfileAvatar.vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { storeToRefs } from 'pinia'
-import { useUserStore } from '@/store/UserStore'
+import { useAuthStore } from '@/store/AuthStore'
 import { useRouter } from 'vue-router'
 
-const { loggedUser } = storeToRefs(useUserStore())
+const { loggedUser } = storeToRefs(useAuthStore())
 const router = useRouter()
 function navigateUsers() {
   router.push({ name: 'users' })
