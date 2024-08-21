@@ -68,7 +68,7 @@ animals = [
         entry_date=datetime(2022, 10, 9),
         is_castrated=True,
         is_animal_compatible=True,
-        image="https://cdn2.thecatapi.com/images/9vh.jpg",
+        image="images/01J5TZRCGPEQBDPTYJZC3CDS03.jpg",
         yard=yards[0],
         treatments=[
             Treatment(
@@ -129,7 +129,7 @@ animals = [
         entry_date=datetime(2023, 3, 22),
         is_castrated=False,
         is_animal_compatible=False,
-        image="https://cdn2.thecatapi.com/images/27r.jpg",
+        image="images/01J5TZSETF2Q15RERY4EB7CEF1.jpg",
         yard=yards[0],
     ),
     Animal(
@@ -141,7 +141,7 @@ animals = [
         entry_date=datetime(2022, 12, 20),
         is_castrated=False,
         is_animal_compatible=True,
-        image="https://cdn2.thecatapi.com/images/abc.jpg",
+        image="images/01J5TZTBZPS49PC2YKXMK2V66T.jpg",
         yard=yards[1],
         treatments=[
             Treatment(

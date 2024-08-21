@@ -13,7 +13,6 @@ class EditableAnimal(BaseSchema):
     entry_date: date | None = None
     is_animal_compatible: bool | None = None
     is_castrated: bool | None = None
-    image: str | None = None
     yard: ULID | None = None
 
 

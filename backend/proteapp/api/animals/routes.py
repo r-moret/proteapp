@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile
 from sqlmodel import Session, select
 from proteapp.api.animals.schemas import ListedAnimal, CompleteAnimal, EditableAnimal
 from proteapp.models.sql.animals import Animal
@@ -6,6 +6,9 @@ from proteapp.api.deps import get_sql_session
 from ulid import ULID
 from proteapp.api.animals.adapters import to_animal
 from pydantic import ValidationError
+import shutil
+import os
+from pathlib import Path
 
 router = APIRouter(prefix="/animal", tags=["animal"])
 
@@ -22,6 +25,56 @@ def post_animal(animal: EditableAnimal, session: Session = Depends(get_sql_sessi
         animal_db = to_animal(animal)
     except ValidationError:
         raise HTTPException(422, "Unable to create a new animal with the data passed")
+
+    session.add(animal_db)
+    session.commit()
+    session.refresh(animal_db)
+
+    return animal_db
+
+
+@router.post("/{id}/image")
+def post_animal_image(id: ULID, image: UploadFile, session: Session = Depends(get_sql_session)):
+    if not image.filename:
+        raise HTTPException(422, "Unable to upload an image with no filename")
+
+    animal_db = session.get(Animal, id)
+
+    if animal_db is None:
+        raise HTTPException(404, "Animal not found")
+
+    image_new_filename = f"{ULID()}{Path(image.filename).suffix}"
+    image_path = f"images/{image_new_filename}"
+
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    with open(image_path, "wb") as file:
+        shutil.copyfileobj(image.file, file)
+
+    if animal_db.image:
+        Path(animal_db.image).unlink(missing_ok=True)
+
+    animal_db.image = image_path
+
+    session.add(animal_db)
+    session.commit()
+    session.refresh(animal_db)
+
+    return animal_db
+
+
+@router.delete("/{id}/image")
+def delete_animal_image(id: ULID, session: Session = Depends(get_sql_session)):
+    animal_db = session.get(Animal, id)
+
+    if animal_db is None:
+        raise HTTPException(404, "Animal not found")
+
+    if not animal_db.image:
+        return animal_db
+
+    Path(animal_db.image).unlink(missing_ok=True)
+
+    animal_db.image = None
 
     session.add(animal_db)
     session.commit()
