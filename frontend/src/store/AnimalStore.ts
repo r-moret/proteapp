@@ -5,7 +5,8 @@ import type {
   Animal,
   AnimalInfo,
   EditAppointment,
-  EditTreatment
+  EditTreatment,
+  EnrichedEditAnimal
 } from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
@@ -14,8 +15,9 @@ import {
   crudTreatment as crudTreatmentApi,
   crudAppointment as crudAppointmentApi
 } from '@/modules/Animal/api'
-import { AnimalAdapter, AnimalInfoAdapter } from '@/modules/Animal/adapters'
+import { AnimalAdapter, AnimalInfoAdapter, EditAnimalAdapter } from '@/modules/Animal/adapters'
 import { authFetch } from '@/composable/useAuthFetch'
+import { omit } from 'lodash'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<AnimalInfo[]>([])
@@ -49,6 +51,34 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       .then((animal) => (animalDetails.value = animal))
 
     isLoading.value = false
+  }
+
+  async function createAnimal(enrichedAnimal: EnrichedEditAnimal) {
+    const animal = EditAnimalAdapter({ ...enrichedAnimal, yard: enrichedAnimal.yard?.id })
+
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}`, {
+      method: 'post',
+      body: JSON.stringify(omit(animal, 'image')),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!animal.image) return
+    const createdAnimal = AnimalAdapter(await response.json())
+
+    const body = new FormData()
+    body.set('image', animal.image)
+
+    await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${createdAnimal.id}/image`,
+      {
+        method: 'post',
+        body
+      }
+    )
+
+    await fetchAnimals()
   }
 
   async function createTreatment(treatment: EditTreatment) {
@@ -133,6 +163,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading,
     fetchAnimals,
     fetchAnimal,
+    createAnimal,
     createTreatment,
     deleteTreatment,
     createAppointment,

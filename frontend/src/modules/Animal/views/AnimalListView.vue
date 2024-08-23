@@ -70,6 +70,10 @@ function navigateAdoptions() {
   router.push({ name: 'adoptions' })
 }
 
+function navigateCreator() {
+  router.push({ name: 'animal.create' })
+}
+
 const updateFilters = (newFilters: AnimalFilters) => {
   filters.value = newFilters
 }
@@ -112,6 +116,9 @@ onBeforeMount(async () => {
     <AppHeader left="profile" title="Animales">
       <button class="btn btn-square btn-ghost" @click="navigateAdoptions">
         <span class="i-mingcute-home-5-line text-3xl" />
+      </button>
+      <button class="btn btn-square btn-ghost" @click="navigateCreator">
+        <span class="i-mingcute-add-line text-3xl" />
       </button>
     </AppHeader>
     <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
