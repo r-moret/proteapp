@@ -2,12 +2,10 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile
 from sqlmodel import Session, select
 from proteapp.api.animals.schemas import ListedAnimal, CompleteAnimal, EditableAnimal
 from proteapp.models.sql.animals import Animal
-from proteapp.api.deps import get_sql_session
+from proteapp.api.deps import get_sql_session, save_image
 from ulid import ULID
 from proteapp.api.animals.adapters import to_animal
 from pydantic import ValidationError
-import shutil
-import os
 from pathlib import Path
 
 router = APIRouter(prefix="/animal", tags=["animal"])
@@ -35,20 +33,12 @@ def post_animal(animal: EditableAnimal, session: Session = Depends(get_sql_sessi
 
 @router.post("/{id}/image")
 def post_animal_image(id: ULID, image: UploadFile, session: Session = Depends(get_sql_session)):
-    if not image.filename:
-        raise HTTPException(422, "Unable to upload an image with no filename")
-
     animal_db = session.get(Animal, id)
 
     if animal_db is None:
         raise HTTPException(404, "Animal not found")
 
-    image_new_filename = f"{ULID()}{Path(image.filename).suffix}"
-    image_path = f"images/{image_new_filename}"
-
-    os.makedirs(os.path.dirname(image_path), exist_ok=True)
-    with open(image_path, "wb") as file:
-        shutil.copyfileobj(image.file, file)
+    image_path = save_image(image)
 
     if animal_db.image:
         Path(animal_db.image).unlink(missing_ok=True)
