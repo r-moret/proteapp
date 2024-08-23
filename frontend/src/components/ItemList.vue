@@ -1,7 +1,6 @@
-<script setup lang="ts" generic="T extends { [key: string]: any; id: string }">
+<script setup lang="ts" generic="T extends { [key: string]: any }">
 import { useSlots, onBeforeMount, ref } from 'vue'
 import BottomDrawer from './BottomDrawer.vue'
-import { useSortable } from '@vueuse/integrations/useSortable'
 
 const props = withDefaults(
   defineProps<{
@@ -11,21 +10,16 @@ const props = withDefaults(
     deleteTitle?: string
     labels?: Partial<Record<keyof T, string>>
     formatters?: Partial<Record<keyof T, (value: any) => string>>
-    sortable?: boolean
   }>(),
   {
     canDelete: true
   }
 )
 
-const itemList = ref(props.items ?? [])
-
 const emit = defineEmits<{
   delete: [payload: T]
-  resort: [payload: T[]]
 }>()
 
-const el = ref<HTMLElement | null>(null)
 const slots = useSlots()
 
 const pendingDeleteItem = ref<T>()
@@ -56,17 +50,15 @@ onBeforeMount(() => {
     )
   }
 })
-
-useSortable(el, itemList)
 </script>
 
 <template>
   <div class="flex-1 overflow-y-auto">
     <slot v-if="!items || !items.length" name="empty" />
 
-    <ul ref="el" v-else class="space-y-2">
-      <li v-for="(item, index) in itemList" :key="item.id">
-        <span v-if="index != 0" class="divider my-0" />
+    <ul v-else>
+      <li v-for="(item, index) in props.items" :key="index">
+        <span v-if="index != 0" class="divider my-2" />
         <slot name="item" :item="item" :open-confirm="handleConfirmDeleteItem">
           <div class="flex flex-row justify-between px-4 py-2">
             <div class="flex flex-col">

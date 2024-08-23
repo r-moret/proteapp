@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import AppHeader from '@/skeleton/AppHeader.vue'
-import YardList from '@/modules/Animal/components/YardList.vue'
+import YardList from '@/modules/Yard/components/YardList.vue'
 import { onBeforeMount, ref } from 'vue'
-import { useAnimalStore } from '@/store/AnimalStore'
+import { useYardStore } from '@/store/YardStore'
 import { storeToRefs } from 'pinia'
 import TextInput from '@/components/TextInput.vue'
 import ToastNotifications from '@/components/ToastNotifications.vue'
 import type { EditYard } from '../declarations'
-import { EditYardAdapter } from '@/modules/Animal/adapters'
+import { EditYardAdapter } from '@/modules/Yard/adapters'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { ZodError } from 'zod'
 import BottomDrawer from '@/components/BottomDrawer.vue'
@@ -15,10 +15,24 @@ import BottomDrawer from '@/components/BottomDrawer.vue'
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 
-const animalStore = useAnimalStore()
-const { yardList } = storeToRefs(animalStore)
+const yardStore = useYardStore()
+const { lastYardOrder } = storeToRefs(yardStore)
+
 const newYardForm = ref<HTMLFormElement | null>(null)
 const newYard = ref<EditYard>()
+
+async function addYardOrder() {
+  if (!lastYardOrder.value) {
+    return
+  }
+  const newYardOrder = {
+    date: new Date(),
+    yardOrder: lastYardOrder.value.map((item) => item.id)
+  }
+  yardStore.postYardOrder(newYardOrder)
+  showSuccessNotification('Nuevo orden de patio guardado.')
+  await yardStore.fetchLastYardOrder()
+}
 
 async function handleAddYard(closeDrawer: () => void) {
   if (!newYard.value) return
@@ -26,8 +40,10 @@ async function handleAddYard(closeDrawer: () => void) {
   try {
     EditYardAdapter(newYard.value)
 
-    await animalStore.createYard(newYard.value)
-    showSuccessNotification('Adopción añadida correctamente.')
+    await yardStore.createYard(newYard.value)
+    await yardStore.fetchYards()
+    await yardStore.fetchLastYardOrder()
+    showSuccessNotification('Patio añadido correctamente.')
 
     newYardForm.value?.reset()
     newYard.value = {
@@ -45,7 +61,9 @@ async function handleAddYard(closeDrawer: () => void) {
 }
 
 onBeforeMount(async () => {
-  await animalStore.fetchYards()
+  await yardStore.fetchLastYardOrder()
+  await yardStore.fetchYards()
+
   newYard.value = {
     name: ''
   }
@@ -58,11 +76,16 @@ const newYardOpen = ref(false)
   <main class="flex flex-col">
     <ToastNotifications ref="notificationsRef" />
     <AppHeader left="back" title="Patios">
+      <button class="btn btn-square btn-ghost" @click="addYardOrder">
+        <span class="i-mingcute-save-2-line text-3xl" />
+      </button>
       <button class="btn btn-square btn-ghost" @click="newYardOpen = true">
         <span class="i-mingcute-add-fill text-3xl" />
       </button>
     </AppHeader>
-    <YardList :yard-list="yardList"></YardList>
+
+    <YardList v-if="lastYardOrder" :yard-list="lastYardOrder"></YardList>
+
     <BottomDrawer class="bg-base-200" size="small" v-model="newYardOpen" v-slot="{ close }">
       <div class="flex h-full flex-col gap-5">
         <h1 class="text-3xl font-semibold">Nuevo patio</h1>

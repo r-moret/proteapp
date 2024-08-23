@@ -9,6 +9,7 @@ import AppHeader from '@/skeleton/AppHeader.vue'
 import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
 import AnimalFiltersMenuButton from '@/modules/Animal/components/AnimalFiltersMenuButton.vue'
 import { useAnimalStore } from '@/store/AnimalStore'
+import { useYardStore } from '@/store/YardStore'
 import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
@@ -16,8 +17,10 @@ import type { AnimalInfo } from '@/modules/Animal/declarations'
 const router = useRouter()
 
 const animalStore = useAnimalStore()
-const { animalList, yardList, isLoading } = storeToRefs(animalStore)
+const yardStore = useYardStore()
 
+const { animalList, isLoading } = storeToRefs(animalStore)
+const { yardList } = storeToRefs(yardStore)
 const searchInput = ref<HTMLElement | null>(null)
 
 const filters = ref<AnimalFilters>({

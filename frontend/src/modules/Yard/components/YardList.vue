@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import type { YardInfo } from '../declarations'
+import type { YardInfo } from '../../Yard/declarations'
 import ItemList from '@/components/ItemList.vue'
-import { useAnimalStore } from '@/store/AnimalStore'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import ToastNotifications from '@/components/ToastNotifications.vue'
 import { ref } from 'vue'
-import YardCard from '@/modules/Animal/components/YardCard.vue'
+import YardCard from '@/modules/Yard/components/YardCard.vue'
+import { useYardStore } from '@/store/YardStore'
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
-const animalStore = useAnimalStore()
+const yardStore = useYardStore()
 
 async function handleDeleteYard(yardId: string) {
   try {
-    await animalStore.deleteYard(yardId)
+    await yardStore.deleteYard(yardId)
+    yardStore.fetchLastYardOrder()
     showSuccessNotification('Patio eliminado correctamente')
   } catch (error) {
     showErrorNotification('Ha ocurrido un error, prueba otra vez.')

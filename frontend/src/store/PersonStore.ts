@@ -58,5 +58,5 @@ export const usePersonStore = defineStore('PersonStore', () => {
     await fetchPeople()
   }
 
-  return { fetchPeople, personList, deletePerson, createPerson }
+  return { fetchPeople, personList, deletePerson, createPerson, fetchPerson }
 })

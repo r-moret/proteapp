@@ -36,7 +36,7 @@ const router = createRouter({
     {
       path: '/yards',
       name: 'yards',
-      component: () => import('@/modules/Animal/views/YardsListView.vue')
+      component: () => import('@/modules/Yard/views/YardsListView.vue')
     },
     {
       path: '/adoptions',

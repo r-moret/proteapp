@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YardInfo } from '@/modules/Animal/declarations'
+import type { YardInfo } from '@/modules/Yard/declarations'
 
 const props = defineProps<{
   yard: YardInfo

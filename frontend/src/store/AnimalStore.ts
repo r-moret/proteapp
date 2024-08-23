@@ -1,29 +1,26 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type {
-  Yard,
   Animal,
   AnimalInfo,
   EditAppointment,
-  EditTreatment,
-  EditYard
+  EditTreatment
 } from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
-  listYards as listYardApi,
   crudAnimal as crudAnimalApi,
   crudTreatment as crudTreatmentApi,
-  crudAppointment as crudAppointmentApi,
-  crudYard as crudYardApi
+  crudAppointment as crudAppointmentApi
 } from '@/modules/Animal/api'
+
+import { listYards as listYardApi } from '@/modules/Yard/api'
+import type { Yard } from '@/modules/Yard/declarations'
 import { AnimalAdapter, AnimalInfoAdapter } from '@/modules/Animal/adapters'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<AnimalInfo[]>([])
   const animalDetails = ref<Animal>()
-
   const yardList = ref<Yard[]>([])
-
   const isLoading = ref(false)
 
   async function fetchAnimals() {
@@ -127,57 +124,15 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     )
   }
 
-  async function deleteYard(yardId: string) {
-    if (!yardList.value || !yardList.value.map((yard) => yard.id).includes(yardId)) {
-      throw Error(
-        'Cannot delete a yard that belongs to a yard different than the one that is loaded'
-      )
-    }
-
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}/${yardId}`, {
-      method: 'delete'
-    })
-    yardList.value = yardList.value.filter((yard) => yard.id !== yardId)
-  }
-
-  async function fetchYards() {
-    isLoading.value = true
-
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
-      .then((res) => res.json())
-      .then((json: Yard[]) => (yardList.value = json))
-
-    isLoading.value = false
-  }
-
-  async function createYard(yard: EditYard) {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}`, {
-      method: 'post',
-      body: JSON.stringify(yard),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(async (data) => {
-      if (!data.ok) {
-        throw Error(`Error backend response: ${await data.json()}`)
-      }
-    })
-    await fetchYards()
-  }
-
   return {
     animalList,
     animalDetails,
-    yardList,
     isLoading,
     fetchAnimals,
     fetchAnimal,
     createTreatment,
     deleteTreatment,
     createAppointment,
-    deleteAppointment,
-    deleteYard,
-    fetchYards,
-    createYard
+    deleteAppointment
   }
 })
