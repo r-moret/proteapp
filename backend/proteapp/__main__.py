@@ -11,7 +11,8 @@ def start(mode: Literal["dev", "prd"] = "dev"):
             container = docker_client.containers.run(
                 "mongo", ports={"27017": 27017}, auto_remove=True, detach=True
             )
-        except DockerException:
+        except DockerException as e:
+            print(e)
             print(
                 "Something happening while connecting to Docker. Do you have the Docker daemon initialized?"
             )
