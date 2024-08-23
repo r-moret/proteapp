@@ -27,7 +27,8 @@ const age = computed(() => {
     language: 'es',
     units: ['y', 'mo', 'd'],
     largest: 1,
-    round: false
+    round: false,
+    maxDecimalPoints: 0
   })
 })
 
