@@ -4,26 +4,17 @@ import { crudUser as crudUserApi, listUser as listUserApi } from '@/modules/Info
 import type { UserInfo, User } from '@/modules/Inform/declarations'
 import { UserInfoAdapter, UserAdapter } from '@/modules/Inform/adapters'
 import type { EditUser } from '@/modules/User/declarations'
+import { authFetch } from '@/composable/useAuthFetch'
 
 export const useUserStore = defineStore('UserStore', () => {
-  const loggedUser = ref<User>()
   const userList = ref<UserInfo[]>([])
   const userDetails = ref<User>()
   const isLoading = ref(false)
 
-  async function loginUser() {
-    const loggedUserId = '01J3DSAAMJCCXJNB7M2XZGVEPW' // TODO
-
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}/${loggedUserId}`)
-      .then((res) => res.json())
-      .then(UserAdapter)
-      .then((user) => (loggedUser.value = user))
-  }
-
   async function fetchUsers() {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listUserApi}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listUserApi}`)
       .then((res) => res.json())
       .then((json) => json.map(UserInfoAdapter))
       .then((users) => (userList.value = users))
@@ -34,7 +25,7 @@ export const useUserStore = defineStore('UserStore', () => {
   async function fetchUser(id: string) {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}/${id}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}/${id}`)
       .then((res) => res.json())
       .then(UserAdapter)
       .then((user) => (userDetails.value = user))
@@ -49,14 +40,14 @@ export const useUserStore = defineStore('UserStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}/${userId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}/${userId}`, {
       method: 'delete'
     })
     userList.value = userList.value.filter((user) => user.id !== userId)
   }
 
   async function createUser(user: EditUser) {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudUserApi}`, {
       method: 'post',
       body: JSON.stringify(user),
       headers: {
@@ -71,11 +62,9 @@ export const useUserStore = defineStore('UserStore', () => {
   }
 
   return {
-    loggedUser,
     userDetails,
     userList,
     isLoading,
-    loginUser,
     fetchUser,
     fetchUsers,
     deleteUser,

@@ -1,5 +1,3 @@
-import hashlib
-import random
 from fastapi import APIRouter, Depends, HTTPException
 from proteapp.api.users.schemas import ListedUser, CompleteUser, EditableUser
 from proteapp.exceptions import UnsavedDataError
@@ -8,19 +6,9 @@ from proteapp.models.sql.users import User
 from proteapp.api.deps import get_sql_session
 from sqlmodel import Session, select
 from ulid import ULID
-import string
 from proteapp.api.users.adapters import to_user
 from sqlalchemy.exc import IntegrityError
-
-
-def generate_password(id):
-    hash_email = hashlib.sha256(str(id).encode()).hexdigest()
-    int_hash = int(hash_email, 16)
-    random.seed(int_hash)
-    characters = string.ascii_letters + string.digits
-    password = "".join(random.choices(characters, k=8))
-
-    return password
+from passlib.pwd import genword
 
 
 router = APIRouter(prefix="/user", tags=["user"])
@@ -34,10 +22,13 @@ def get_users(session: Session = Depends(get_sql_session)):
 @router.post("/", response_model=CompleteUser, status_code=201)
 def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
     try:
+        user.password = genword(length=12)
         user_db = to_user(user)
-        if user_db.password == "":
-            user_db.password = generate_password(user_db.person_id)
-        print(user_db.password)
+
+        print(
+            f"EMAIL: Your new password is {user.password}"
+        )  # TODO: Send an actual email to the user
+
     except UnsavedDataError as e:
         raise HTTPException(
             422, f"The field {e.field} makes reference to an entity that is not saved yet"

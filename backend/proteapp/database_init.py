@@ -26,7 +26,7 @@ people = [
             id=ULID.from_str("01J3DSAAMJCCXJNB7M2XZGVEPW"),  # Fixed, this is the fake logged user
             active=True,
             veteran=False,
-            password="hola",
+            hashed_password="$2b$12$uGvFa6aQ5V/ciqbWwvRWkuL5fpPowr2.iW1FA0tSKGG2L0XmdEpEC",
         ),
     ),
     Person(
@@ -34,14 +34,22 @@ people = [
         first_surname="Moret",
         phone=PhoneNumber("+34640564432"),
         email="rafaelmoret@gmail.com",
-        user=User(active=True, veteran=True, password="adios"),
+        user=User(
+            active=True,
+            veteran=True,
+            hashed_password="$2b$12$S098AHvdtzW1Tmh0t/PrWumjMCw0aRSutfVV4CVMB/o69jC2ufDSC",
+        ),
     ),
     Person(
         name="Obi Wan",
         first_surname="Kenobi",
         phone=PhoneNumber("+34640564432"),
         email="obisw@gmail.com",
-        user=User(active=True, veteran=False, password="sw"),
+        user=User(
+            active=True,
+            veteran=False,
+            hashed_password="$2b$12$n9vOCWdFWOe1HIOSu6H0OesKAg2m5nmKehZb3ZGXq.07y4V9CEZJy",
+        ),
     ),
 ]
 
