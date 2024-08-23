@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { authFetch } from '@/composable/useAuthFetch'
 
 import type {
   Yard,
@@ -26,7 +27,7 @@ export const useYardStore = defineStore('YardStore', () => {
   async function fetchYards() {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
       .then((res) => res.json())
       .then((json: Yard[]) => (yardList.value = json))
 
@@ -36,7 +37,7 @@ export const useYardStore = defineStore('YardStore', () => {
   async function fetchYard(id: string) {
     isLoading.value = true
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}/${id}`)
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}/${id}`)
       .then((res) => res.json())
       .then(YardAdapter)
       .then((yard) => (yardDetails.value = yard))
@@ -45,7 +46,7 @@ export const useYardStore = defineStore('YardStore', () => {
   }
 
   async function createYard(yard: EditYard) {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}`, {
       method: 'post',
       body: JSON.stringify(yard),
       headers: {
@@ -66,14 +67,14 @@ export const useYardStore = defineStore('YardStore', () => {
       )
     }
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}/${yardId}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardApi}/${yardId}`, {
       method: 'delete'
     })
     yardList.value = yardList.value.filter((yard) => yard.id !== yardId)
   }
 
   async function postYardOrder(yardOrder: EditYardOrder) {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}`, {
       method: 'post',
       body: JSON.stringify(yardOrder),
       headers: {
@@ -85,7 +86,7 @@ export const useYardStore = defineStore('YardStore', () => {
   async function fetchLastYardOrder() {
     isLoading.value = true
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardOrderApi}`)
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardOrderApi}`)
     const json = await response.json()
     const yardOrderList: YardOrder[] = json.map(YardOrderAdapter)
 
