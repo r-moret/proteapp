@@ -25,7 +25,7 @@ export const EditAnimalSchema = z.object({
   entryDate: z.coerce.date().nullish(),
   isAnimalCompatible: z.boolean().nullish(),
   isCastrated: z.boolean().nullish(),
-  image: z.instanceof(File).nullish(),
+  image: z.string().nullish(),
   yard: IdSchema.nullish()
 })
 

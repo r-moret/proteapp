@@ -33,6 +33,9 @@ const age = computed(() => {
 })
 
 const navigateBack = () => router.back()
+const navigateEdit = () => {
+  router.push({ name: 'animal.edit', params: { id: routeParams.value.id } })
+}
 const navigateTreatments = () => {
   router.push({ name: 'animal.treatments', params: { id: routeParams.value.id } })
 }
@@ -50,28 +53,36 @@ onBeforeMount(async () => {
 
     <template v-else-if="animalDetails">
       <div class="relative h-[50vh] w-screen overflow-hidden shadow-2xl">
-        <div
+        <button
           class="absolute left-0 top-0 mx-3 mt-4 flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 backdrop-blur-lg"
           @click="navigateBack"
         >
           <span class="i-mingcute-left-line text-4xl text-white" />
-        </div>
-        <div
-          @click="navigateTreatments"
-          :class="[
-            'indicator absolute right-0 top-0 mx-3 mt-4 flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 text-white backdrop-blur-lg'
-          ]"
-        >
-          <span
-            v-if="
-              animalDetails.treatments?.length ||
-              animalDetails.appointments?.some((appointment) => !appointment.isPast)
-            "
-            class="badge indicator-item badge-secondary badge-md indicator-start font-semibold"
+        </button>
+        <div class="absolute right-0 top-0 mr-3 mt-4 flex gap-4">
+          <button
+            class="flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 backdrop-blur-lg"
+            @click="navigateEdit"
           >
-            !
-          </span>
-          <span class="i-mingcute-stethoscope-line text-4xl" />
+            <span class="i-mingcute-pencil-line text-4xl text-white" />
+          </button>
+          <button
+            @click="navigateTreatments"
+            :class="[
+              'indicator flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 text-white backdrop-blur-lg'
+            ]"
+          >
+            <span
+              v-if="
+                animalDetails.treatments?.length ||
+                animalDetails.appointments?.some((appointment) => !appointment.isPast)
+              "
+              class="badge indicator-item badge-secondary badge-md indicator-start font-semibold"
+            >
+              !
+            </span>
+            <span class="i-mingcute-stethoscope-line text-4xl" />
+          </button>
         </div>
         <AnimalImage :image="animalDetails.image" class="h-full w-full object-cover" />
         <div

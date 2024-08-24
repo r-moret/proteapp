@@ -31,7 +31,7 @@ const searchResults = computed(() => {
 })
 
 function toggleSelect(item: T) {
-  if (props.modelValue.includes(item)) {
+  if (props.modelValue.map((item) => item.id).includes(item.id)) {
     emit(
       'update:model-value',
       props.modelValue.filter((selected) => selected.id !== item.id)
@@ -55,7 +55,7 @@ function toggleSelect(item: T) {
       name="item"
       :key="item.id"
       :toggleSelect
-      :isSelected="props.modelValue.includes(item)"
+      :isSelected="props.modelValue.map((item) => item.id).includes(item.id)"
       :item
     />
   </ul>

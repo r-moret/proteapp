@@ -64,11 +64,15 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       }
     })
 
+    if (!response.ok) return // TODO error
     if (!animal.image) return
     const createdAnimal = AnimalAdapter(await response.json())
 
+    const image = await fetch(animal.image)
+    const imageFile = await image.blob()
+
     const body = new FormData()
-    body.set('image', animal.image)
+    body.set('image', imageFile)
 
     await authFetch(
       `${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${createdAnimal.id}/image`,
@@ -79,6 +83,42 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     )
 
     await fetchAnimals()
+  }
+
+  async function updateAnimal(animalId: string, enrichedAnimal: EnrichedEditAnimal) {
+    const animal = EditAnimalAdapter({ ...enrichedAnimal, yard: enrichedAnimal.yard?.id })
+
+    const response = await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${animalId}`,
+      {
+        method: 'put',
+        body: JSON.stringify(omit(animal, 'image')),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (!response.ok) return // TODO error
+    if (animal.image && new URL(animal.image).protocol !== 'blob:') return
+
+    if (!animal.image) {
+      await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${animalId}/image`, {
+        method: 'delete'
+      })
+      return
+    }
+
+    const image = await fetch(animal.image)
+    const imageFile = await image.blob()
+
+    const body = new FormData()
+    body.set('image', imageFile)
+
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${animalId}/image`, {
+      method: 'post',
+      body
+    })
   }
 
   async function createTreatment(treatment: EditTreatment) {
@@ -164,6 +204,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     fetchAnimals,
     fetchAnimal,
     createAnimal,
+    updateAnimal,
     createTreatment,
     deleteTreatment,
     createAppointment,

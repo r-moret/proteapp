@@ -12,12 +12,15 @@ import YardSelector from '@/modules/Animal/components/YardSelector.vue'
 import ToastNotifications from '@/components/ToastNotifications.vue'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 
 const params = useParams<{
   id?: string
 }>()
 
 const animalStore = useAnimalStore()
+const { animalDetails } = storeToRefs(animalStore)
+
 const router = useRouter()
 
 const notificiationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
@@ -35,34 +38,54 @@ async function handleSaveAnimal() {
   try {
     EnrichedEditAnimalAdapter(editingAnimal.value)
   } catch (error) {
-    showErrorNotification('Faltan datos para crear el animal o están en un formato incorrecto.')
+    showErrorNotification(
+      'Faltan datos para poder guardar el animal o están en un formato incorrecto.'
+    )
     return
   }
 
   try {
-    await animalStore.createAnimal(editingAnimal.value as EnrichedEditAnimal)
+    if (isEditMode.value && params.value.id) {
+      await animalStore.updateAnimal(params.value.id, editingAnimal.value as EnrichedEditAnimal)
+    } else {
+      await animalStore.createAnimal(editingAnimal.value as EnrichedEditAnimal)
+    }
+
     router.push({ name: 'animals' })
   } catch (error) {
     showErrorNotification(
-      'Parece que un error inesperado ocurrió creando al animal, por favor prueba de nuevo.'
+      'Parece que un error inesperado ocurrió guardando el animal, por favor prueba de nuevo.'
     )
     return
   }
 }
 
-onBeforeMount(() => {
-  if (isEditMode.value) return
-  editingAnimal.value = {
-    name: undefined,
-    sex: undefined,
-    birthDate: undefined,
-    entryDate: undefined,
-    isCastrated: false,
-    isAnimalCompatible: false,
-    description: undefined,
-    personality: undefined,
-    image: undefined,
-    yard: undefined
+onBeforeMount(async () => {
+  if (isEditMode.value) {
+    await animalStore.fetchAnimal(params.value.id!)
+
+    if (!animalDetails.value) {
+      showErrorNotification('No se encontró ningún animal.')
+      router.push({ name: 'animals' })
+      return
+    }
+
+    editingAnimal.value = {
+      ...animalDetails.value
+    }
+  } else {
+    editingAnimal.value = {
+      name: undefined,
+      sex: undefined,
+      birthDate: undefined,
+      entryDate: undefined,
+      isCastrated: false,
+      isAnimalCompatible: false,
+      description: undefined,
+      personality: undefined,
+      image: undefined,
+      yard: undefined
+    }
   }
 })
 </script>
@@ -71,7 +94,7 @@ onBeforeMount(() => {
   <main class="flex flex-col">
     <ToastNotifications ref="notificiationsRef" />
 
-    <AppHeader left="back" :title="isEditMode ? '<Animal>' : 'Crear animal'">
+    <AppHeader left="back" :title="isEditMode ? 'Editar animal' : 'Crear animal'">
       <button class="btn btn-square btn-ghost" @click="handleSaveAnimal">
         <span class="i-mingcute-save-2-line text-3xl" />
       </button>
@@ -101,6 +124,7 @@ onBeforeMount(() => {
                 type="radio"
                 name="radio-sex"
                 class="radio-secondary radio"
+                :checked="editingAnimal.sex === 'male'"
                 @change="handleSexInput('male')"
               />
               <span class="label-text font-semibold">Masculino</span>
@@ -110,6 +134,7 @@ onBeforeMount(() => {
                 type="radio"
                 name="radio-sex"
                 class="radio-secondary radio"
+                :checked="editingAnimal.sex === 'female'"
                 @change="handleSexInput('female')"
               />
               <span class="label-text font-semibold">Femenino</span>

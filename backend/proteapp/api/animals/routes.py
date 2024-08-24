@@ -96,7 +96,7 @@ def put_animal(id: ULID, animal: EditableAnimal, session: Session = Depends(get_
         raise HTTPException(422, "Unable to edit the animal with the data passed")
 
     for prop, value in dict(edited_animal).items():
-        if prop == "id":
+        if prop == "id" or prop == "image":
             continue
         setattr(animal_db, prop, value)
 
