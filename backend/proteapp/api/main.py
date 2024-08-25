@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Depends, HTTPException
+from pathlib import Path
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from proteapp.api.animals.routes import router as animals_router
 from proteapp.api.treatments.routes import router as treatments_router
@@ -50,4 +51,12 @@ app.include_router(monitorings_router, dependencies=[Depends(get_logged_user_htt
 # Auth dependencies applied within router due to WebSockets different auth protocol
 app.include_router(shifts_router)
 
-app.mount("/images", StaticFiles(directory="images", check_dir=False), "images")
+
+@app.get("/images/{image}", response_class=FileResponse)
+def get_image(image: str):
+    image_path = Path(f"images/{image}")
+
+    if not image_path.exists():
+        raise HTTPException(404, "Image not found")
+
+    return image_path
