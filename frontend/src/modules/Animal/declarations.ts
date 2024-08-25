@@ -16,6 +16,23 @@ export const YardSchema = YardInfoSchema.extend({
   )
 })
 
+export const EditAnimalSchema = z.object({
+  name: z.string().min(1),
+  sex: z.enum(['male', 'female']),
+  personality: z.string().nullish(),
+  description: z.string().nullish(),
+  birthDate: z.coerce.date().nullish(),
+  entryDate: z.coerce.date().nullish(),
+  isAnimalCompatible: z.boolean().nullish(),
+  isCastrated: z.boolean().nullish(),
+  image: z.string().nullish(),
+  yard: IdSchema.nullish()
+})
+
+export const EnrichedEditAnimalSchema = EditAnimalSchema.extend({
+  yard: YardInfoSchema.nullish()
+})
+
 export const AnimalInfoSchema = z.object({
   id: IdSchema,
   name: z.string(),
@@ -81,5 +98,7 @@ export type YardInfo = z.infer<typeof YardInfoSchema>
 export type Yard = z.infer<typeof YardSchema>
 export type EditTreatment = z.infer<typeof EditTreatmentSchema>
 export type EditAppointment = z.infer<typeof EditAppointmentSchema>
+export type EditAnimal = z.infer<typeof EditAnimalSchema>
+export type EnrichedEditAnimal = z.infer<typeof EnrichedEditAnimalSchema>
 export type AnimalInfo = z.infer<typeof AnimalInfoSchema>
 export type Animal = z.infer<typeof AnimalSchema>

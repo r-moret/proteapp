@@ -9,11 +9,10 @@ class EditableAnimal(BaseSchema):
     sex: Sex
     personality: str | None = None
     description: str | None = None
-    birth_date: date | None = None
-    entry_date: date | None = None
+    birth_date: date | datetime | None = None
+    entry_date: date | datetime | None = None
     is_animal_compatible: bool | None = None
     is_castrated: bool | None = None
-    image: str | None = None
     yard: ULID | None = None
 
 

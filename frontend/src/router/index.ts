@@ -39,6 +39,16 @@ const router = createRouter({
       component: () => import('@/modules/Animal/views/AppointmentsView.vue')
     },
     {
+      path: '/animals/create',
+      name: 'animal.create',
+      component: () => import('@/modules/Animal/views/AnimalEditorView.vue')
+    },
+    {
+      path: '/animals/:id/edit',
+      name: 'animal.edit',
+      component: () => import('@/modules/Animal/views/AnimalEditorView.vue')
+    },
+    {
       path: '/adoptions',
       name: 'adoptions',
       component: () => import('@/modules/Adoption/views/AdoptionListView.vue')
