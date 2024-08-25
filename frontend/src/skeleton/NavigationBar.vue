@@ -10,10 +10,18 @@ const route = useRoute()
     <RouterLink
       v-for="view in navigationBarConfig.items"
       :to="{ name: view.name }"
-      :class="['transition-colors', { 'text-secondary': view.name == route.name }]"
+      :class="[
+        'transition-colors',
+        { 'text-secondary': route.name?.toString().includes(view.name) }
+      ]"
       :key="view.name"
     >
-      <span :class="['text-2xl', view.name == route.name ? view.activeIcon : view.icon]" />
+      <span
+        :class="[
+          'text-2xl',
+          route.name?.toString().includes(view.name) ? view.activeIcon : view.icon
+        ]"
+      />
       <p class="text-xs font-semibold">{{ view.label }}</p>
     </RouterLink>
   </div>

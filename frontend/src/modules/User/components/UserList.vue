@@ -31,14 +31,13 @@ function getFullName(name: String, firstSurname: String, secondSurname: String |
 </script>
 
 <template>
-  <ToastNotifications ref="notificationsRef" />
-
   <div class="flex w-full flex-col">
+    <ToastNotifications ref="notificationsRef" />
+
     <ItemList
       :items="props.userList"
       delete-title="¿Estás seguro de que quieres borrar este usuario?"
       @delete="(user) => handleDeleteUser(user.id)"
-      class="mx-5"
     >
       <template #empty>
         <div class="mt-6 flex flex-col items-center">
