@@ -10,6 +10,13 @@ class EditablePerson(BaseSchema):
     second_surname: str | None = None
 
 
+class ListedPerson(ULIDSchema):
+    name: str
+    first_surname: str
+    email: str
+    second_surname: str | None
+
+
 class CompletePerson(ULIDSchema):
     name: str
     first_surname: str

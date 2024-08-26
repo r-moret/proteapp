@@ -1,11 +1,8 @@
-<script setup lang="ts">
-type Tabs = string[]
-type Tab = Tabs[number]
-
-const model = defineModel<Tab>()
+<script setup lang="ts" generic="T extends string">
+const model = defineModel<T>()
 
 const props = defineProps<{
-  tabs: Tabs
+  tabs: T[]
 }>()
 </script>
 

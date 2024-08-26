@@ -40,6 +40,11 @@ const router = createRouter({
       component: () => import('@/modules/User/views/UserEditorView.vue')
     },
     {
+      path: '/people/volunteers/:id/edit',
+      name: 'people.volunteers.edit',
+      component: () => import('@/modules/User/views/UserEditorView.vue')
+    },
+    {
       path: '/animals',
       name: 'animals',
       component: () => import('@/modules/Animal/views/AnimalListView.vue')

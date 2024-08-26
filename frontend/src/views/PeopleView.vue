@@ -1,24 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 import AppHeader from '@/skeleton/AppHeader.vue'
 import TabSelector from '@/components/TabSelector.vue'
 
+const Tabs = {
+  Registered: {
+    label: 'Inscritos',
+    route: 'people',
+    createRoute: 'people.create'
+  },
+  Volunteers: {
+    label: 'Voluntarios',
+    route: 'people.volunteers',
+    createRoute: 'people.volunteers.create'
+  }
+}
+
 const router = useRouter()
+const route = useRoute()
 
-const tab = ref('Todos')
+const tab = computed(() =>
+  Object.values(Tabs).find((tab) => tab.route === route.name || tab.createRoute === route.name)
+)
 
-function handleSelectTab(newTab: string) {
-  tab.value = newTab
-  const newRoute = newTab === 'Voluntarios' ? 'people.volunteers' : 'people'
+function handleSelectTab(newTab: (typeof Tabs)[keyof typeof Tabs]['label']) {
+  const tab = Object.values(Tabs).find((tab) => tab.label === newTab)
 
-  router.push({ name: newRoute })
+  router.push({ name: tab?.route })
 }
 
 function handleAddClick() {
-  const newRoute = tab.value === 'Voluntarios' ? 'people.volunteers.create' : 'people.create'
-  router.push({ name: newRoute })
+  router.push({ name: tab.value?.createRoute })
 }
 </script>
 
@@ -33,8 +47,8 @@ function handleAddClick() {
     <section class="min-h-0 w-full flex-grow overflow-y-auto px-4">
       <TabSelector
         class="mb-3"
-        :model-value="tab"
-        :tabs="['Todos', 'Voluntarios']"
+        :model-value="tab?.label"
+        :tabs="Object.values(Tabs).map((tab) => tab.label)"
         @update:model-value="handleSelectTab"
       />
 

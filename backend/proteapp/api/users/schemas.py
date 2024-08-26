@@ -4,10 +4,8 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class EditableUser(BaseSchema):
-    password: str | None = None
     active: bool
     veteran: bool
-    image: str | None = None
     person: ULID
 
 

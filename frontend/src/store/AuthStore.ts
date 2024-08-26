@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useJwt } from '@vueuse/integrations/useJwt'
 import { crudUser as crudUserApi } from '@/modules/Inform/api'
-import { UserAdapter } from '@/modules/Inform/adapters'
+import { UserAdapter } from '@/modules/User/adapters'
 import type { User } from '@/modules/Inform/declarations'
 
 export const useAuthStore = defineStore('AuthStore', () => {

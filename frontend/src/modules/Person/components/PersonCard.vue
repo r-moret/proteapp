@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Person } from '@/modules/Person/declarations'
-import { computed } from 'vue'
 
 function getFullName(name: String, firstSurname: String, secondSurname: String | null | undefined) {
   return `${name} ${firstSurname}${secondSurname ? ' ' + secondSurname : ''}`
