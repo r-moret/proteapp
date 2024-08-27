@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type AnimalInfo, type YardInfo } from '@/modules/Animal/declarations'
+import type { AnimalInfo } from '@/modules/Animal/declarations'
+import type { YardInfo } from '@/modules/Yard/declarations'
 import { computed, ref } from 'vue'
 import BottomDrawer from './BottomDrawer.vue'
 import TextInput from './TextInput.vue'

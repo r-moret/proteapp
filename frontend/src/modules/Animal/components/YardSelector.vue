@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { YardInfo } from '@/modules/Animal/declarations'
+import type { YardInfo } from '@/modules/Yard/declarations'
 import { ref } from 'vue'
-import { useAnimalStore } from '@/store/AnimalStore'
+import { useYardStore } from '@/store/YardStore'
 import { storeToRefs } from 'pinia'
 import ItemSelector from '@/components/ItemSelector.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
@@ -9,7 +9,7 @@ import YardCard from '@/modules/Animal/components/YardCard.vue'
 
 const model = defineModel<YardInfo | null>()
 
-const { yardList } = storeToRefs(useAnimalStore())
+const { yardList } = storeToRefs(useYardStore())
 
 const selectionDrawerOpen = ref(false)
 </script>

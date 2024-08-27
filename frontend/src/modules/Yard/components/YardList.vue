@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YardInfo } from '../../Yard/declarations'
+import type { YardInfo } from '@/modules/Yard/declarations'
 import ItemList from '@/components/ItemList.vue'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import ToastNotifications from '@/components/ToastNotifications.vue'

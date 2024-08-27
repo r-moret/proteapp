@@ -13,6 +13,7 @@ import { useYardStore } from '@/store/YardStore'
 import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
+import TextInput from '@/components/TextInput.vue'
 
 const router = useRouter()
 
@@ -21,7 +22,6 @@ const yardStore = useYardStore()
 
 const { animalList, isLoading } = storeToRefs(animalStore)
 const { yardList } = storeToRefs(yardStore)
-const searchInput = ref<HTMLElement | null>(null)
 
 const filters = ref<AnimalFilters>({
   name: '',
@@ -115,6 +115,7 @@ watch(animalList, () => {
 
 onBeforeMount(async () => {
   await animalStore.fetchAnimals()
+  await yardStore.fetchYards()
 })
 </script>
 
@@ -136,21 +137,11 @@ onBeforeMount(async () => {
     </div>
     <div v-else class="grid flex-grow overflow-y-scroll">
       <div class="col-start-1 row-start-1 overflow-y-scroll">
-        <div class="mb-4 mt-2 flex h-12 w-full px-4" @click="searchInput?.focus()">
-          <div class="flex items-center justify-center rounded-l-lg bg-white px-3">
+        <TextInput v-model="filters.name" class="mb-4 mt-2 px-4" placeholder="Buscar animal">
+          <template #icon>
             <span class="i-mingcute-search-3-line text-2xl text-secondary" />
-          </div>
-          <div class="divider divider-horizontal mx-0 w-fit bg-white py-2" />
-          <input
-            type="text"
-            name="animal-search"
-            id="animal-search"
-            class="h-full w-full rounded-r-lg px-4"
-            placeholder="Buscar animal"
-            ref="searchInput"
-            autocomplete="off"
-          />
-        </div>
+          </template>
+        </TextInput>
         <div class="flex flex-col gap-1 px-0">
           <div
             v-for="(animals, yard, yardNumber) in animalsByYard"
