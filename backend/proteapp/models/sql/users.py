@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class User(SQLULIDSchema, table=True):
-    hashed_password: str
+    hashed_password: str | None = Field(default=None, nullable=False)
     active: bool
     veteran: bool
     image: str | None = None

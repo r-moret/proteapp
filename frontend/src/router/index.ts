@@ -15,8 +15,34 @@ const router = createRouter({
     },
     {
       path: '/people',
-      name: 'people',
-      component: () => import('@/modules/Person/views/PeopleListView.vue')
+      component: () => import('@/views/PeopleView.vue'),
+      children: [
+        {
+          path: '',
+          name: 'people',
+          component: () => import('@/modules/Person/views/PeopleListSubview.vue')
+        },
+        {
+          path: 'create',
+          name: 'people.create',
+          component: () => import('@/modules/Person/views/PeopleListSubview.vue')
+        },
+        {
+          path: 'volunteers',
+          name: 'people.volunteers',
+          component: () => import('@/modules/User/views/UserListSubview.vue')
+        }
+      ]
+    },
+    {
+      path: '/people/volunteers/create',
+      name: 'people.volunteers.create',
+      component: () => import('@/modules/User/views/UserEditorView.vue')
+    },
+    {
+      path: '/people/volunteers/:id/edit',
+      name: 'people.volunteers.edit',
+      component: () => import('@/modules/User/views/UserEditorView.vue')
     },
     {
       path: '/animals',

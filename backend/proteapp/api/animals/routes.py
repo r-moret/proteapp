@@ -31,7 +31,7 @@ def post_animal(animal: EditableAnimal, session: Session = Depends(get_sql_sessi
     return animal_db
 
 
-@router.post("/{id}/image")
+@router.post("/{id}/image", response_model=CompleteAnimal)
 def post_animal_image(id: ULID, image: UploadFile, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
@@ -52,7 +52,7 @@ def post_animal_image(id: ULID, image: UploadFile, session: Session = Depends(ge
     return animal_db
 
 
-@router.delete("/{id}/image")
+@router.delete("/{id}/image", response_model=CompleteAnimal)
 def delete_animal_image(id: ULID, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
