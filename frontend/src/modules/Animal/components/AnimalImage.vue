@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
   image?: string | null
@@ -7,16 +7,29 @@ const props = defineProps<{
 
 const PLACEHOLDER_IMAGE = '/images/dog.png'
 
-const validSource = ref<string>(props.image || PLACEHOLDER_IMAGE)
+const error = ref(false)
+const showPlaceholder = computed(() => error.value || !props.image)
 
-const setPlaceholder = () => (validSource.value = PLACEHOLDER_IMAGE)
+watch(
+  () => props.image,
+  () => {
+    error.value = false
+  }
+)
 </script>
 
 <template>
   <img
-    :src="validSource"
+    v-if="!showPlaceholder"
+    :src="props.image!"
     alt="Image of the animal"
-    @error="setPlaceholder"
-    :class="['object-cover', { 'bg-base-300 object-scale-down': validSource == PLACEHOLDER_IMAGE }]"
+    @error="error = true"
+    class="object-cover"
+  />
+  <img
+    v-else
+    :src="PLACEHOLDER_IMAGE"
+    alt="Image of the animal"
+    class="bg-base-300 object-scale-down"
   />
 </template>

@@ -3,8 +3,13 @@ from sqlmodel.pool import StaticPool
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import UploadFile
 from typing import Annotated
 from fastapi import Depends, HTTPException, status, Query, WebSocketException
+from pathlib import Path
+from ulid import ULID
+import os
+import shutil
 
 # These imports are mandatory to ensure that once the SQL database
 # is created, all models are registered
@@ -94,3 +99,17 @@ def get_logged_user_ws(token: Annotated[str, Query()]):
             )
 
     return user
+
+
+def save_image(image: UploadFile) -> str:
+    if not image.filename:
+        raise HTTPException(422, "Unable to upload an image with no filename")
+
+    image_new_filename = f"{ULID()}{Path(image.filename).suffix}"
+    image_path = f"images/{image_new_filename}"
+
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    with open(image_path, "wb") as file:
+        shutil.copyfileobj(image.file, file)
+
+    return image_path

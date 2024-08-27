@@ -4,7 +4,8 @@ import type {
   Animal,
   AnimalInfo,
   EditAppointment,
-  EditTreatment
+  EditTreatment,
+  EnrichedEditAnimal
 } from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
@@ -15,8 +16,9 @@ import {
 
 import { listYards as listYardApi } from '@/modules/Yard/api'
 import type { Yard } from '@/modules/Yard/declarations'
-import { AnimalAdapter, AnimalInfoAdapter } from '@/modules/Animal/adapters'
+import { AnimalAdapter, AnimalInfoAdapter, EditAnimalAdapter } from '@/modules/Animal/adapters'
 import { authFetch } from '@/composable/useAuthFetch'
+import { omit } from 'lodash'
 
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<AnimalInfo[]>([])
@@ -48,6 +50,74 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       .then((animal) => (animalDetails.value = animal))
 
     isLoading.value = false
+  }
+
+  async function createAnimal(enrichedAnimal: EnrichedEditAnimal) {
+    const animal = EditAnimalAdapter({ ...enrichedAnimal, yard: enrichedAnimal.yard?.id })
+
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}`, {
+      method: 'post',
+      body: JSON.stringify(omit(animal, 'image')),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) return // TODO error
+    if (!animal.image) return
+    const createdAnimal = AnimalAdapter(await response.json())
+
+    const image = await fetch(animal.image)
+    const imageFile = await image.blob()
+
+    const body = new FormData()
+    body.set('image', imageFile)
+
+    await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${createdAnimal.id}/image`,
+      {
+        method: 'post',
+        body
+      }
+    )
+
+    await fetchAnimals()
+  }
+
+  async function updateAnimal(animalId: string, enrichedAnimal: EnrichedEditAnimal) {
+    const animal = EditAnimalAdapter({ ...enrichedAnimal, yard: enrichedAnimal.yard?.id })
+
+    const response = await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${animalId}`,
+      {
+        method: 'put',
+        body: JSON.stringify(omit(animal, 'image')),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (!response.ok) return // TODO error
+    if (animal.image && new URL(animal.image).protocol !== 'blob:') return
+
+    if (!animal.image) {
+      await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${animalId}/image`, {
+        method: 'delete'
+      })
+      return
+    }
+
+    const image = await fetch(animal.image)
+    const imageFile = await image.blob()
+
+    const body = new FormData()
+    body.set('image', imageFile)
+
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/${animalId}/image`, {
+      method: 'post',
+      body
+    })
   }
 
   async function createTreatment(treatment: EditTreatment) {
@@ -131,6 +201,8 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     isLoading,
     fetchAnimals,
     fetchAnimal,
+    createAnimal,
+    updateAnimal,
     createTreatment,
     deleteTreatment,
     createAppointment,
