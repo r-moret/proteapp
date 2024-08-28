@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useJwt } from '@vueuse/integrations/useJwt'
 import { crudUser as crudUserApi } from '@/modules/Inform/api'
 import { UserAdapter } from '@/modules/User/adapters'
-import type { User } from '@/modules/Inform/declarations'
+import type { User } from '@/modules/User/declarations'
 
 export const useAuthStore = defineStore('AuthStore', () => {
   const token = ref<string>()
