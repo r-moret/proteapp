@@ -8,6 +8,7 @@ from ulid import ULID
 from proteapp.models.sql.treatments import Treatment
 from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
+from proteapp.models.nosql.yard_order import YardOrder
 from proteapp.models.sql.users import User
 from proteapp.models.sql.people import Person, PhoneNumber
 from proteapp.models.sql.adoptions import Adoption
@@ -57,6 +58,7 @@ yards = [
     Yard(name="Patio 2"),
     Yard(name="Patio inmunodeficiencia"),
 ]
+
 
 animals = [
     Animal(
@@ -296,6 +298,29 @@ async def init_database_data():
             ),
         ]
 
+        yards_order = [
+            YardOrder.model_validate(
+                dict(
+                    date=datetime(2024, 7, 20),
+                    yard_order=[
+                        dict(id=yards[0].id, name=yards[0].name),
+                        dict(id=yards[1].id, name=yards[1].name),
+                        dict(id=yards[2].id, name=yards[2].name),
+                    ],
+                )
+            ),
+            YardOrder.model_validate(
+                dict(
+                    date=datetime(2024, 8, 20),
+                    yard_order=[
+                        dict(id=yards[1].id, name=yards[1].name),
+                        dict(id=yards[0].id, name=yards[0].name),
+                        dict(id=yards[2].id, name=yards[2].name),
+                    ],
+                )
+            ),
+        ]
+
         shift = Shift.model_validate(
             dict(
                 status="open",
@@ -351,6 +376,7 @@ async def init_database_data():
 
         await Inform.insert_many(informs)
         await Shift.insert_one(shift)
+        await YardOrder.insert_many(yards_order)
 
         next(sql_session_generator)
     except StopIteration:

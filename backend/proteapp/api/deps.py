@@ -24,6 +24,7 @@ from proteapp.models.sql.monitorings import Monitoring  # noqa: F401
 
 from proteapp.models.nosql.inform import Inform
 from proteapp.models.nosql.shift import Shift, TimeTable, DayTime
+from proteapp.models.nosql.yard_order import YardOrder
 
 from proteapp.api.auth.token import decode_token
 
@@ -32,7 +33,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 async def connect_mongo():
     nosql_client = AsyncIOMotorClient()
-    await init_beanie(database=nosql_client.db_name, document_models=[Inform, Shift])
+    await init_beanie(database=nosql_client.db_name, document_models=[Inform, Shift, YardOrder])
 
 
 sql_engine = create_engine(

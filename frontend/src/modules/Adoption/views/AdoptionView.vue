@@ -72,7 +72,6 @@ async function handleAddMonitoring(closeDrawer: () => void) {
       newMonitoring.value.followDate.getMonth(),
       newMonitoring.value.followDate.getDate()
     )
-    console.log(newMonitoring.value)
     EditMonitoringAdapter(newMonitoring.value)
 
     await adoptionStore.createMonitoring(newMonitoring.value)

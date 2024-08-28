@@ -1,19 +1,17 @@
-<script setup lang="ts" generic="T extends { [key: string]: any }">
+<script setup lang="ts" generic="T extends ObjectWithId">
 import { useSlots, onBeforeMount, ref } from 'vue'
 import BottomDrawer from './BottomDrawer.vue'
+import type { ObjectWithId } from '@/types'
 
 const props = withDefaults(
   defineProps<{
     items?: T[] | null
     title?: keyof T
-    canDelete?: boolean
     deleteTitle?: string
     labels?: Partial<Record<keyof T, string>>
     formatters?: Partial<Record<keyof T, (value: any) => string>>
   }>(),
-  {
-    canDelete: true
-  }
+  {}
 )
 
 const emit = defineEmits<{
@@ -54,12 +52,11 @@ onBeforeMount(() => {
 
 <template>
   <div class="flex-1 overflow-y-auto">
-    <slot v-if="!items || !items.length" name="empty" />
-
+    <slot v-if="!props.items || !props.items.length" name="empty" />
     <ul v-else>
-      <li v-for="(item, index) in props.items" :key="index">
+      <li v-for="(item, index) in props.items" :key="item.id">
         <span v-if="index != 0" class="divider my-2" />
-        <slot name="item" :item="item" :open-confirm="handleConfirmDeleteItem">
+        <slot name="item" :item="item" :index="index" :open-confirm="handleConfirmDeleteItem">
           <div class="flex flex-row justify-between px-4 py-2">
             <div class="flex flex-col">
               <p class="mb-1 text-lg font-semibold text-blue-600">{{ item[props.title!] }}</p>

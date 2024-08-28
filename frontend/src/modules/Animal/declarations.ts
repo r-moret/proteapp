@@ -1,20 +1,7 @@
 import { z } from 'zod'
+import { YardInfoSchema } from '@/modules/Yard/declarations'
 
 const IdSchema = z.string().ulid()
-
-export const YardInfoSchema = z.object({
-  id: IdSchema,
-  name: z.string()
-})
-
-export const YardSchema = YardInfoSchema.extend({
-  animals: z.array(
-    z.object({
-      id: IdSchema,
-      name: z.string()
-    })
-  )
-})
 
 export const EditAnimalSchema = z.object({
   name: z.string().min(1),
@@ -94,8 +81,6 @@ export const EditAppointmentSchema = z.object({
   animal: IdSchema
 })
 
-export type YardInfo = z.infer<typeof YardInfoSchema>
-export type Yard = z.infer<typeof YardSchema>
 export type EditTreatment = z.infer<typeof EditTreatmentSchema>
 export type EditAppointment = z.infer<typeof EditAppointmentSchema>
 export type EditAnimal = z.infer<typeof EditAnimalSchema>

@@ -9,6 +9,7 @@ const age = (birthdate: Date) => diffYears(new Date(), birthdate)
 export const useAnimalFilters = (animals: Ref<AnimalInfo[]>, filters: Ref<AnimalFilters>) => {
   return computed(() => {
     let filtered = animals.value
+    console.log(filtered)
 
     for (const filterName in filters.value) {
       switch (filterName) {

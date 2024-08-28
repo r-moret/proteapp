@@ -3,6 +3,7 @@ import type { EditInform, UserInfo } from '@/modules/Inform/declarations'
 import { ref } from 'vue'
 import { useUserStore } from '@/store/UserStore'
 import { useAnimalStore } from '@/store/AnimalStore'
+import { useYardStore } from '@/store/YardStore'
 import { storeToRefs } from 'pinia'
 import UserCard from '@/modules/Inform/components/UserCard.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
@@ -33,7 +34,8 @@ import type {
 } from '@/modules/Inform/declarations'
 
 const { userList } = storeToRefs(useUserStore())
-const { yardList, animalList } = storeToRefs(useAnimalStore())
+const { animalList } = storeToRefs(useAnimalStore())
+const { yardList } = storeToRefs(useYardStore())
 
 const props = defineProps<{
   modelValue: EditInform

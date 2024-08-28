@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { EnrichedInform } from '@/modules/Inform/declarations'
-import { useAnimalStore } from '@/store/AnimalStore'
 import { storeToRefs } from 'pinia'
 import UserCard from '@/modules/Inform/components/UserCard.vue'
 import HoursInput from '@/components/HoursInput.vue'
@@ -11,8 +10,9 @@ import AdoptionCard from '@/modules/Adoption/components/AdoptionCard.vue'
 import AnimalTestCard from '@/modules/Inform/components/AnimalTestCard.vue'
 import AnimalCard from '@/modules/Animal/components/AnimalCard.vue'
 import MultipleTextListInput from '@/components/MultipleTextListInput.vue'
+import { useYardStore } from '@/store/YardStore'
 
-const { yardList } = storeToRefs(useAnimalStore())
+const { yardList } = storeToRefs(useYardStore())
 
 const props = defineProps<{
   inform: EnrichedInform

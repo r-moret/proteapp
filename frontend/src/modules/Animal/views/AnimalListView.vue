@@ -9,16 +9,19 @@ import AppHeader from '@/skeleton/AppHeader.vue'
 import VerticalAnimalCard from '@/modules/Animal/components/VerticalAnimalCard.vue'
 import AnimalFiltersMenuButton from '@/modules/Animal/components/AnimalFiltersMenuButton.vue'
 import { useAnimalStore } from '@/store/AnimalStore'
+import { useYardStore } from '@/store/YardStore'
 import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
+import TextInput from '@/components/TextInput.vue'
 
 const router = useRouter()
 
 const animalStore = useAnimalStore()
-const { animalList, yardList, isLoading } = storeToRefs(animalStore)
+const yardStore = useYardStore()
 
-const searchInput = ref<HTMLElement | null>(null)
+const { animalList, isLoading } = storeToRefs(animalStore)
+const { yardList } = storeToRefs(yardStore)
 
 const filters = ref<AnimalFilters>({
   name: '',
@@ -66,6 +69,10 @@ const animalsByYard = computed(() => {
 
 const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
 
+function navigateYards() {
+  router.push({ name: 'yards' })
+}
+
 function navigateAdoptions() {
   router.push({ name: 'adoptions' })
 }
@@ -108,12 +115,16 @@ watch(animalList, () => {
 
 onBeforeMount(async () => {
   await animalStore.fetchAnimals()
+  await yardStore.fetchYards()
 })
 </script>
 
 <template>
   <main class="flex flex-col">
     <AppHeader left="profile" title="Animales">
+      <button class="btn btn-square btn-ghost" @click="navigateYards">
+        <span class="i-mingcute-location-line text-3xl" />
+      </button>
       <button class="btn btn-square btn-ghost" @click="navigateAdoptions">
         <span class="i-mingcute-home-5-line text-3xl" />
       </button>
@@ -126,21 +137,11 @@ onBeforeMount(async () => {
     </div>
     <div v-else class="grid flex-grow overflow-y-scroll">
       <div class="col-start-1 row-start-1 overflow-y-scroll">
-        <div class="mb-4 mt-2 flex h-12 w-full px-4" @click="searchInput?.focus()">
-          <div class="flex items-center justify-center rounded-l-lg bg-white px-3">
+        <TextInput v-model="filters.name" class="mb-4 mt-2 px-4" placeholder="Buscar animal">
+          <template #icon>
             <span class="i-mingcute-search-3-line text-2xl text-secondary" />
-          </div>
-          <div class="divider divider-horizontal mx-0 w-fit bg-white py-2" />
-          <input
-            type="text"
-            name="animal-search"
-            id="animal-search"
-            class="h-full w-full rounded-r-lg px-4"
-            placeholder="Buscar animal"
-            ref="searchInput"
-            autocomplete="off"
-          />
-        </div>
+          </template>
+        </TextInput>
         <div class="flex flex-col gap-1 px-0">
           <div
             v-for="(animals, yard, yardNumber) in animalsByYard"

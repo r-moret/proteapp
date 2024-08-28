@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type {
-  Yard,
   Animal,
   AnimalInfo,
   EditAppointment,
@@ -10,11 +9,11 @@ import type {
 } from '@/modules/Animal/declarations'
 import {
   listAnimal as listAnimalApi,
-  listYards as listYardApi,
   crudAnimal as crudAnimalApi,
   crudTreatment as crudTreatmentApi,
   crudAppointment as crudAppointmentApi
 } from '@/modules/Animal/api'
+
 import { AnimalAdapter, AnimalInfoAdapter, EditAnimalAdapter } from '@/modules/Animal/adapters'
 import { authFetch } from '@/composable/useAuthFetch'
 import { omit } from 'lodash'
@@ -22,9 +21,6 @@ import { omit } from 'lodash'
 export const useAnimalStore = defineStore('AnimalStore', () => {
   const animalList = ref<AnimalInfo[]>([])
   const animalDetails = ref<Animal>()
-
-  const yardList = ref<Yard[]>([])
-
   const isLoading = ref(false)
 
   async function fetchAnimals() {
@@ -34,10 +30,6 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       .then((res) => res.json())
       .then((json) => json.map(AnimalInfoAdapter))
       .then((animals) => (animalList.value = animals))
-
-    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
-      .then((res) => res.json())
-      .then((json: Yard[]) => (yardList.value = json))
 
     isLoading.value = false
   }
@@ -199,7 +191,6 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
   return {
     animalList,
     animalDetails,
-    yardList,
     isLoading,
     fetchAnimals,
     fetchAnimal,
