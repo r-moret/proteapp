@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { EditInform, UserInfo } from '@/modules/Inform/declarations'
+import type { EditInform } from '@/modules/Inform/declarations'
+import type { UserInfo } from '@/modules/User/declarations'
 import { ref } from 'vue'
 import { useUserStore } from '@/store/UserStore'
 import { useAnimalStore } from '@/store/AnimalStore'

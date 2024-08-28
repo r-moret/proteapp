@@ -22,7 +22,7 @@ export const UserSchema = UserInfoSchema.extend({
     name: z.string(),
     email: z.string(),
     firstSurname: z.string(),
-    phone: z.string().refine((phone) => /^\+[1-9]\d{1,14}$/.test(phone)), // TODO: This regex can be improved
+    phone: z.string(),
     secondSurname: z.string().nullish()
   })
 })

@@ -1,5 +1,4 @@
 from proteapp.models.base import ULIDSchema, BaseSchema
-from pydantic_extra_types.phone_numbers import PhoneNumber
 from datetime import date, datetime
 
 from ulid import ULID
@@ -34,7 +33,7 @@ class CompleteAdoption(ULIDSchema):
     class Person(ULIDSchema):
         name: str
         first_surname: str
-        phone: PhoneNumber
+        phone: str
         second_surname: str | None = None
         email: str | None = None
 

@@ -7,69 +7,101 @@ import { ZodError } from 'zod'
 import { usePersonStore } from '@/store/PersonStore'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { EditPersonAdapter } from '@/modules/Person/adapters'
+import { useParams } from '@/composable/useParams'
 
 import PersonList from '@/modules/Person/components/PersonList.vue'
 import ToastNotifications from '@/components/ToastNotifications.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
-import TextInput from '@/components/TextInput.vue'
+import PersonEditor from '@/modules/Person/components/PersonEditor.vue'
 
-import type { EditPerson } from '../declarations'
+import type { EditPerson, Person } from '@/modules/Person/declarations'
 
 const route = useRoute()
 const router = useRouter()
+const routeParams = useParams<{
+  id?: string
+}>()
 
 const personStore = usePersonStore()
-const { personList } = storeToRefs(personStore)
+const { personList, personDetails } = storeToRefs(personStore)
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 
-const isNewPersonOpen = computed(() => route.name === 'people.create')
+const isEditMode = computed(() => !!routeParams.value.id)
+const isEditingPersonOpen = computed(
+  () => route.name === 'people.create' || route.name === 'people.edit'
+)
 
-const newPersonForm = ref<HTMLFormElement | null>(null)
-const newPerson = ref<EditPerson>()
+const editingPerson = ref<EditPerson>()
 
 function handleCloseNewPersonDrawer() {
+  editingPerson.value = {
+    name: '',
+    firstSurname: '',
+    phone: '',
+    email: ''
+  }
   router.push({ name: 'people' })
 }
 
 async function handleAddPerson(callback: () => void) {
-  if (!newPerson.value) return
+  if (!editingPerson.value) return
 
   try {
-    newPerson.value.phone = '+34' + newPerson.value.phone
-    EditPersonAdapter(newPerson.value)
-    await personStore.createPerson(newPerson.value)
-    showSuccessNotification('Persona añadida correctamente.')
+    EditPersonAdapter(editingPerson.value)
 
-    newPersonForm.value?.reset()
-    newPerson.value = {
-      name: '',
-      firstSurname: '',
-      phone: ''
+    if (isEditMode.value && routeParams.value.id) {
+      await personStore.updatePerson(routeParams.value.id, editingPerson.value)
+      showSuccessNotification('Persona editada correctamente.')
+    } else {
+      await personStore.createPerson(editingPerson.value)
+      showSuccessNotification('Persona añadida correctamente.')
     }
+
     callback()
-  } catch (error) {
-    newPersonForm.value?.reset()
-    newPerson.value = {
+    editingPerson.value = {
       name: '',
       firstSurname: '',
-      phone: ''
+      phone: '',
+      email: ''
     }
+  } catch (error) {
     if (error instanceof ZodError) {
-      showErrorNotification('Parece que hay un error con los datos de la persona.')
+      showErrorNotification(
+        'Faltan datos para guardar la persona o están en un formato incorrecto.'
+      )
     } else {
       showErrorNotification('Ha ocurrido un error, prueba otra vez.')
     }
   }
 }
 
+function navigateEdit(person: Person) {
+  editingPerson.value = person
+  router.push({ name: 'people.edit', params: { id: person.id } })
+}
+
 onBeforeMount(async () => {
   await personStore.fetchPeople()
-  newPerson.value = {
-    name: '',
-    firstSurname: '',
-    phone: ''
+
+  if (isEditMode.value) {
+    await personStore.fetchPerson(routeParams.value.id!)
+
+    if (!personDetails.value) {
+      showErrorNotification('No se encontró ninguna persona.')
+      router.push({ name: 'people' })
+      return
+    }
+
+    editingPerson.value = { ...personDetails.value }
+  } else {
+    editingPerson.value = {
+      name: '',
+      firstSurname: '',
+      phone: '',
+      email: ''
+    }
   }
 })
 </script>
@@ -77,69 +109,27 @@ onBeforeMount(async () => {
 <template>
   <ToastNotifications ref="notificationsRef" />
 
-  <PersonList class="px-1" :person-list="personList"></PersonList>
+  <PersonList class="px-1" :person-list="personList" @click-person="navigateEdit" />
 
   <BottomDrawer
     class="bg-base-200"
     size="big"
-    :model-value="isNewPersonOpen"
+    :model-value="isEditingPersonOpen"
     @update:model-value="handleCloseNewPersonDrawer"
     v-slot="{ close }"
   >
     <div class="flex h-full flex-col gap-5">
-      <h1 class="text-3xl font-semibold">Nueva persona</h1>
+      <h1 class="text-3xl font-semibold">{{ isEditMode ? 'Editar persona' : 'Nueva persona' }}</h1>
       <form
-        v-if="newPerson"
-        ref="newPersonForm"
+        v-if="editingPerson"
         class="flex h-full flex-col gap-6 pb-10"
         @submit.prevent="handleAddPerson(close)"
       >
-        <div v class="flex flex-col gap-2">
-          <label class="font-semibold" for="new-person-name"> Nombre *</label>
-          <TextInput
-            name="new-person-name"
-            placeholder="ej. Juan"
-            v-model="newPerson.name"
-            :req="true"
-          />
-        </div>
-        <div v class="flex flex-col gap-2">
-          <label class="font-semibold" for="new-person-surname"> Primer apellido *</label>
-          <TextInput
-            name="new-person-surname"
-            placeholder="ej. Pérez"
-            v-model="newPerson.firstSurname"
-            :req="true"
-          />
-        </div>
-        <div v class="flex flex-col gap-2">
-          <label class="font-semibold" for="new-person-second-surname"> Segundo apellido </label>
-          <TextInput
-            name="new-person-second-surname"
-            placeholder="ej. Machado"
-            v-model="newPerson.secondSurname"
-          />
-        </div>
-
-        <div v class="flex flex-col gap-2">
-          <label class="font-semibold" for="new-person-phone"> Teléfono * </label>
-          <TextInput
-            :req="true"
-            name="new-person-phone"
-            placeholder=""
-            v-model="newPerson.phone"
-            required
-          />
-        </div>
-
-        <div v class="flex flex-col gap-2">
-          <label class="font-semibold" for="new-person-email"> Email </label>
-          <TextInput name="new-person-email" placeholder="" v-model="newPerson.email" />
-        </div>
+        <PersonEditor v-model="editingPerson" :embedded="false" />
         <button
           class="mt-auto w-fit self-center rounded-lg bg-secondary px-10 py-3 text-xl font-semibold text-white"
         >
-          Añadir
+          {{ isEditMode ? 'Guardar' : 'Añadir' }}
         </button>
       </form>
     </div>

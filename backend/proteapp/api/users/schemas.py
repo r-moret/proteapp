@@ -1,6 +1,5 @@
 from ulid import ULID
 from proteapp.models.base import ULIDSchema, BaseSchema
-from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class EditableUser(BaseSchema):
@@ -26,7 +25,7 @@ class CompleteUser(ListedUser):
     class Person(ULIDSchema):
         name: str
         first_surname: str
-        phone: PhoneNumber
+        phone: str
         second_surname: str | None
         email: str
 

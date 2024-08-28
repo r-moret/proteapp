@@ -59,5 +59,30 @@ export const usePersonStore = defineStore('PersonStore', () => {
     await fetchPeople()
   }
 
-  return { fetchPeople, personList, deletePerson, createPerson, fetchPerson }
+  async function updatePerson(personId: string, person: EditPerson) {
+    const response = await authFetch(
+      `${import.meta.env.VITE_BACKEND_URL}/${crudPersonApi}/${personId}`,
+      {
+        method: 'put',
+        body: JSON.stringify(person),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (!response.ok) throw Error(`Error backend response: ${await response.json()}`)
+
+    await fetchPeople()
+  }
+
+  return {
+    personList,
+    personDetails,
+    fetchPeople,
+    deletePerson,
+    createPerson,
+    fetchPerson,
+    updatePerson
+  }
 })

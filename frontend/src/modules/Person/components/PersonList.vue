@@ -16,6 +16,10 @@ const props = defineProps<{
   personList: Person[]
 }>()
 
+const emit = defineEmits<{
+  clickPerson: [payload: Person]
+}>()
+
 async function handleDeletePerson(personId: string) {
   try {
     await personStore.deletePerson(personId)
@@ -45,7 +49,7 @@ function getFullName(name: String, firstSurname: String, secondSurname: String |
         </div>
       </template>
       <template #item="{ item, openConfirm }">
-        <PersonCard :person="item">
+        <PersonCard :person="item" @click="emit('clickPerson', item)">
           <template #action>
             <button class="my-1 flex flex-col" @click.stop="openConfirm(item)">
               <span class="i-mingcute-close-fill text-xl text-gray-400" /></button

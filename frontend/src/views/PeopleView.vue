@@ -9,12 +9,14 @@ const Tabs = {
   Registered: {
     label: 'Inscritos',
     route: 'people',
-    createRoute: 'people.create'
+    createRoute: 'people.create',
+    editRoute: 'people.edit'
   },
   Volunteers: {
     label: 'Voluntarios',
     route: 'people.volunteers',
-    createRoute: 'people.volunteers.create'
+    createRoute: 'people.volunteers.create',
+    editRoute: 'people.volunteers.edit'
   }
 }
 
@@ -22,7 +24,10 @@ const router = useRouter()
 const route = useRoute()
 
 const tab = computed(() =>
-  Object.values(Tabs).find((tab) => tab.route === route.name || tab.createRoute === route.name)
+  Object.values(Tabs).find(
+    (tab) =>
+      tab.route === route.name || tab.createRoute === route.name || tab.editRoute === route.name
+  )
 )
 
 function handleSelectTab(newTab: (typeof Tabs)[keyof typeof Tabs]['label']) {
