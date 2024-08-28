@@ -8,8 +8,6 @@ import type { AnimalInfo } from '@/modules/Animal/declarations'
 import type { Person } from '@/modules/Person/declarations'
 import { EditAdoptionAdapter } from '@/modules/Adoption/adapters'
 import ToastNotifications from '@/components/ToastNotifications.vue'
-const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
-const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 import { ZodError } from 'zod'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { addDay } from '@formkit/tempo'
@@ -21,6 +19,9 @@ import { usePersonStore } from '@/store/PersonStore'
 import DateInput from '@/components/DateInput.vue'
 import type { EditAdoption } from '../declarations'
 import { useAnimalStore } from '@/store/AnimalStore'
+
+const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
+const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 
 const personStore = usePersonStore()
 const adoptionStore = useAdoptionStore()
