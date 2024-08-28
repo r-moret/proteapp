@@ -5,10 +5,11 @@ from fastapi import (
     WebSocketException,
     HTTPException,
     Depends,
+    status,
 )
 from proteapp.websockets import WSConnectionManager
 from proteapp.api.shifts.schemas import ShiftAction, ShiftStatus, ShiftData
-from proteapp.models.nosql.shift import Shift
+from proteapp.models.nosql.shift import Shift, TimeTable, DayTime
 from operator import attrgetter
 from ulid import ULID
 from proteapp.api.deps import get_logged_user_http, get_logged_user_ws
@@ -50,6 +51,43 @@ async def status_ws(websocket: WebSocket):
 
     except WebSocketDisconnect:
         status_ws_manager.disconnect(websocket)
+
+
+@router.post(
+    "/shift/clean",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(get_logged_user_http)],
+)
+async def clean_shift():
+    shift = await Shift.find_one()
+
+    if not shift:
+        status = "open"
+    else:
+        status = shift.status
+
+    new_shift = Shift(
+        status=status,
+        timetable=TimeTable(
+            monday=DayTime(morning=[], afternoon=[]),
+            thursday=DayTime(morning=[], afternoon=[]),
+            wednesday=DayTime(morning=[], afternoon=[]),
+            tuesday=DayTime(morning=[], afternoon=[]),
+            friday=DayTime(morning=[], afternoon=[]),
+            saturday=DayTime(morning=[], afternoon=[]),
+            sunday=DayTime(morning=[], afternoon=[]),
+        ),
+    )
+
+    await Shift.delete_all()
+    await new_shift.save()
+
+    await shift_ws_manager.broadcast(
+        ShiftData(
+            timetable=new_shift.timetable,
+            connected=len(shift_ws_manager.active_connections),
+        ).model_dump(),
+    )
 
 
 @router.websocket("/shift", dependencies=[Depends(get_logged_user_ws)])

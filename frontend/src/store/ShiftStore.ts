@@ -4,6 +4,13 @@ import { useWebSocket } from '@vueuse/core'
 import { useAuthStore } from '@/store/AuthStore'
 import { ShiftStatusAdapter, ShiftAdapter, ShiftActionAdapter } from '@/modules/Shift/adapters'
 import type { ShiftAction, ShiftSelection } from '@/modules/Shift/declarations'
+import {
+  wsShift as wsShiftApi,
+  crudStatus as crudStatusApi,
+  wsStatus as wsStatusApi,
+  cleanShift as cleanShiftApi
+} from '@/modules/Shift/api'
+import { authFetch } from '@/composable/useAuthFetch'
 
 const { token } = storeToRefs(useAuthStore())
 
@@ -14,7 +21,7 @@ export const useShiftStore = defineStore('ShiftStore', () => {
     close: statusClose,
     open: statusOpen
   } = useWebSocket<string>(
-    `${import.meta.env.VITE_BACKEND_URL}/shift/status?token=${token.value}`,
+    `${import.meta.env.VITE_BACKEND_URL}/${wsStatusApi}?token=${token.value}`,
     {
       immediate: false
     }
@@ -26,9 +33,12 @@ export const useShiftStore = defineStore('ShiftStore', () => {
     close: shiftClose,
     open: shiftOpen,
     send: shiftSend
-  } = useWebSocket<string>(`${import.meta.env.VITE_BACKEND_URL}/shift?token=${token.value}`, {
-    immediate: false
-  })
+  } = useWebSocket<string>(
+    `${import.meta.env.VITE_BACKEND_URL}/${wsShiftApi}?token=${token.value}`,
+    {
+      immediate: false
+    }
+  )
 
   const isConnecting = computed(
     () => statusConnection.value === 'CONNECTING' || shiftConnection.value === 'CONNECTING'
@@ -64,6 +74,28 @@ export const useShiftStore = defineStore('ShiftStore', () => {
     shiftSend(JSON.stringify(action))
   }
 
+  async function toggleStatus() {
+    const toggledStatus = status.value === 'open' ? 'closed' : 'open'
+
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudStatusApi}`, {
+      method: 'post',
+      body: JSON.stringify({ status: toggledStatus }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) throw Error(`Error backend response: ${await response.json()}`)
+  }
+
+  async function cleanShift() {
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${cleanShiftApi}`, {
+      method: 'post'
+    })
+
+    if (!response.ok) throw Error(`Error backend response: ${await response.json()}`)
+  }
+
   return {
     status,
     shift,
@@ -72,6 +104,8 @@ export const useShiftStore = defineStore('ShiftStore', () => {
 
     sendShiftAction,
     startConnection,
-    finishConnection
+    finishConnection,
+    toggleStatus,
+    cleanShift
   }
 })

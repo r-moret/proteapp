@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, computed, onBeforeUnmount } from 'vue'
+import { storeToRefs } from 'pinia'
+
 import { useUserStore } from '@/store/UserStore'
 import { useAuthStore } from '@/store/AuthStore'
 import { useShiftStore } from '@/store/ShiftStore'
-import { storeToRefs } from 'pinia'
+import { useToastNotifications } from '@/composable/useToastNotifications'
 
 import AppHeader from '@/skeleton/AppHeader.vue'
 import ShiftPicker from '@/modules/Shift/components/ShiftPicker.vue'
 import ShiftStatus from '@/modules/Shift/components/ShiftStatus.vue'
+import ToastNotifications from '@/components/ToastNotifications.vue'
 
 import type { EnrichedShift, ShiftSelection } from '@/modules/Shift/declarations'
 
@@ -18,6 +21,9 @@ const { loggedUser } = storeToRefs(useAuthStore())
 
 const shiftStore = useShiftStore()
 const { status, shift, connections, isConnecting } = storeToRefs(shiftStore)
+
+const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
+const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 
 const isLoading = ref(false)
 
@@ -70,6 +76,23 @@ function handleShiftSelect(selectedShift: ShiftSelection) {
   shiftStore.sendShiftAction('add_user', loggedUser.value.id, selectedShift)
 }
 
+async function handleCleanShift() {
+  try {
+    await shiftStore.cleanShift()
+    showSuccessNotification('El turno ha sido reiniciado correctamente.')
+  } catch (error) {
+    showErrorNotification('Un error inesperado ocurrió intentando reiniciar el turno.')
+  }
+}
+
+async function handleToggleStatus() {
+  try {
+    await shiftStore.toggleStatus()
+  } catch (error) {
+    showErrorNotification('Un error inesperado ocurrió intentando actualizar el estado del turno.')
+  }
+}
+
 onBeforeMount(async () => {
   isLoading.value = true
 
@@ -86,7 +109,24 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="flex flex-col">
-    <AppHeader title="Cuadrante de turnos"> </AppHeader>
+    <ToastNotifications ref="notificationsRef" />
+
+    <AppHeader title="Cuadrante de turnos">
+      <button v-if="!status || isLoading || isConnecting" class="btn btn-square btn-ghost">
+        <span class="loading loading-dots text-3xl" />
+      </button>
+      <button v-else class="btn btn-square btn-ghost" @click="handleToggleStatus">
+        <span
+          :class="[
+            'text-3xl',
+            status === 'open' ? 'i-mingcute-pause-line' : 'i-mingcute-play-line text-3xl'
+          ]"
+        />
+      </button>
+      <button class="btn btn-square btn-ghost" @click="handleCleanShift">
+        <span class="i-mingcute-file-new-line text-3xl" />
+      </button>
+    </AppHeader>
 
     <div
       v-if="isLoading || isConnecting || !enrichedShift || !status"
@@ -95,7 +135,7 @@ onBeforeUnmount(() => {
       <span class="loading loading-spinner loading-lg text-secondary" />
     </div>
 
-    <section v-else class="min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
+    <section v-else class="mt-2 min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
       <div class="mb-3 flex justify-between px-1">
         <div class="flex items-center gap-2">
           <span class="i-mingcute-group-fill text-2xl text-secondary" />
