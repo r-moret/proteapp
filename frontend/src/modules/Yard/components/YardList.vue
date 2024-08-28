@@ -1,40 +1,45 @@
 <script setup lang="ts">
-import type { YardInfo } from '@/modules/Yard/declarations'
 import ItemList from '@/components/ItemList.vue'
-import { useToastNotifications } from '@/composable/useToastNotifications'
-import ToastNotifications from '@/components/ToastNotifications.vue'
-import { ref } from 'vue'
 import YardCard from '@/modules/Yard/components/YardCard.vue'
-import { useYardStore } from '@/store/YardStore'
 
-const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
-const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
-const yardStore = useYardStore()
+import type { YardInfo } from '@/modules/Yard/declarations'
 
-async function handleDeleteYard(yardId: string) {
-  try {
-    await yardStore.deleteYard(yardId)
-    yardStore.fetchLastYardOrder()
-    showSuccessNotification('Patio eliminado correctamente')
-  } catch (error) {
-    showErrorNotification('Ha ocurrido un error, prueba otra vez.')
-  }
-}
+const model = defineModel<YardInfo[]>()
 
 const props = defineProps<{
-  yardList: YardInfo[]
+  editMode: boolean
 }>()
+
+const emit = defineEmits<{
+  delete: [payload: YardInfo]
+}>()
+
+function handleMoveYard(yard: YardInfo, direction: 'up' | 'down') {
+  const yardIndex = model.value?.findIndex((savedYard) => savedYard.id === yard.id)
+
+  if (yardIndex == undefined || !model.value) return
+
+  if (direction === 'up') {
+    ;[model.value[yardIndex], model.value[yardIndex - 1]] = [
+      model.value[yardIndex - 1],
+      model.value[yardIndex]
+    ]
+  } else {
+    ;[model.value[yardIndex], model.value[yardIndex + 1]] = [
+      model.value[yardIndex + 1],
+      model.value[yardIndex]
+    ]
+  }
+}
 </script>
 
 <template>
-  <ToastNotifications ref="notificationsRef" />
-
   <div class="flex h-3/4 w-full flex-col">
     <ItemList
-      :items="props.yardList"
+      :items="model"
       delete-title="¿Estás seguro de que quieres borrar este patio?"
       class="mx-5"
-      @delete="(yard) => handleDeleteYard(yard.id)"
+      @delete="(yard) => emit('delete', yard)"
     >
       <template #empty>
         <div class="mt-6 flex flex-col items-center">
@@ -42,8 +47,14 @@ const props = defineProps<{
           <p class="text-gray-500">No hay patios</p>
         </div>
       </template>
-      <template #item="{ item, openConfirm }">
-        <YardCard :yard="item">
+      <template #item="{ item, index, openConfirm }">
+        <YardCard
+          :yard="item"
+          :arrow-up="props.editMode && index !== 0"
+          :arrow-down="props.editMode && index !== model!.length - 1"
+          @move-up="handleMoveYard(item, 'up')"
+          @move-down="handleMoveYard(item, 'down')"
+        >
           <template #action>
             <button class="my-1 flex flex-col" @click.stop="openConfirm(item)">
               <span class="i-mingcute-close-fill text-xl text-gray-400" /></button

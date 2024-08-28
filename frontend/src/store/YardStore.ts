@@ -2,26 +2,19 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { authFetch } from '@/composable/useAuthFetch'
 
-import type {
-  Yard,
-  YardInfo,
-  EditYard,
-  EditYardOrder,
-  YardOrder
-} from '@/modules/Yard/declarations'
+import type { Yard, YardInfo, EditYard, EditYardOrder } from '@/modules/Yard/declarations'
 import {
   listYards as listYardApi,
   crudYard as crudYardApi,
-  crudYardOrder as crudYardOrderApi,
-  listYardsOrder as listYardOrderApi
+  crudYardOrder as crudYardOrderApi
 } from '@/modules/Yard/api'
 
-import { YardAdapter, YardOrderAdapter } from '@/modules/Yard/adapters'
+import { YardAdapter, YardInfoAdapter, YardOrderAdapter } from '@/modules/Yard/adapters'
 
 export const useYardStore = defineStore('YardStore', () => {
-  const yardList = ref<Yard[]>([])
-  const lastYardOrder = ref<YardInfo[]>()
+  const yardList = ref<YardInfo[]>([])
   const yardDetails = ref<Yard>()
+  const currentOrder = ref<YardInfo[]>()
   const isLoading = ref(false)
 
   async function fetchYards() {
@@ -29,7 +22,8 @@ export const useYardStore = defineStore('YardStore', () => {
 
     await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
       .then((res) => res.json())
-      .then((json: Yard[]) => (yardList.value = json))
+      .then((json) => json.map(YardInfoAdapter))
+      .then((json: YardInfo[]) => (yardList.value = json))
 
     isLoading.value = false
   }
@@ -73,45 +67,41 @@ export const useYardStore = defineStore('YardStore', () => {
     yardList.value = yardList.value.filter((yard) => yard.id !== yardId)
   }
 
-  async function postYardOrder(yardOrder: EditYardOrder) {
-    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}`, {
+  async function createOrder(yardOrder: EditYardOrder) {
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}`, {
       method: 'post',
       body: JSON.stringify(yardOrder),
       headers: {
         'Content-Type': 'application/json'
       }
     })
+
+    if (!response.ok) throw Error('Unexpected error from backend while creating a new yard order')
   }
 
-  async function fetchLastYardOrder() {
+  async function fetchCurrentOrder() {
     isLoading.value = true
 
-    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardOrderApi}`)
-    const json = await response.json()
-    const yardOrderList: YardOrder[] = json.map(YardOrderAdapter)
-
-    const mostRecentOrder = yardOrderList.reduce(
-      (latest, current) => {
-        if (!latest) return current
-
-        return current.date > latest.date ? current : latest
-      },
-      undefined as YardOrder | undefined
-    )
-
-    lastYardOrder.value = mostRecentOrder?.yardOrder
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}/current`)
+      .then((res) => {
+        if (res.status === 204) throw Error("There's no current order")
+        return res.json()
+      })
+      .then(YardOrderAdapter)
+      .then((order) => (currentOrder.value = order.yardOrder))
+      .catch(() => (currentOrder.value = []))
 
     isLoading.value = false
   }
 
   return {
-    deleteYard,
-    createYard,
     yardList,
+    currentOrder,
+    fetchYard,
     fetchYards,
-    postYardOrder,
-    fetchLastYardOrder,
-    lastYardOrder,
-    fetchYard
+    createYard,
+    deleteYard,
+    createOrder,
+    fetchCurrentOrder
   }
 })
