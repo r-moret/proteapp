@@ -10,7 +10,7 @@ from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
 from proteapp.models.nosql.yard_order import YardOrder
 from proteapp.models.sql.users import User
-from proteapp.models.sql.people import Person, PhoneNumber
+from proteapp.models.sql.people import Person
 from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.monitorings import Monitoring
 from proteapp.models.nosql.inform import Inform
@@ -20,7 +20,7 @@ people = [
     Person(
         name="Cris",
         first_surname="Espejo",
-        phone=PhoneNumber("+34640040545"),
+        phone="640040545",
         email="cristinaespejo@gmail.com",
         user=User(
             id=ULID.from_str("01J3DSAAMJCCXJNB7M2XZGVEPW"),  # Fixed, this is the fake logged user
@@ -32,7 +32,7 @@ people = [
     Person(
         name="Rafael",
         first_surname="Moret",
-        phone=PhoneNumber("+34640564432"),
+        phone="640564432",
         email="rafaelmoret@gmail.com",
         user=User(
             active=True,
@@ -43,7 +43,7 @@ people = [
     Person(
         name="Obi Wan",
         first_surname="Kenobi",
-        phone=PhoneNumber("+34640564432"),
+        phone="640564432",
         email="obisw@gmail.com",
         user=User(
             active=True,

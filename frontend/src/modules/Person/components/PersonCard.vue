@@ -5,10 +5,6 @@ function getFullName(name: String, firstSurname: String, secondSurname: String |
   return `${name} ${firstSurname}${secondSurname ? ' ' + secondSurname : ''}`
 }
 
-function getPhone(phone: String) {
-  return phone.substring(3)
-}
-
 const props = defineProps<{
   person: Person
 }>()
@@ -28,7 +24,7 @@ const props = defineProps<{
       </header>
       <span class="italic"> {{ props.person.email }} </span>
       <span> - </span>
-      <span class="italic">{{ getPhone(props.person.phone) }}</span>
+      <span class="italic">{{ props.person.phone }}</span>
     </section>
     <div class="self-start">
       <slot name="action" />

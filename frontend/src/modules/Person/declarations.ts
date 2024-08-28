@@ -20,11 +20,11 @@ export const PersonSchema = z.object({
 })
 
 export const EditPersonSchema = z.object({
-  name: z.string(),
-  firstSurname: z.string(),
-  phone: z.string(),
-  secondSurname: z.string().nullish(),
-  email: z.string()
+  name: z.string().min(1),
+  firstSurname: z.string().min(1),
+  phone: z.string().min(1),
+  secondSurname: z.string().min(1).nullish(),
+  email: z.string().min(1)
 })
 
 export type Person = z.infer<typeof PersonSchema>

@@ -28,6 +28,11 @@ const router = createRouter({
           component: () => import('@/modules/Person/views/PeopleListSubview.vue')
         },
         {
+          path: ':id/edit',
+          name: 'people.edit',
+          component: () => import('@/modules/Person/views/PeopleListSubview.vue')
+        },
+        {
           path: 'volunteers',
           name: 'people.volunteers',
           component: () => import('@/modules/User/views/UserListSubview.vue')
