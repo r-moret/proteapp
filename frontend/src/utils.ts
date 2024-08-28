@@ -1,5 +1,6 @@
 import { tzDate, parse, isAfter } from '@formkit/tempo'
 import { z } from 'zod'
+import { get, has, set } from 'lodash'
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -24,4 +25,12 @@ export function createObjectSchema<K extends string, V extends z.ZodTypeAny>(
     .refine((obj): obj is Record<K, z.infer<V>> =>
       keysSchema.options.every((key) => obj[key] != null)
     )
+}
+
+export function ImageAdapter<T extends object>(input: T, path: string = 'image') {
+  if (has(input, path) && get(input, path)) {
+    set(input, path, `${import.meta.env.VITE_BACKEND_URL}/${get(input, path)}`)
+  }
+
+  return input
 }

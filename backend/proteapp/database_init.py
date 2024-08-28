@@ -374,8 +374,13 @@ async def init_database_data():
             )
         )
 
+        await Inform.delete_all()
         await Inform.insert_many(informs)
+
+        await Shift.delete_all()
         await Shift.insert_one(shift)
+
+        await YardOrder.delete_all()
         await YardOrder.insert_many(yards_order)
 
         next(sql_session_generator)
