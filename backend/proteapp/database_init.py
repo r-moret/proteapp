@@ -1,15 +1,15 @@
 from proteapp.api.deps import get_sql_session
-from proteapp.models.sql.animals import Animal, Sex
 from datetime import datetime, date, time
 from zoneinfo import ZoneInfo
 from typing import cast
 from ulid import ULID
 
+from proteapp.models.sql.animals import Animal, Sex
 from proteapp.models.sql.treatments import Treatment
 from proteapp.models.sql.appointments import Appointment
 from proteapp.models.sql.yards import Yard
 from proteapp.models.nosql.yard_order import YardOrder
-from proteapp.models.sql.users import User
+from proteapp.models.sql.users import User, Role
 from proteapp.models.sql.people import Person
 from proteapp.models.sql.adoptions import Adoption
 from proteapp.models.sql.monitorings import Monitoring
@@ -27,6 +27,7 @@ people = [
             active=True,
             veteran=False,
             hashed_password="$2b$12$uGvFa6aQ5V/ciqbWwvRWkuL5fpPowr2.iW1FA0tSKGG2L0XmdEpEC",
+            role=Role.admin,
         ),
     ),
     Person(

@@ -3,7 +3,7 @@ from proteapp.api.yards.schemas import ListedYard, EditableYard, CompleteYard
 from proteapp.models.sql.yards import Yard
 from proteapp.api.yards_order.schemas import EditableYardOrder
 from sqlmodel import Session, select
-from proteapp.api.deps import get_sql_session
+from proteapp.api.deps import get_sql_session, admin_required
 from proteapp.api.yards_order.routes import post_yard_order, list_yards_order
 from ulid import ULID
 from datetime import datetime
@@ -17,7 +17,12 @@ def get_yards(session: Session = Depends(get_sql_session)):
     return yards
 
 
-@router.post("/", response_model=CompleteYard, status_code=201)
+@router.post(
+    "/",
+    response_model=CompleteYard,
+    status_code=201,
+    dependencies=[Depends(admin_required)],
+)
 async def post_yard(yard: EditableYard, session: Session = Depends(get_sql_session)):
     yard_db = Yard.model_validate(yard)
 
@@ -51,7 +56,7 @@ def get_yard(id: ULID, session: Session = Depends(get_sql_session)):
     return yard_db
 
 
-@router.put("/{id}", response_model=CompleteYard)
+@router.put("/{id}", response_model=CompleteYard, dependencies=[Depends(admin_required)])
 def put_yard(id: ULID, yard: EditableYard, session: Session = Depends(get_sql_session)):
     yard_db = session.get(Yard, id)
 
@@ -67,7 +72,7 @@ def put_yard(id: ULID, yard: EditableYard, session: Session = Depends(get_sql_se
     return yard_db
 
 
-@router.delete("/{id}", status_code=204)
+@router.delete("/{id}", status_code=204, dependencies=[Depends(admin_required)])
 async def delete_yard(id: ULID, session: Session = Depends(get_sql_session)):
     yard_db = session.get(Yard, id)
 

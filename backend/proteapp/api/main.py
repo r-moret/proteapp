@@ -48,10 +48,10 @@ app.include_router(users_router, dependencies=[Depends(get_logged_user_http)])
 app.include_router(informs_router, dependencies=[Depends(get_logged_user_http)])
 app.include_router(adoptions_router, dependencies=[Depends(get_logged_user_http)])
 app.include_router(monitorings_router, dependencies=[Depends(get_logged_user_http)])
+app.include_router(yards_order_router, dependencies=[Depends(get_logged_user_http)])
 
 # Auth dependencies applied within router due to WebSockets different auth protocol
 app.include_router(shifts_router)
-app.include_router(yards_order_router)
 
 
 @app.get("/images/{image}", response_class=FileResponse)

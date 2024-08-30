@@ -20,5 +20,5 @@ def generate_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = create_token(str(user.id))
+    token = create_token(str(user.id), [user.role])
     return Token(access_token=token, token_type="bearer")

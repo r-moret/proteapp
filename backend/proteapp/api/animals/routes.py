@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile
 from sqlmodel import Session, select
 from proteapp.api.animals.schemas import ListedAnimal, CompleteAnimal, EditableAnimal
 from proteapp.models.sql.animals import Animal
-from proteapp.api.deps import get_sql_session, save_image
+from proteapp.api.deps import get_sql_session, save_image, admin_required
 from ulid import ULID
 from proteapp.api.animals.adapters import to_animal
 from pydantic import ValidationError
@@ -17,7 +17,9 @@ def get_animals(session: Session = Depends(get_sql_session)):
     return animals
 
 
-@router.post("/", response_model=CompleteAnimal, status_code=201)
+@router.post(
+    "/", response_model=CompleteAnimal, status_code=201, dependencies=[Depends(admin_required)]
+)
 def post_animal(animal: EditableAnimal, session: Session = Depends(get_sql_session)):
     try:
         animal_db = to_animal(animal)
@@ -31,7 +33,7 @@ def post_animal(animal: EditableAnimal, session: Session = Depends(get_sql_sessi
     return animal_db
 
 
-@router.post("/{id}/image", response_model=CompleteAnimal)
+@router.post("/{id}/image", response_model=CompleteAnimal, dependencies=[Depends(admin_required)])
 def post_animal_image(id: ULID, image: UploadFile, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
@@ -52,7 +54,9 @@ def post_animal_image(id: ULID, image: UploadFile, session: Session = Depends(ge
     return animal_db
 
 
-@router.delete("/{id}/image", response_model=CompleteAnimal)
+@router.delete(
+    "/{id}/image", response_model=CompleteAnimal, dependencies=[Depends(admin_required)]
+)
 def delete_animal_image(id: ULID, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
@@ -83,7 +87,7 @@ def get_animal(id: ULID, session: Session = Depends(get_sql_session)):
     return animal_db
 
 
-@router.put("/{id}", response_model=CompleteAnimal)
+@router.put("/{id}", response_model=CompleteAnimal, dependencies=[Depends(admin_required)])
 def put_animal(id: ULID, animal: EditableAnimal, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 
@@ -107,7 +111,7 @@ def put_animal(id: ULID, animal: EditableAnimal, session: Session = Depends(get_
     return animal_db
 
 
-@router.delete("/{id}", status_code=204)
+@router.delete("/{id}", status_code=204, dependencies=[Depends(admin_required)])
 def delete_animal(id: ULID, session: Session = Depends(get_sql_session)):
     animal_db = session.get(Animal, id)
 

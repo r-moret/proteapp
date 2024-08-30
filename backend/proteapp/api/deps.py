@@ -5,7 +5,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import UploadFile
 from typing import Annotated
-from fastapi import Depends, HTTPException, status, Query, WebSocketException
+from fastapi import Depends, HTTPException, status, Query, WebSocketException, Security
+from fastapi.security import SecurityScopes
 from pathlib import Path
 from ulid import ULID
 import os
@@ -27,6 +28,7 @@ from proteapp.models.nosql.shift import Shift, TimeTable, DayTime
 from proteapp.models.nosql.yard_order import YardOrder
 
 from proteapp.api.auth.token import decode_token
+from proteapp.exceptions import TokenDecodificationError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -70,8 +72,21 @@ async def init_shift():
         await shift.save()
 
 
-def get_logged_user_http(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
-    token_data = decode_token(token)
+def get_logged_user_http(
+    token: Annotated[str, Depends(oauth2_scheme)], security_scopes: SecurityScopes
+) -> User:
+    auth_header = (
+        "Bearer" + "" if not security_scopes.scopes else f' scope="{security_scopes.scope_str}"'
+    )
+
+    try:
+        token_data = decode_token(token, security_scopes)
+    except TokenDecodificationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": auth_header},
+        )
 
     with Session(sql_engine) as session:
         user = session.get(User, token_data.user_id)
@@ -80,14 +95,20 @@ def get_logged_user_http(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"WWW-Authenticate": auth_header},
             )
 
     return user
 
 
-def get_logged_user_ws(token: Annotated[str, Query()]):
-    token_data = decode_token(token)
+def get_logged_user_ws(token: Annotated[str, Query()], security_scopes: SecurityScopes):
+    try:
+        token_data = decode_token(token, security_scopes)
+    except TokenDecodificationError as e:
+        raise WebSocketException(
+            code=status.WS_1003_UNSUPPORTED_DATA,
+            reason=str(e),
+        )
 
     with Session(sql_engine) as session:
         user = session.get(User, token_data.user_id)
@@ -95,10 +116,13 @@ def get_logged_user_ws(token: Annotated[str, Query()]):
         if not user:
             raise WebSocketException(
                 code=status.WS_1003_UNSUPPORTED_DATA,
-                reason="Unauthorized",
+                reason="Could not validate credentials",
             )
 
     return user
+
+
+def admin_required(user: Annotated[User, Security(get_logged_user_http, scopes=["admin"])]): ...
 
 
 def save_image(image: UploadFile) -> str:

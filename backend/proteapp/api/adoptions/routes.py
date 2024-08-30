@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from proteapp.api.deps import get_sql_session
+from proteapp.api.deps import get_sql_session, admin_required
 from proteapp.exceptions import UnsavedDataError
 from pydantic import ValidationError
 from sqlmodel import Session, select
@@ -27,7 +27,7 @@ def get_adoption(id: ULID, session: Session = Depends(get_sql_session)):
     return adoption_db
 
 
-@router.delete("/{id}", status_code=204)
+@router.delete("/{id}", status_code=204, dependencies=[Depends(admin_required)])
 def delete_adoption(id: ULID, session: Session = Depends(get_sql_session)):
     adoption_db = session.get(Adoption, id)
 
