@@ -19,6 +19,7 @@ Endpoints restringidos:
 - Personas
 
   - Borrar
+  - Actualizar
 
 - Turnos
 

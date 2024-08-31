@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, ref, onBeforeMount } from 'vue'
 import { ZodError } from 'zod'
 
+import { useAuthStore } from '@/store/AuthStore'
 import { usePersonStore } from '@/store/PersonStore'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { EditPersonAdapter } from '@/modules/Person/adapters'
@@ -21,6 +22,9 @@ const router = useRouter()
 const routeParams = useParams<{
   id?: string
 }>()
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
 
 const personStore = usePersonStore()
 const { personList, personDetails } = storeToRefs(personStore)
@@ -78,6 +82,8 @@ async function handleAddPerson(callback: () => void) {
 }
 
 function navigateEdit(person: Person) {
+  if (!isAdmin.value) return
+
   editingPerson.value = person
   router.push({ name: 'people.edit', params: { id: person.id } })
 }
@@ -109,7 +115,12 @@ onBeforeMount(async () => {
 <template>
   <ToastNotifications ref="notificationsRef" />
 
-  <PersonList class="px-1" :person-list="personList" @click-person="navigateEdit" />
+  <PersonList
+    class="px-1"
+    :person-list="personList"
+    :show-delete="isAdmin"
+    @click-person="navigateEdit"
+  />
 
   <BottomDrawer
     class="bg-base-200"

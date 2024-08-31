@@ -49,7 +49,7 @@ export const useInformStore = defineStore('InformStore', () => {
       method: 'delete'
     })
 
-    informList.value = informList.value.filter((inform) => inform.id !== informId)
+    await fetchInforms()
   }
 
   return {

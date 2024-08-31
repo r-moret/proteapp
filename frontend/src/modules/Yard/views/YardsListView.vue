@@ -10,6 +10,7 @@ import { storeToRefs } from 'pinia'
 import { ZodError } from 'zod'
 
 import { EditYardAdapter } from '@/modules/Yard/adapters'
+import { useAuthStore } from '@/store/AuthStore'
 import { useYardStore } from '@/store/YardStore'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 
@@ -20,6 +21,9 @@ const { showErrorNotification, showSuccessNotification } = useToastNotifications
 
 const yardStore = useYardStore()
 const { currentOrder } = storeToRefs(yardStore)
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
 
 const newYardForm = ref<HTMLFormElement | null>(null)
 const newYard = ref<EditYard>()
@@ -125,7 +129,7 @@ onBeforeMount(async () => {
       <button v-else class="btn btn-square btn-ghost" @click="isEditOrderMode = true">
         <span class="i-mingcute-transfer-4-line text-3xl" />
       </button>
-      <button class="btn btn-square btn-ghost" @click="isNewYardOpen = true">
+      <button v-if="isAdmin" class="btn btn-square btn-ghost" @click="isNewYardOpen = true">
         <span class="i-mingcute-add-fill text-3xl" />
       </button>
     </AppHeader>
@@ -138,6 +142,7 @@ onBeforeMount(async () => {
     <YardList
       v-if="editingYardOrder"
       v-model="editingYardOrder"
+      :show-delete="isAdmin"
       :edit-mode="isEditOrderMode"
       @delete="handleDeleteYard"
     />

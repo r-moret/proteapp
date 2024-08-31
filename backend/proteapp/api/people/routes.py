@@ -35,7 +35,7 @@ def get_person(id: ULID, session: Session = Depends(get_sql_session)):
     return person_db
 
 
-@router.put("/{id}", response_model=CompletePerson)
+@router.put("/{id}", response_model=CompletePerson, dependencies=[Depends(admin_required)])
 def put_person(id: ULID, person: EditablePerson, session: Session = Depends(get_sql_session)):
     person_db = session.get(Person, id)
 

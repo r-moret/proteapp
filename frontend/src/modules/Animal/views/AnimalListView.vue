@@ -14,14 +14,17 @@ import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
 import TextInput from '@/components/TextInput.vue'
+import { useAuthStore } from '@/store/AuthStore'
 
 const router = useRouter()
 
+const authStore = useAuthStore()
 const animalStore = useAnimalStore()
 const yardStore = useYardStore()
 
 const { animalList, isLoading } = storeToRefs(animalStore)
 const { yardList } = storeToRefs(yardStore)
+const { isAdmin } = storeToRefs(authStore)
 
 const filters = ref<AnimalFilters>({
   name: '',
@@ -128,7 +131,7 @@ onBeforeMount(async () => {
       <button class="btn btn-square btn-ghost" @click="navigateAdoptions">
         <span class="i-mingcute-home-5-line text-3xl" />
       </button>
-      <button class="btn btn-square btn-ghost" @click="navigateCreator">
+      <button v-if="isAdmin" class="btn btn-square btn-ghost" @click="navigateCreator">
         <span class="i-mingcute-add-line text-3xl" />
       </button>
     </AppHeader>

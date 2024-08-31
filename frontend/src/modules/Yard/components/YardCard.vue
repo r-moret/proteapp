@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import type { YardInfo } from '@/modules/Yard/declarations'
 
-const props = defineProps<{
-  yard: YardInfo
-  arrowUp: boolean
-  arrowDown: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    yard: YardInfo
+    arrowUp?: boolean
+    arrowDown?: boolean
+  }>(),
+  {
+    arrowDown: false,
+    arrowUp: false
+  }
+)
 
 const emit = defineEmits<{
   moveUp: []
