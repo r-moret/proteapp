@@ -70,7 +70,7 @@ const animalsByYard = computed(() => {
   return { ...groupedAnimals, 'Sin patio': nonYardAnimals }
 })
 
-const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
+const navigateAnimal = (id: string) => router.push({ name: 'animals.view', params: { id } })
 
 function navigateYards() {
   router.push({ name: 'yards' })
@@ -81,7 +81,7 @@ function navigateAdoptions() {
 }
 
 function navigateCreator() {
-  router.push({ name: 'animal.create' })
+  router.push({ name: 'animals.create' })
 }
 
 const updateFilters = (newFilters: AnimalFilters) => {

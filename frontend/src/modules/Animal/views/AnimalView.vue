@@ -38,10 +38,10 @@ const age = computed(() => {
 
 const navigateBack = () => router.back()
 const navigateEdit = () => {
-  router.push({ name: 'animal.edit', params: { id: routeParams.value.id } })
+  router.push({ name: 'animals.edit', params: { id: routeParams.value.id } })
 }
 const navigateTreatments = () => {
-  router.push({ name: 'animal.treatments', params: { id: routeParams.value.id } })
+  router.push({ name: 'animals.treatments', params: { id: routeParams.value.id } })
 }
 
 onBeforeMount(async () => {

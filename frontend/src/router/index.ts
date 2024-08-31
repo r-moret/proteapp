@@ -56,27 +56,27 @@ const router = createRouter({
     },
     {
       path: '/animals/:id',
-      name: 'animal',
+      name: 'animals.view',
       component: () => import('@/modules/Animal/views/AnimalView.vue')
     },
     {
       path: '/animals/:id/treatments',
-      name: 'animal.treatments',
+      name: 'animals.treatments',
       component: () => import('@/modules/Animal/views/TreatmentsView.vue')
     },
     {
       path: '/animals/:id/appointments',
-      name: 'animal.appointments',
+      name: 'animals.appointments',
       component: () => import('@/modules/Animal/views/AppointmentsView.vue')
     },
     {
       path: '/animals/create',
-      name: 'animal.create',
+      name: 'animals.create',
       component: () => import('@/modules/Animal/views/AnimalEditorView.vue')
     },
     {
       path: '/animals/:id/edit',
-      name: 'animal.edit',
+      name: 'animals.edit',
       component: () => import('@/modules/Animal/views/AnimalEditorView.vue')
     },
     {

@@ -54,7 +54,7 @@ function formatFrequency(minutes: number): string {
 }
 
 function navigateAppointments() {
-  router.push({ name: 'animal.appointments', params: { id: routeParams.value.id } })
+  router.push({ name: 'animals.appointments', params: { id: routeParams.value.id } })
 }
 
 async function handleAddTreatment(closeDrawer: () => void) {
