@@ -1,14 +1,48 @@
+import os
+import tempfile
+from ulid import ULID
 from fastapi import APIRouter, HTTPException, Depends, UploadFile
+from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 from proteapp.api.animals.schemas import ListedAnimal, CompleteAnimal, EditableAnimal
 from proteapp.models.sql.animals import Animal
 from proteapp.api.deps import get_sql_session, save_image, admin_required
-from ulid import ULID
 from proteapp.api.animals.adapters import to_animal
+from proteapp.animal_report import create_report
 from pydantic import ValidationError
 from pathlib import Path
+from starlette.background import BackgroundTask
+
 
 router = APIRouter(prefix="/animal", tags=["animal"])
+
+
+@router.get("/report")
+def download(session: Session = Depends(get_sql_session)):
+    absolute_root_directory = os.path.abspath(".")
+
+    animals = [
+        CompleteAnimal.model_validate(
+            {
+                **dict(animal),
+                "yard": animal.yard.model_dump() if animal.yard is not None else None,
+                "treatments": [treatment.model_dump() for treatment in animal.treatments],
+                "appointments": [appointment.model_dump() for appointment in animal.appointments],
+                "image": f"{absolute_root_directory}/{animal.image if animal.image is not None else 'images/dog.png'}",
+            }
+        )
+        for animal in session.exec(select(Animal)).all()
+    ]
+
+    tempdir = tempfile.TemporaryDirectory(dir=".")
+    report_path = f"{tempdir.name}/report.pdf"
+    create_report(animals, report_path)
+
+    return FileResponse(
+        report_path,
+        media_type="application/pdf",
+        background=BackgroundTask(tempdir.cleanup),
+    )
 
 
 @router.get("/search", response_model=list[ListedAnimal])
@@ -120,3 +154,8 @@ def delete_animal(id: ULID, session: Session = Depends(get_sql_session)):
 
     session.delete(animal_db)
     session.commit()
+
+
+# @router.get("/report")
+# def get_report(session: Session = Depends(get_sql_session)):
+#     return None

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cuadrante de gatos</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 0mm;
+      }
+
+      body {
+        font-family: sans-serif;
+        box-sizing: border-box;
+      }
+
+      .title {
+        font-size: 32px;
+        line-height: 1.75rem;
+        text-align: center;
+        color: #387cfa;
+        padding-bottom: 25px;
+        margin: 35px 15px 0 15px;
+        border-bottom: 2px solid rgb(221, 221, 221);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 0 10px 0 10px;
+      }
+
+      .cell {
+        display: flex;
+        padding: 0.75rem;
+        align-items: center;
+        flex-direction: column;
+        border-right: 2px solid rgb(221, 221, 221);
+        border-bottom: 2px solid rgb(221, 221, 221);
+      }
+
+      .cell:nth-child(3n) {
+        border-right: none;
+      }
+
+      .cell:nth-child(3n + 1):nth-last-child(-n + 3),
+      .cell:nth-child(3n + 1):nth-last-child(-n + 3) ~ .cell {
+        border-bottom: none;
+      }
+
+      .image {
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 0.75rem;
+        width: 12rem;
+        height: 12rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .content {
+        width: 220px;
+      }
+
+      .cell-title {
+        margin: 0;
+        width: 100%;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgb(221, 221, 221);
+        text-align: center;
+        font-size: 16px;
+      }
+
+      .details * p {
+        margin: 0;
+        font-size: 12px;
+      }
+
+      .details > div {
+        margin-top: 10px;
+      }
+
+      .details * ul {
+        padding: 0 0 0 20px;
+        margin: 0;
+
+        li::marker {
+          color: #387cfa;
+        }
+
+        li {
+          margin-bottom: 5px;
+        }
+      }
+
+      strong {
+        color: #387cfa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title">{{ yard }}</h1>
+    <div class="grid">
+      {% for animal in animals %}
+      <div class="cell">
+        <img
+          class="image"
+          src="file://{{ animal.image }}"
+          alt="{{ animal.name }}"
+        />
+        <section class="content">
+          <h2 class="cell-title">
+            <strong>{{ animal.name }}</strong>
+          </h2>
+          <div class="details">
+            <div>
+              <p><strong>Sexo</strong></p>
+              <p>{{ animal.sex }}</p>
+            </div>
+            <div>
+              <p><strong>Personalidad</strong></p>
+              <p>{{ animal.personality }}</p>
+            </div>
+            <div>
+              <p><strong>Tratamientos</strong></p>
+              {% if animal.treatments %}
+              <ul>
+                {% for treatment in animal.treatments %}
+                <li><p>{{ treatment }}</p></li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p>Sin tratamientos</p>
+              {% endif %}
+            </div>
+          </div>
+        </section>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
