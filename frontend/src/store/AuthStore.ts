@@ -46,12 +46,19 @@ export const useAuthStore = defineStore('AuthStore', () => {
         isLoading.value = false
       })
 
+    await fetchLoggedUser()
+
+    isLoading.value = false
+  }
+
+  async function fetchLoggedUser() {
+    isLoading.value = true
+
     if (!token.value) return
 
     const { payload } = useJwt<JwtPayloadWithScopes>(token.value)
     const authUserId = payload.value?.sub
     const authUserRoles = payload.value?.scopes
-    console.log(payload.value)
 
     if (!authUserId) {
       authError.value = 'Lo siento, no es posible encontrar tu usuario.'
@@ -77,7 +84,6 @@ export const useAuthStore = defineStore('AuthStore', () => {
       })
 
     isAdmin.value = authUserRoles?.includes('admin') ?? false
-
     isLoading.value = false
   }
 
@@ -89,6 +95,7 @@ export const useAuthStore = defineStore('AuthStore', () => {
     isLoading,
     authError,
 
-    login
+    login,
+    fetchLoggedUser
   }
 })
