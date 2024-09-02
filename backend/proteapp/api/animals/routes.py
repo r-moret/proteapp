@@ -18,7 +18,7 @@ router = APIRouter(prefix="/animal", tags=["animal"])
 
 
 @router.get("/report")
-def download(session: Session = Depends(get_sql_session)):
+def get_report(session: Session = Depends(get_sql_session)):
     absolute_root_directory = os.path.abspath(".")
 
     animals = [
@@ -41,6 +41,7 @@ def download(session: Session = Depends(get_sql_session)):
     return FileResponse(
         report_path,
         media_type="application/pdf",
+        filename="animal_report.pdf",
         background=BackgroundTask(tempdir.cleanup),
     )
 
