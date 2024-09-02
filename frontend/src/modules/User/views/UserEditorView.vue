@@ -2,7 +2,6 @@
 import { onBeforeMount, ref } from 'vue'
 import AppHeader from '@/skeleton/AppHeader.vue'
 import { useParams } from '@/composable/useParams'
-import ImagePicker from '@/components/ImagePicker.vue'
 import type { EnrichedEditUser } from '@/modules/User/declarations'
 import { EnrichedEditUserAdapter } from '@/modules/User/adapters'
 import { useUserStore } from '@/store/UserStore'
@@ -10,9 +9,8 @@ import ToastNotifications from '@/components/ToastNotifications.vue'
 import { useToastNotifications } from '@/composable/useToastNotifications'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import PersonSelector from '@/modules/Adoption/components/PersonSelector.vue'
-import PersonEditor from '@/modules/Person/components/PersonEditor.vue'
 import { usePersonStore } from '@/store/PersonStore'
+import UserEditor from '@/modules/User/components/UserEditor.vue'
 
 const params = useParams<{
   id?: string
@@ -96,7 +94,12 @@ onBeforeMount(async () => {
     </AppHeader>
 
     <section class="min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
-      <div v-if="editingVolunteer" class="flex flex-col gap-4">
+      <UserEditor
+        v-if="editingVolunteer"
+        v-model="editingVolunteer"
+        :person="isEditMode ? 'editor' : 'selector'"
+      />
+      <!-- <div v-if="editingVolunteer" class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
           <h2 class="text-xl font-semibold">Imagen</h2>
           <ImagePicker v-model="editingVolunteer.image" class="px-2" />
@@ -119,7 +122,7 @@ onBeforeMount(async () => {
             <span class="label-text w-full text-start font-semibold"> Voluntario veterano </span>
           </label>
         </div>
-      </div>
+      </div> -->
     </section>
   </main>
 </template>

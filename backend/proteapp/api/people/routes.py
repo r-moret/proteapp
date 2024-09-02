@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from proteapp.api.people.schemas import EditablePerson, CompletePerson
 
 from proteapp.models.sql.people import Person
-from proteapp.api.deps import get_sql_session
+from proteapp.api.deps import get_sql_session, admin_required
 from sqlmodel import Session, select
 from ulid import ULID
 
@@ -35,7 +35,7 @@ def get_person(id: ULID, session: Session = Depends(get_sql_session)):
     return person_db
 
 
-@router.put("/{id}", response_model=CompletePerson)
+@router.put("/{id}", response_model=CompletePerson, dependencies=[Depends(admin_required)])
 def put_person(id: ULID, person: EditablePerson, session: Session = Depends(get_sql_session)):
     person_db = session.get(Person, id)
 
@@ -53,7 +53,7 @@ def put_person(id: ULID, person: EditablePerson, session: Session = Depends(get_
     return person_db
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(admin_required)])
 def delete_person(id: ULID, session: Session = Depends(get_sql_session)):
     person_db = session.get(Person, id)
 

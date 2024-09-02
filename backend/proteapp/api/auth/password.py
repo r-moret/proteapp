@@ -21,7 +21,11 @@ def authenticate(username: str, password: str) -> User | Literal[False]:
         results = session.exec(select(User).join(Person).where(Person.email == username))
         user = results.first()
 
-        if not user or not verify_password(password, user.hashed_password):
+        if (
+            not user
+            or not user.hashed_password
+            or not verify_password(password, user.hashed_password)
+        ):
             return False
 
         return user

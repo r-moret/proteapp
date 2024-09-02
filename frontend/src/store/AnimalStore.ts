@@ -56,7 +56,7 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
       }
     })
 
-    if (!response.ok) return // TODO error
+    if (!response.ok) throw Error(`Error backend response: ${await response.json()}`)
     if (!animal.image) return
     const createdAnimal = AnimalAdapter(await response.json())
 
@@ -188,12 +188,30 @@ export const useAnimalStore = defineStore('AnimalStore', () => {
     )
   }
 
+  async function fetchReport() {
+    const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudAnimalApi}/report`)
+
+    if (!response.ok) throw Error(`Error backend response: ${await response.json()}`)
+
+    const blob = await response.blob()
+
+    const elem = window.document.createElement('a')
+    elem.href = window.URL.createObjectURL(blob)
+    elem.download = 'animal_report.pdf'
+
+    document.body.appendChild(elem)
+    elem.click()
+
+    document.body.removeChild(elem)
+  }
+
   return {
     animalList,
     animalDetails,
     isLoading,
     fetchAnimals,
     fetchAnimal,
+    fetchReport,
     createAnimal,
     updateAnimal,
     createTreatment,

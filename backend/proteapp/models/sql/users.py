@@ -2,9 +2,15 @@ from typing import TYPE_CHECKING
 from proteapp.models.base import SQLULIDSchema, SQLAlchemyULIDType
 from sqlmodel import Field, Relationship
 from ulid import ULID
+from enum import StrEnum
 
 if TYPE_CHECKING:
     from proteapp.models.sql.people import Person
+
+
+class Role(StrEnum):
+    admin = "admin"
+    regular = "regular"
 
 
 class User(SQLULIDSchema, table=True):
@@ -12,6 +18,7 @@ class User(SQLULIDSchema, table=True):
     active: bool
     veteran: bool
     image: str | None = None
+    role: Role = Role.regular
 
     person_id: ULID = Field(
         default=None,

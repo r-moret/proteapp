@@ -3,7 +3,7 @@ from proteapp.api.users.schemas import ListedUser, CompleteUser, EditableUser
 from proteapp.exceptions import UnsavedDataError
 from pydantic import ValidationError
 from proteapp.models.sql.users import User
-from proteapp.api.deps import get_sql_session, save_image
+from proteapp.api.deps import get_sql_session, save_image, admin_required
 from sqlmodel import Session, select
 from ulid import ULID
 from proteapp.api.users.adapters import to_user
@@ -22,7 +22,12 @@ def get_users(session: Session = Depends(get_sql_session)):
     return session.exec(select(User)).all()
 
 
-@router.post("/", response_model=CompleteUser, status_code=201)
+@router.post(
+    "/",
+    response_model=CompleteUser,
+    status_code=201,
+    dependencies=[Depends(admin_required)],
+)
 def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
     try:
         user_db = to_user(user)
@@ -54,7 +59,7 @@ def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
     return user_db
 
 
-@router.post("/{id}/image", response_model=CompleteUser)
+@router.post("/{id}/image", response_model=CompleteUser, dependencies=[Depends(admin_required)])
 def post_user_image(id: ULID, image: UploadFile, session: Session = Depends(get_sql_session)):
     user_db = session.get(User, id)
 
@@ -75,7 +80,7 @@ def post_user_image(id: ULID, image: UploadFile, session: Session = Depends(get_
     return user_db
 
 
-@router.delete("/{id}/image", response_model=CompleteUser)
+@router.delete("/{id}/image", response_model=CompleteUser, dependencies=[Depends(admin_required)])
 def delete_user_image(id: ULID, session: Session = Depends(get_sql_session)):
     user_db = session.get(User, id)
 
@@ -106,7 +111,7 @@ def get_user(id: ULID, session: Session = Depends(get_sql_session)):
     return user_db
 
 
-@router.put("/{id}", response_model=CompleteUser)
+@router.put("/{id}", response_model=CompleteUser, dependencies=[Depends(admin_required)])
 def put_user(id: ULID, user: EditableUser, session: Session = Depends(get_sql_session)):
     user_db = session.get(User, id)
 
@@ -130,7 +135,7 @@ def put_user(id: ULID, user: EditableUser, session: Session = Depends(get_sql_se
     return user_db
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(admin_required)])
 def delete_user(id: ULID, session: Session = Depends(get_sql_session)):
     user_db = session.get(User, id)
 

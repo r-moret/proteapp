@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from proteapp.api.informs.schemas import (
     CompleteInform,
     ListedInform,
@@ -8,6 +8,7 @@ from proteapp.models.nosql.inform import Inform
 from ulid import ULID
 from proteapp.api.informs.adapters import to_inform
 from pydantic import ValidationError
+from proteapp.api.deps import admin_required
 
 router = APIRouter(prefix="/inform", tags=["inform"])
 
@@ -61,7 +62,7 @@ async def update_inform(id: ULID, inform: EditableInform):
     return inform_db
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(admin_required)])
 async def delete_inform(id: ULID):
     inform_db = await Inform.get(id)
 

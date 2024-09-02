@@ -14,6 +14,7 @@ from proteapp.api.monitorings.routes import router as monitorings_router
 from proteapp.api.yards_order.routes import router as yards_order_router
 from proteapp.api.shifts.routes import router as shifts_router
 from proteapp.api.auth.routes import router as auth_router
+from proteapp.api.profile.routes import router as profile_router
 from proteapp.database_init import init_database_data
 from proteapp.api.deps import connect_mongo, init_shift, get_logged_user_http
 from contextlib import asynccontextmanager
@@ -48,10 +49,11 @@ app.include_router(users_router, dependencies=[Depends(get_logged_user_http)])
 app.include_router(informs_router, dependencies=[Depends(get_logged_user_http)])
 app.include_router(adoptions_router, dependencies=[Depends(get_logged_user_http)])
 app.include_router(monitorings_router, dependencies=[Depends(get_logged_user_http)])
+app.include_router(yards_order_router, dependencies=[Depends(get_logged_user_http)])
+app.include_router(profile_router, dependencies=[Depends(get_logged_user_http)])
 
 # Auth dependencies applied within router due to WebSockets different auth protocol
 app.include_router(shifts_router)
-app.include_router(yards_order_router)
 
 
 @app.get("/images/{image}", response_class=FileResponse)

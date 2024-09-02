@@ -3,3 +3,6 @@ class UnsavedDataError(Exception):
         super().__init__(message)
 
         self.field = field
+
+
+class TokenDecodificationError(Exception): ...

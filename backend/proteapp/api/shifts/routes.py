@@ -12,7 +12,7 @@ from proteapp.api.shifts.schemas import ShiftAction, ShiftStatus, ShiftData
 from proteapp.models.nosql.shift import Shift, TimeTable, DayTime
 from operator import attrgetter
 from ulid import ULID
-from proteapp.api.deps import get_logged_user_http, get_logged_user_ws
+from proteapp.api.deps import get_logged_user_ws, admin_required
 
 router = APIRouter(tags=["shift"])
 
@@ -20,7 +20,7 @@ shift_ws_manager = WSConnectionManager()
 status_ws_manager = WSConnectionManager()
 
 
-@router.post("/shift/status", status_code=204, dependencies=[Depends(get_logged_user_http)])
+@router.post("/shift/status", status_code=204, dependencies=[Depends(admin_required)])
 async def post_status(body: ShiftStatus):
     shift = await Shift.find_one()
 
@@ -56,7 +56,7 @@ async def status_ws(websocket: WebSocket):
 @router.post(
     "/shift/clean",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(get_logged_user_http)],
+    dependencies=[Depends(admin_required)],
 )
 async def clean_shift():
     shift = await Shift.find_one()

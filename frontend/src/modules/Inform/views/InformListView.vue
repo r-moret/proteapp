@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { format, parse, sameDay } from '@formkit/tempo'
 
+import { useAuthStore } from '@/store/AuthStore'
 import { useInformStore } from '@/store/InformStore'
 import { shiftType } from '@/utils'
 
@@ -15,6 +16,9 @@ import InformCard from '@/modules/Inform/components/InformCard.vue'
 import type { InformInfo } from '@/modules/Inform/declarations'
 
 const router = useRouter()
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
 
 const informStore = useInformStore()
 const { informList } = storeToRefs(informStore)
@@ -71,7 +75,7 @@ onBeforeMount(async () => {
         </template>
         <template #item="{ item, openConfirm }">
           <InformCard :inform="item" @click="handleViewInform(item.id)">
-            <template #action>
+            <template v-if="isAdmin" #action>
               <button type="button" @click.stop="openConfirm(item)">
                 <span class="i-mingcute-close-fill" />
               </button>

@@ -8,9 +8,13 @@ import humanizeDuration from 'humanize-duration'
 import { format } from '@formkit/tempo'
 import { storeToRefs } from 'pinia'
 import { useParams } from '@/composable/useParams'
+import { useAuthStore } from '@/store/AuthStore'
 
 const animalStore = useAnimalStore()
 const { animalDetails, isLoading } = storeToRefs(animalStore)
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
 
 const router = useRouter()
 const routeParams = useParams<{ id: string }>()
@@ -34,10 +38,10 @@ const age = computed(() => {
 
 const navigateBack = () => router.back()
 const navigateEdit = () => {
-  router.push({ name: 'animal.edit', params: { id: routeParams.value.id } })
+  router.push({ name: 'animals.edit', params: { id: routeParams.value.id } })
 }
 const navigateTreatments = () => {
-  router.push({ name: 'animal.treatments', params: { id: routeParams.value.id } })
+  router.push({ name: 'animals.treatments', params: { id: routeParams.value.id } })
 }
 
 onBeforeMount(async () => {
@@ -61,6 +65,7 @@ onBeforeMount(async () => {
         </button>
         <div class="absolute right-0 top-0 mr-3 mt-4 flex gap-4">
           <button
+            v-if="isAdmin"
             class="flex items-center justify-center rounded-xl bg-black bg-opacity-40 p-1 backdrop-blur-lg"
             @click="navigateEdit"
           >

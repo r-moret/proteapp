@@ -90,7 +90,7 @@ export const useUserStore = defineStore('UserStore', () => {
       }
     )
 
-    if (!response.ok) return // TODO error
+    if (!response.ok) throw Error(`Error backend response: ${await response.json()}`)
     if (user.image && new URL(user.image).protocol !== 'blob:') return
 
     if (!user.image) {

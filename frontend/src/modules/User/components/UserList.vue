@@ -14,6 +14,7 @@ const { showErrorNotification, showSuccessNotification } = useToastNotifications
 
 const props = defineProps<{
   userList: UserInfo[]
+  showDelete?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -51,7 +52,7 @@ function getFullName(name: String, firstSurname: String, secondSurname: String |
       </template>
       <template #item="{ item, openConfirm }">
         <UserCard :user="item" size="regular" @click="emit('clickUser', item)">
-          <template #action>
+          <template v-if="props.showDelete" #action>
             <button class="my-1 flex flex-col" @click.stop="openConfirm(item)">
               <span class="i-mingcute-close-fill text-xl text-gray-400" /></button
           ></template>

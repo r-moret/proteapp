@@ -17,7 +17,7 @@ import type { EnrichedShift, ShiftSelection } from '@/modules/Shift/declarations
 const userStore = useUserStore()
 const { userList } = storeToRefs(userStore)
 
-const { loggedUser } = storeToRefs(useAuthStore())
+const { loggedUser, isAdmin } = storeToRefs(useAuthStore())
 
 const shiftStore = useShiftStore()
 const { status, shift, connections, isConnecting } = storeToRefs(shiftStore)
@@ -112,20 +112,22 @@ onBeforeUnmount(() => {
     <ToastNotifications ref="notificationsRef" />
 
     <AppHeader title="Cuadrante de turnos">
-      <button v-if="!status || isLoading || isConnecting" class="btn btn-square btn-ghost">
-        <span class="loading loading-dots text-3xl" />
-      </button>
-      <button v-else class="btn btn-square btn-ghost" @click="handleToggleStatus">
-        <span
-          :class="[
-            'text-3xl',
-            status === 'open' ? 'i-mingcute-pause-line' : 'i-mingcute-play-line text-3xl'
-          ]"
-        />
-      </button>
-      <button class="btn btn-square btn-ghost" @click="handleCleanShift">
-        <span class="i-mingcute-file-new-line text-3xl" />
-      </button>
+      <template v-if="isAdmin">
+        <button v-if="!status || isLoading || isConnecting" class="btn btn-square btn-ghost">
+          <span class="loading loading-dots text-3xl" />
+        </button>
+        <button v-else class="btn btn-square btn-ghost" @click="handleToggleStatus">
+          <span
+            :class="[
+              'text-3xl',
+              status === 'open' ? 'i-mingcute-pause-line' : 'i-mingcute-play-line text-3xl'
+            ]"
+          />
+        </button>
+        <button class="btn btn-square btn-ghost" @click="handleCleanShift">
+          <span class="i-mingcute-file-new-line text-3xl" />
+        </button>
+      </template>
     </AppHeader>
 
     <div

@@ -8,6 +8,7 @@ const model = defineModel<YardInfo[]>()
 
 const props = defineProps<{
   editMode: boolean
+  showDelete?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -55,7 +56,7 @@ function handleMoveYard(yard: YardInfo, direction: 'up' | 'down') {
           @move-up="handleMoveYard(item, 'up')"
           @move-down="handleMoveYard(item, 'down')"
         >
-          <template #action>
+          <template v-if="props.showDelete" #action>
             <button class="my-1 flex flex-col" @click.stop="openConfirm(item)">
               <span class="i-mingcute-close-fill text-xl text-gray-400" /></button
           ></template>

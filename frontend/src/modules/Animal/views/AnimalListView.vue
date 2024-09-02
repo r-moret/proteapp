@@ -14,14 +14,22 @@ import type { AnimalFilters } from '@/types'
 import { useAnimalFilters } from '@/modules/Animal/composable/useAnimalFilters'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
 import TextInput from '@/components/TextInput.vue'
+import { useAuthStore } from '@/store/AuthStore'
+import ToastNotifications from '@/components/ToastNotifications.vue'
+import { useToastNotifications } from '@/composable/useToastNotifications'
 
 const router = useRouter()
 
+const authStore = useAuthStore()
 const animalStore = useAnimalStore()
 const yardStore = useYardStore()
 
 const { animalList, isLoading } = storeToRefs(animalStore)
 const { yardList } = storeToRefs(yardStore)
+const { isAdmin } = storeToRefs(authStore)
+
+const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
+const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
 
 const filters = ref<AnimalFilters>({
   name: '',
@@ -67,7 +75,7 @@ const animalsByYard = computed(() => {
   return { ...groupedAnimals, 'Sin patio': nonYardAnimals }
 })
 
-const navigateAnimal = (id: string) => router.push({ name: 'animal', params: { id } })
+const navigateAnimal = (id: string) => router.push({ name: 'animals.view', params: { id } })
 
 function navigateYards() {
   router.push({ name: 'yards' })
@@ -78,7 +86,18 @@ function navigateAdoptions() {
 }
 
 function navigateCreator() {
-  router.push({ name: 'animal.create' })
+  router.push({ name: 'animals.create' })
+}
+
+async function handleDownloadReport() {
+  try {
+    await animalStore.fetchReport()
+    showSuccessNotification('Cuadrante de gatos descargado con éxito.')
+  } catch (error) {
+    showErrorNotification(
+      'Ocurrió un error inesperado intentando descargar el cuadrante de gatos, prueba de nuevo, por favor.'
+    )
+  }
 }
 
 const updateFilters = (newFilters: AnimalFilters) => {
@@ -122,16 +141,22 @@ onBeforeMount(async () => {
 <template>
   <main class="flex flex-col">
     <AppHeader left="profile" title="Animales">
+      <button class="btn btn-square btn-ghost" @click="handleDownloadReport">
+        <span class="i-mingcute-table-2-line text-3xl" />
+      </button>
       <button class="btn btn-square btn-ghost" @click="navigateYards">
         <span class="i-mingcute-location-line text-3xl" />
       </button>
       <button class="btn btn-square btn-ghost" @click="navigateAdoptions">
         <span class="i-mingcute-home-5-line text-3xl" />
       </button>
-      <button class="btn btn-square btn-ghost" @click="navigateCreator">
+      <button v-if="isAdmin" class="btn btn-square btn-ghost" @click="navigateCreator">
         <span class="i-mingcute-add-line text-3xl" />
       </button>
     </AppHeader>
+
+    <ToastNotifications ref="notificationsRef" />
+
     <div v-if="isLoading" class="flex h-full w-full items-center justify-center">
       <span class="loading loading-spinner loading-lg text-secondary" />
     </div>

@@ -5,7 +5,7 @@ import { useYardStore } from '@/store/YardStore'
 import { storeToRefs } from 'pinia'
 import ItemSelector from '@/components/ItemSelector.vue'
 import BottomDrawer from '@/components/BottomDrawer.vue'
-import YardCard from '@/modules/Animal/components/YardCard.vue'
+import YardCard from '@/modules/Yard/components/YardCard.vue'
 
 const model = defineModel<YardInfo | null>()
 

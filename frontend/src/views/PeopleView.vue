@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/store/AuthStore'
+import { isEqual } from 'lodash'
 
 import AppHeader from '@/skeleton/AppHeader.vue'
 import TabSelector from '@/components/TabSelector.vue'
+import { storeToRefs } from 'pinia'
 
 const Tabs = {
   Registered: {
@@ -22,6 +25,9 @@ const Tabs = {
 
 const router = useRouter()
 const route = useRoute()
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
 
 const tab = computed(() =>
   Object.values(Tabs).find(
@@ -44,7 +50,11 @@ function handleAddClick() {
 <template>
   <main class="flex flex-col">
     <AppHeader left="profile" title="Personas">
-      <button class="btn btn-square btn-ghost" @click="handleAddClick">
+      <button
+        v-if="isEqual(tab, Tabs.Registered) || isAdmin"
+        class="btn btn-square btn-ghost"
+        @click="handleAddClick"
+      >
         <span class="i-mingcute-add-fill text-3xl" />
       </button>
     </AppHeader>

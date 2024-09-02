@@ -4,10 +4,16 @@ import { useJwt } from '@vueuse/integrations/useJwt'
 import { crudUser as crudUserApi } from '@/modules/Inform/api'
 import { UserAdapter } from '@/modules/User/adapters'
 import type { User } from '@/modules/User/declarations'
+import type { JwtPayload } from 'jwt-decode'
+
+interface JwtPayloadWithScopes extends JwtPayload {
+  scopes?: string[]
+}
 
 export const useAuthStore = defineStore('AuthStore', () => {
   const token = ref<string>()
   const loggedUser = ref<User>()
+  const isAdmin = ref(false)
   const isAuthenticated = ref(false)
   const isLoading = ref(false)
 
@@ -40,10 +46,19 @@ export const useAuthStore = defineStore('AuthStore', () => {
         isLoading.value = false
       })
 
+    await fetchLoggedUser()
+
+    isLoading.value = false
+  }
+
+  async function fetchLoggedUser() {
+    isLoading.value = true
+
     if (!token.value) return
 
-    const { payload } = useJwt(token.value)
+    const { payload } = useJwt<JwtPayloadWithScopes>(token.value)
     const authUserId = payload.value?.sub
+    const authUserRoles = payload.value?.scopes
 
     if (!authUserId) {
       authError.value = 'Lo siento, no es posible encontrar tu usuario.'
@@ -68,16 +83,19 @@ export const useAuthStore = defineStore('AuthStore', () => {
         isLoading.value = false
       })
 
+    isAdmin.value = authUserRoles?.includes('admin') ?? false
     isLoading.value = false
   }
 
   return {
     token,
     loggedUser,
+    isAdmin,
     isAuthenticated,
     isLoading,
     authError,
 
-    login
+    login,
+    fetchLoggedUser
   }
 })
