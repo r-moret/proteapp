@@ -29,6 +29,7 @@ from proteapp.models.nosql.yard_order import YardOrder
 
 from proteapp.api.auth.token import decode_token
 from proteapp.exceptions import TokenDecodificationError
+from proteapp.email import EmailSender
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -137,3 +138,12 @@ def save_image(image: UploadFile) -> str:
         shutil.copyfileobj(image.file, file)
 
     return image_path
+
+
+def get_register_email_sender():
+    email_sender = EmailSender(
+        template="register.html",
+        sender="Proteapp <registro@proteapp.es>",
+    )
+
+    return email_sender

@@ -3,7 +3,13 @@ from proteapp.api.users.schemas import ListedUser, CompleteUser, EditableUser
 from proteapp.exceptions import UnsavedDataError
 from pydantic import ValidationError
 from proteapp.models.sql.users import User
-from proteapp.api.deps import get_sql_session, save_image, admin_required
+from proteapp.api.deps import (
+    get_sql_session,
+    save_image,
+    admin_required,
+    get_register_email_sender,
+)
+from proteapp.email import EmailSender
 from sqlmodel import Session, select
 from ulid import ULID
 from proteapp.api.users.adapters import to_user
@@ -12,7 +18,6 @@ from passlib.pwd import genword
 from pathlib import Path
 from typing import cast
 from proteapp.api.auth.password import hash_password
-
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -28,16 +33,16 @@ def get_users(session: Session = Depends(get_sql_session)):
     status_code=201,
     dependencies=[Depends(admin_required)],
 )
-def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
+def post_user(
+    user: EditableUser,
+    session: Session = Depends(get_sql_session),
+    email: EmailSender = Depends(get_register_email_sender),
+):
     try:
         user_db = to_user(user)
 
         user_password = cast(str, genword(length=12))
         user_db.hashed_password = hash_password(user_password)
-
-        print(
-            f"EMAIL: Your new password is {user_password}"
-        )  # TODO: Send an actual email to the user
 
     except UnsavedDataError as e:
         raise HTTPException(
@@ -55,6 +60,15 @@ def post_user(user: EditableUser, session: Session = Depends(get_sql_session)):
             raise HTTPException(422, "The person specified already has an user")
 
         raise HTTPException(422, "There was an error with the specified data")
+
+    email.send(
+        to=user_db.person.email,
+        subject="¡Bienvenido a tu nueva cuenta de Proteapp!",
+        template_kwargs={
+            "name": user_db.person.name,
+            "password": user_password,
+        },
+    )
 
     return user_db
 
