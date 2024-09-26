@@ -22,7 +22,6 @@ def update_profile_person(
     session.commit()
     session.refresh(my_user)
 
-    print("Person updated")
     return my_user.person
 
 

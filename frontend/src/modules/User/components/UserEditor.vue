@@ -6,9 +6,15 @@ import PersonSelector from '@/modules/Adoption/components/PersonSelector.vue'
 
 const model = defineModel<Partial<EnrichedEditUser>>({ required: true })
 
-const props = defineProps<{
-  person: 'editor' | 'selector'
-}>()
+const props = withDefaults(
+  defineProps<{
+    person: 'editor' | 'selector'
+    showDetails?: boolean
+  }>(),
+  {
+    showDetails: true
+  }
+)
 </script>
 
 <template>
@@ -24,7 +30,7 @@ const props = defineProps<{
       <PersonSelector v-else v-model="model.person" />
     </div>
 
-    <div class="flex flex-col gap-2">
+    <div v-if="props.showDetails" class="flex flex-col gap-2">
       <h2 class="text-xl font-semibold">Detalles</h2>
       <label class="label gap-2">
         <input type="checkbox" class="checkbox-secondary checkbox" v-model="model.veteran" />
