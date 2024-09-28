@@ -64,7 +64,12 @@ onBeforeMount(() => {
     </AppHeader>
 
     <section class="min-h-0 w-full flex-grow overflow-y-auto px-6 pb-8">
-      <UserEditor v-if="editingProfile" v-model="editingProfile" person="editor" />
+      <UserEditor
+        v-if="editingProfile"
+        v-model="editingProfile"
+        person="editor"
+        :show-details="false"
+      />
     </section>
   </main>
 </template>
