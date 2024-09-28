@@ -1,5 +1,6 @@
+from zoneinfo import ZoneInfo
 from proteapp.api.deps import get_sql_session
-from datetime import datetime, date
+from datetime import datetime, date, time
 from typing import cast
 from ulid import ULID
 
@@ -756,73 +757,173 @@ async def init_database_data():
         list(map(sql_session.refresh, people))
 
         informs = [
-            # Inform.model_validate(
-            #     dict(
-            #         creator=dict(cast(User, people[0].user)) | dict(person=dict(people[0])),
-            #         volunteers=[dict(cast(User, people[1].user)) | dict(person=dict(people[1]))],
-            #         date=date(2024, 7, 14),
-            #         time_range=dict(
-            #             start=time(10, 30, tzinfo=ZoneInfo("Europe/Madrid")),
-            #             end=time(13, 0, tzinfo=ZoneInfo("Europe/Madrid")),
-            #         ),
-            #         highlights=["Todo estaba muy ordenado"],
-            #         notes=[
-            #             dict(
-            #                 yard=dict(cast(Yard, animals[0].yard)),
-            #                 animal=dict(animals[0]),
-            #                 text="Estaba perfecta",
-            #             ),
-            #             dict(
-            #                 yard=dict(cast(Yard, animals[1].yard)),
-            #                 animal=dict(animals[1]),
-            #                 text="Hoy ha sido probado con perros",
-            #             ),
-            #         ],
-            #         arrivals=[dict(name="Lulu", description="Gata blanca con manchas marrones")],
-            #         tested_animals=[
-            #             dict(
-            #                 animal=dict(animals[1]),
-            #                 compatible=False,
-            #             )
-            #         ],
-            #     )
-            # ),
-            # Inform.model_validate(
-            #     dict(
-            #         creator=dict(cast(User, people[1].user)) | dict(person=dict(people[1])),
-            #         volunteers=[dict(cast(User, people[0].user)) | dict(person=dict(people[0]))],
-            #         date=date(2024, 7, 15),
-            #         time_range=dict(
-            #             start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
-            #             end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
-            #         ),
-            #         notes=[
-            #             dict(
-            #                 yard=dict(cast(Yard, animals[2].yard)),
-            #                 animal=dict(animals[2]),
-            #                 text="Tenía un comportamiento normal",
-            #             ),
-            #             dict(
-            #                 yard=dict(cast(Yard, animals[0].yard)),
-            #                 animal=dict(animals[0]),
-            #                 text="Se encontraba regular",
-            #             ),
-            #         ],
-            #         tested_animals=[
-            #             dict(
-            #                 animal=dict(animals[2]),
-            #                 compatible=True,
-            #             )
-            #         ],
-            #         adoptions=[
-            #             dict(
-            #                 animal=dict(animals[3]),
-            #                 foster=False,
-            #             )
-            #         ],
-            #         losses=[dict(animal=dict(animals[4]))],
-            #     )
-            # ),
+            Inform.model_validate(
+                dict(
+                    creator=dict(cast(User, people[0].user)) | dict(person=dict(people[0])),
+                    volunteers=[dict(cast(User, people[1].user)) | dict(person=dict(people[1]))],
+                    date=date(2024, 7, 14),
+                    time_range=dict(
+                        start=time(10, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(13, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+                    ),
+                    highlights=["Todo estaba muy ordenado"],
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[0].yard)),
+                            animal=dict(animals[0]),
+                            text="Estaba perfecta",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[5].yard)),
+                            animal=dict(animals[5]),
+                            text="Hoy ha sido probado con perros",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[13].yard)),
+                            animal=dict(animals[13]),
+                            text="Hoy ha sido probado con perros",
+                        ),
+                    ],
+                    arrivals=[dict(name="Lulu", description="Gata blanca con manchas marrones")],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[1]),
+                            compatible=False,
+                        )
+                    ],
+                )
+            ),
+            Inform.model_validate(
+                dict(
+                    creator=dict(cast(User, people[6].user)) | dict(person=dict(people[6])),
+                    volunteers=[dict(cast(User, people[11].user)) | dict(person=dict(people[11]))],
+                    date=date(2024, 7, 15),
+                    time_range=dict(
+                        start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+                    ),
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[5].yard)),
+                            animal=dict(animals[5]),
+                            text="Tenía un comportamiento normal",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[0].yard)),
+                            animal=dict(animals[0]),
+                            text="Se encontraba regular",
+                        ),
+                    ],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[2]),
+                            compatible=True,
+                        )
+                    ],
+                    adoptions=[
+                        dict(
+                            animal=dict(animals[3]),
+                            foster=False,
+                        )
+                    ],
+                    losses=[dict(animal=dict(animals[4]))],
+                )
+            ),
+            Inform.model_validate(
+                dict(
+                    creator=dict(cast(User, people[2].user)) | dict(person=dict(people[2])),
+                    volunteers=[dict(cast(User, people[4].user)) | dict(person=dict(people[4]))],
+                    date=date(2024, 8, 15),
+                    time_range=dict(
+                        start=time(11, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(14, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                    ),
+                    highlights=["Hubo una limpieza profunda del área de juego"],
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[5].yard)),
+                            animal=dict(animals[5]),
+                            text="Ha mejorado su comportamiento con los cuidadores",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[7].yard)),
+                            animal=dict(animals[7]),
+                            text="Se le realizó un examen de salud rutinario",
+                        ),
+                    ],
+                    arrivals=[dict(name="Bella", description="Perra mestiza muy sociable")],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[5]),
+                            compatible=False,
+                        )
+                    ],
+                )
+            ),
+            Inform.model_validate(
+                dict(
+                    creator=dict(cast(User, people[4].user)) | dict(person=dict(people[4])),
+                    volunteers=[dict(cast(User, people[1].user)) | dict(person=dict(people[1]))],
+                    date=date(2024, 9, 5),
+                    time_range=dict(
+                        start=time(10, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(13, 0, tzinfo=ZoneInfo("Europe/Madrid")),
+                    ),
+                    highlights=["El entrenamiento en obediencia básica fue un éxito"],
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[7].yard)),
+                            animal=dict(animals[7]),
+                            text="Respondió bien al entrenamiento, muy receptivo",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[8].yard)),
+                            animal=dict(animals[8]),
+                            text="Todavía tiene que trabajar en su socialización",
+                        ),
+                    ],
+                    arrivals=[dict(name="Tom", description="Gato siamés de carácter tímido")],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[6]),
+                            compatible=True,
+                        )
+                    ],
+                )
+            ),
+            Inform.model_validate(
+                dict(
+                    creator=dict(cast(User, people[2].user)) | dict(person=dict(people[2])),
+                    volunteers=[dict(cast(User, people[4].user)) | dict(person=dict(people[4]))],
+                    date=date(2024, 9, 12),
+                    time_range=dict(
+                        start=time(8, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                        end=time(11, 30, tzinfo=ZoneInfo("Europe/Madrid")),
+                    ),
+                    highlights=[
+                        "Se incorporaron nuevas rutinas para mejorar el bienestar de los animales"
+                    ],
+                    notes=[
+                        dict(
+                            yard=dict(cast(Yard, animals[9].yard)),
+                            animal=dict(animals[1]),
+                            text="Mostró gran curiosidad por las nuevas actividades",
+                        ),
+                        dict(
+                            yard=dict(cast(Yard, animals[12].yard)),
+                            animal=dict(animals[3]),
+                            text="Necesita más interacción con otros perros",
+                        ),
+                    ],
+                    arrivals=[dict(name="Oscar", description="Conejo marrón muy curioso")],
+                    tested_animals=[
+                        dict(
+                            animal=dict(animals[4]),
+                            compatible=True,
+                        )
+                    ],
+                )
+            ),
         ]
 
         yards_order = [
@@ -915,7 +1016,7 @@ async def init_database_data():
         )
 
         await Inform.delete_all()
-        # await Inform.insert_many(informs)
+        await Inform.insert_many(informs)
 
         await Shift.delete_all()
         await Shift.insert_one(shift)
