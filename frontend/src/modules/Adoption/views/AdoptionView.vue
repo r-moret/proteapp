@@ -57,7 +57,7 @@ const phone_number = computed(() => {
 async function handleDeleteMonitoring(monitoringId: string) {
   try {
     await adoptionStore.deleteMonitoring(monitoringId)
-    showSuccessNotification(' eliminada correctamente')
+    showSuccessNotification('Seguimiento eliminado correctamente.')
   } catch (error) {
     showErrorNotification('Ha ocurrido un error, prueba otra vez.')
   }
