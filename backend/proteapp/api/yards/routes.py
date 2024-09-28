@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from proteapp.api.deps import get_sql_session, admin_required
 from proteapp.api.yards_order.routes import post_yard_order, list_yards_order
 from ulid import ULID
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/yard", tags=["yard"])
 
@@ -40,7 +40,10 @@ async def post_yard(yard: EditableYard, session: Session = Depends(get_sql_sessi
     last_yard_order_ids = [item.id for item in closest_yard_order.yard_order]
     last_yard_order_ids += [yard_db.id]
 
-    newYardOrder = EditableYardOrder(date=datetime.now(), yard_order=last_yard_order_ids)
+    newYardOrder = EditableYardOrder(
+        date=datetime.now().astimezone(timezone.utc),
+        yard_order=last_yard_order_ids,
+    )
     await post_yard_order(newYardOrder)
 
     return yard_db
