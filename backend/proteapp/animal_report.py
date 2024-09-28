@@ -3,6 +3,7 @@ from weasyprint import HTML, Page
 from proteapp.api.animals.schemas import CompleteAnimal
 from itertools import groupby
 from typing import Any
+from ulid import ULID
 
 env = Environment(loader=FileSystemLoader(searchpath="proteapp/templates"))
 
@@ -40,11 +41,18 @@ def display_treatment(treatment: CompleteAnimal.Treatment) -> str:
 def create_report(animals: list[CompleteAnimal], output_filename: str):
     template = env.get_template("report.html")
 
+    no_yard_ulid = ULID()
+
     processed_animals: list[dict[str, Any]] = [
         {
             **animal.model_dump(),
             "sex": "Macho" if animal.sex == "male" else "Hembra",
             "treatments": [display_treatment(treatment) for treatment in animal.treatments],
+            "yard": (
+                dict(animal.yard)
+                if animal.yard
+                else dict(CompleteAnimal.Yard(id=no_yard_ulid, name="Sin patio"))
+            ),
         }
         for animal in animals
     ]
