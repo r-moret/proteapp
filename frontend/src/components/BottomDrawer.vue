@@ -2,10 +2,10 @@
 import { ref } from 'vue'
 
 const SIZES = {
-  tiny: 'h-2/5',
-  small: 'h-3/5',
-  medium: 'h-3/4',
-  big: 'h-5/6'
+  tiny: 'h-[40vh]',
+  small: 'h-[60vh]',
+  medium: 'h-[75vh]',
+  big: 'h-[85vh]'
 }
 
 defineOptions({

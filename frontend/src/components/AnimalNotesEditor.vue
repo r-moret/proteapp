@@ -84,7 +84,7 @@ function handleAddNote({ clear } = { clear: false }) {
           :key="stepYard.id"
           @click="selectedYard = stepYard.id"
         >
-          <div class="w-28">
+          <div class="w-full overflow-hidden">
             <div class="truncate">{{ stepYard.name }}</div>
             <div :class="['font-semibold', { invisible: yardNumNotes[index] === 0 }]">
               ({{ yardNumNotes[index] }} nota{{ yardNumNotes[index] > 1 ? 's' : '' }})
