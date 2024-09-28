@@ -23,7 +23,12 @@ export const useYardStore = defineStore('YardStore', () => {
     await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${listYardApi}`)
       .then((res) => res.json())
       .then((json) => json.map(YardInfoAdapter))
-      .then((json: YardInfo[]) => (yardList.value = json))
+      .then(
+        (json: YardInfo[]) =>
+          (yardList.value = json.sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { numeric: true })
+          ))
+      )
 
     isLoading.value = false
   }
