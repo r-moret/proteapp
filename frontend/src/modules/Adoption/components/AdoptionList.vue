@@ -35,7 +35,6 @@ const props = defineProps<{
     <ItemList
       :items="props.adoptionList"
       delete-title="¿Estás seguro de que quieres borrar esta adopción?"
-      class="mx-5"
       @delete="(adoption) => handleDeleteAdoption(adoption.id)"
     >
       <template #empty>

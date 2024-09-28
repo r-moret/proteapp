@@ -98,7 +98,7 @@ onBeforeMount(async () => {
       </button>
     </AppHeader>
 
-    <section class="min-h-0 w-full flex-grow overflow-y-auto px-4">
+    <section class="min-h-0 w-full flex-grow overflow-y-auto px-4 pt-2">
       <AdoptionList :adoption-list="adoptionList"></AdoptionList>
     </section>
 
