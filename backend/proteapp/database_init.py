@@ -756,6 +756,33 @@ async def init_database_data():
         list(map(sql_session.refresh, animals))
         list(map(sql_session.refresh, people))
 
+        yards_order = [
+            YardOrder.model_validate(
+                dict(
+                    date=datetime(2024, 7, 20),
+                    yard_order=[
+                        dict(id=yards[0].id, name=yards[0].name),
+                        dict(id=yards[1].id, name=yards[1].name),
+                        dict(id=yards[2].id, name=yards[2].name),
+                    ],
+                )
+            ),
+            YardOrder.model_validate(
+                dict(
+                    date=datetime(2024, 8, 20),
+                    yard_order=[
+                        dict(id=yards[1].id, name=yards[1].name),
+                        dict(id=yards[0].id, name=yards[0].name),
+                        dict(id=yards[3].id, name=yards[3].name),
+                        dict(id=yards[2].id, name=yards[2].name),
+                        dict(id=yards[4].id, name=yards[4].name),
+                        dict(id=yards[6].id, name=yards[6].name),
+                        dict(id=yards[5].id, name=yards[5].name),
+                    ],
+                )
+            ),
+        ]
+
         informs = [
             Inform.model_validate(
                 dict(
@@ -767,6 +794,7 @@ async def init_database_data():
                         end=time(13, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     highlights=["Todo estaba muy ordenado"],
+                    yard_order=[dict(yard) for yard in yards_order[-1].yard_order],
                     notes=[
                         dict(
                             yard=dict(cast(Yard, animals[0].yard)),
@@ -802,6 +830,7 @@ async def init_database_data():
                         start=time(16, 30, tzinfo=ZoneInfo("Europe/Madrid")),
                         end=time(20, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
+                    yard_order=[dict(yard) for yard in yards_order[-1].yard_order],
                     notes=[
                         dict(
                             yard=dict(cast(Yard, animals[5].yard)),
@@ -839,6 +868,7 @@ async def init_database_data():
                         end=time(14, 30, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     highlights=["Hubo una limpieza profunda del área de juego"],
+                    yard_order=[dict(yard) for yard in yards_order[-1].yard_order],
                     notes=[
                         dict(
                             yard=dict(cast(Yard, animals[5].yard)),
@@ -870,6 +900,7 @@ async def init_database_data():
                         end=time(13, 0, tzinfo=ZoneInfo("Europe/Madrid")),
                     ),
                     highlights=["El entrenamiento en obediencia básica fue un éxito"],
+                    yard_order=[dict(yard) for yard in yards_order[-1].yard_order],
                     notes=[
                         dict(
                             yard=dict(cast(Yard, animals[7].yard)),
@@ -903,6 +934,7 @@ async def init_database_data():
                     highlights=[
                         "Se incorporaron nuevas rutinas para mejorar el bienestar de los animales"
                     ],
+                    yard_order=[dict(yard) for yard in yards_order[-1].yard_order],
                     notes=[
                         dict(
                             yard=dict(cast(Yard, animals[9].yard)),
@@ -921,33 +953,6 @@ async def init_database_data():
                             animal=dict(animals[4]),
                             compatible=True,
                         )
-                    ],
-                )
-            ),
-        ]
-
-        yards_order = [
-            YardOrder.model_validate(
-                dict(
-                    date=datetime(2024, 7, 20),
-                    yard_order=[
-                        dict(id=yards[0].id, name=yards[0].name),
-                        dict(id=yards[1].id, name=yards[1].name),
-                        dict(id=yards[2].id, name=yards[2].name),
-                    ],
-                )
-            ),
-            YardOrder.model_validate(
-                dict(
-                    date=datetime(2024, 8, 20),
-                    yard_order=[
-                        dict(id=yards[1].id, name=yards[1].name),
-                        dict(id=yards[0].id, name=yards[0].name),
-                        dict(id=yards[3].id, name=yards[3].name),
-                        dict(id=yards[2].id, name=yards[2].name),
-                        dict(id=yards[4].id, name=yards[4].name),
-                        dict(id=yards[6].id, name=yards[6].name),
-                        dict(id=yards[5].id, name=yards[5].name),
                     ],
                 )
             ),
