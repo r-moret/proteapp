@@ -51,7 +51,7 @@ const newMonitoring = ref<EditMonitoring>()
 
 const phone_number = computed(() => {
   if (!adoptionDetails.value || !adoptionDetails.value.person.phone) return
-  return adoptionDetails.value.person.phone.substring(3)
+  return adoptionDetails.value.person.phone
 })
 
 async function handleDeleteMonitoring(monitoringId: string) {
