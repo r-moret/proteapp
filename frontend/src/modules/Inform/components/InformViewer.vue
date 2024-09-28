@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { EnrichedInform } from '@/modules/Inform/declarations'
-import { storeToRefs } from 'pinia'
 import UserCard from '@/modules/Inform/components/UserCard.vue'
 import HoursInput from '@/components/HoursInput.vue'
 import DateInput from '@/components/DateInput.vue'
@@ -10,9 +9,6 @@ import AdoptionCard from '@/modules/Adoption/components/AdoptionCard.vue'
 import AnimalTestCard from '@/modules/Inform/components/AnimalTestCard.vue'
 import AnimalCard from '@/modules/Animal/components/AnimalCard.vue'
 import MultipleTextListInput from '@/components/MultipleTextListInput.vue'
-import { useYardStore } from '@/store/YardStore'
-
-const { yardList } = storeToRefs(useYardStore())
 
 const props = defineProps<{
   inform: EnrichedInform
@@ -72,7 +68,7 @@ const props = defineProps<{
 
       <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold">Notas</h2>
-        <AnimalNotesEditor :yards="yardList" :model-value="props.inform.notes" :editable="false" />
+        <AnimalNotesEditor :yards="props.inform.yardOrder" :model-value="props.inform.notes" :editable="false" />
       </div>
 
       <div class="flex flex-col gap-4">

@@ -4,6 +4,7 @@ from proteapp.models.nosql.yard_order import YardOrder
 from proteapp.api.yards_order.adapters import to_yard_order
 
 from pydantic import ValidationError
+from ulid import ULID
 
 router = APIRouter(prefix="/yard_order", tags=["yard_order"])
 
@@ -38,3 +39,13 @@ async def current_yard_order():
 
     date_sorted_yards = sorted(yards_order_db, key=lambda order: order.date)
     return date_sorted_yards[-1]
+
+
+@router.get("/{id}", response_model=ListedYardOrder)
+async def get_yard_order(id: ULID):
+    order_db = await YardOrder.get(id)
+
+    if not order_db:
+        raise HTTPException(404, "Yard order not found")
+
+    return order_db

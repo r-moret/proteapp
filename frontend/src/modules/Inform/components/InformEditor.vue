@@ -36,7 +36,7 @@ import type {
 
 const { userList } = storeToRefs(useUserStore())
 const { animalList } = storeToRefs(useAnimalStore())
-const { yardList } = storeToRefs(useYardStore())
+const { yardOrderList } = storeToRefs(useYardStore())
 
 const props = defineProps<{
   modelValue: EditInform
@@ -63,6 +63,8 @@ const enrichedInform = ref<EnrichedInform>({
     }
   ],
   highlights: props.modelValue.highlights,
+  yardOrder: yardOrderList.value.find((yardOrder) => yardOrder.id === props.modelValue.yardOrder)!
+    .yardOrder,
   notes: animalList.value.map((animal) => ({ info: animal })),
   adoptions: props.modelValue.adoptions.map((adop) => ({
     animal: animalList.value.find((animal) => animal.id === adop.animal)!, // TODO
@@ -330,7 +332,7 @@ function handleCreateArrival(name: string) {
       <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold">Notas</h2>
         <AnimalNotesEditor
-          :yards="yardList"
+          :yards="enrichedInform.yardOrder"
           :model-value="enrichedInform.notes"
           :editable="true"
           @add-highlight="handleAddNoteInHighlights"

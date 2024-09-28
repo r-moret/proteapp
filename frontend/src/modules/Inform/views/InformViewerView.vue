@@ -44,6 +44,7 @@ function enrichInform(inform: Inform): EnrichedInform {
       }
     ],
     highlights: inform.highlights,
+    yardOrder: inform.yardOrder,
     notes: inform.notes?.map((note) => ({
       info: animalList.value.find((animal) => animal.id === note.animal.id)!, // TODO
       note: note.text

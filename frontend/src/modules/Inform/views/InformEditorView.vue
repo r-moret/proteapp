@@ -14,12 +14,15 @@ import AppHeader from '@/skeleton/AppHeader.vue'
 import ToastNotifications from '@/components/ToastNotifications.vue'
 import type { EditInform } from '@/modules/Inform/declarations'
 import { parse, format } from '@formkit/tempo'
+import { useYardStore } from '@/store/YardStore'
 
 const userStore = useUserStore()
 const animalStore = useAnimalStore()
 const informStore = useInformStore()
+const yardStore = useYardStore()
 
 const { loggedUser } = storeToRefs(useAuthStore())
+const { currentOrder } = storeToRefs(yardStore)
 
 const notificationsRef = ref<InstanceType<typeof ToastNotifications> | null>(null)
 const { showErrorNotification, showSuccessNotification } = useToastNotifications(notificationsRef)
@@ -34,6 +37,7 @@ const newInform = ref<EditInform>({
     start: format(parse('16:00', 'HH:mm'), 'HH:mm:ssZ'),
     end: format(parse('20:00', 'HH:mm'), 'HH:mm:ssZ')
   },
+  yardOrder: '',
   notes: [],
   highlights: [],
   visits: [],
@@ -63,6 +67,11 @@ async function handleSaveInform() {
 onBeforeMount(async () => {
   await userStore.fetchUsers()
   await animalStore.fetchAnimals()
+
+  await yardStore.fetchCurrentOrder()
+  await yardStore.fetchOrders()
+  newInform.value.yardOrder = currentOrder.value?.id ?? ''
+
   loading.value = false
 })
 </script>
