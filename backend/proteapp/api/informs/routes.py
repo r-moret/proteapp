@@ -22,7 +22,7 @@ async def list_informs():
 @router.post("/", response_model=CompleteInform, status_code=201)
 async def create_inform(inform: EditableInform):
     try:
-        inform_db = to_inform(inform)
+        inform_db = await to_inform(inform)
     except ValidationError:
         raise HTTPException(422, "Unable to create a new inform with the data passed")
 
@@ -48,7 +48,7 @@ async def update_inform(id: ULID, inform: EditableInform):
         raise HTTPException(404, "Inform not found")
 
     try:
-        changed_inform = to_inform(inform)
+        changed_inform = await to_inform(inform)
     except ValidationError:
         raise HTTPException(422, "Unable to update the inform with the data passed")
 

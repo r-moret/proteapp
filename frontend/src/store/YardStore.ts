@@ -2,7 +2,13 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { authFetch } from '@/composable/useAuthFetch'
 
-import type { Yard, YardInfo, EditYard, EditYardOrder } from '@/modules/Yard/declarations'
+import type {
+  Yard,
+  YardInfo,
+  EditYard,
+  EditYardOrder,
+  YardOrder
+} from '@/modules/Yard/declarations'
 import {
   listYards as listYardApi,
   crudYard as crudYardApi,
@@ -14,7 +20,11 @@ import { YardAdapter, YardInfoAdapter, YardOrderAdapter } from '@/modules/Yard/a
 export const useYardStore = defineStore('YardStore', () => {
   const yardList = ref<YardInfo[]>([])
   const yardDetails = ref<Yard>()
-  const currentOrder = ref<YardInfo[]>()
+
+  const currentOrder = ref<YardOrder>()
+  const yardOrderDetails = ref<YardOrder>()
+  const yardOrderList = ref<YardOrder[]>([])
+
   const isLoading = ref(false)
 
   async function fetchYards() {
@@ -93,8 +103,30 @@ export const useYardStore = defineStore('YardStore', () => {
         return res.json()
       })
       .then(YardOrderAdapter)
-      .then((order) => (currentOrder.value = order.yardOrder))
-      .catch(() => (currentOrder.value = []))
+      .then((order) => (currentOrder.value = order))
+      .catch(() => (currentOrder.value = undefined))
+
+    isLoading.value = false
+  }
+
+  async function fetchOrder(id: string) {
+    isLoading.value = true
+
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}/${id}`)
+      .then((res) => res.json())
+      .then(YardOrderAdapter)
+      .then((order) => (yardOrderDetails.value = order))
+
+    isLoading.value = false
+  }
+
+  async function fetchOrders() {
+    isLoading.value = true
+
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/${crudYardOrderApi}/search`)
+      .then((res) => res.json())
+      .then((json) => json.map(YardOrderAdapter))
+      .then((json: YardOrder[]) => (yardOrderList.value = json))
 
     isLoading.value = false
   }
@@ -102,11 +134,14 @@ export const useYardStore = defineStore('YardStore', () => {
   return {
     yardList,
     currentOrder,
+    yardOrderList,
     fetchYard,
     fetchYards,
     createYard,
     deleteYard,
     createOrder,
-    fetchCurrentOrder
+    fetchCurrentOrder,
+    fetchOrder,
+    fetchOrders
   }
 })

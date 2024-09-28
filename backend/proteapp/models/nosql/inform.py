@@ -17,6 +17,9 @@ class Inform(NoSQLULIDSchema):
     class Animal(ULIDSchema):
         name: str
 
+    class Yard(ULIDSchema):
+        name: str
+
     class Note(BaseSchema):
         class Yard(ULIDSchema):
             name: str
@@ -52,6 +55,7 @@ class Inform(NoSQLULIDSchema):
     volunteers: list[User]
     date: date
     time_range: TimeRange
+    yard_order: list[Yard]
     notes: list[Note]
     highlights: Optional[list[str]] = None
     visits: Optional[list[Visit]] = None

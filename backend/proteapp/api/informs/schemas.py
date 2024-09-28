@@ -29,6 +29,9 @@ class CompleteInform(ListedInform):
     class Animal(ULIDSchema):
         name: str
 
+    class Yard(ULIDSchema):
+        name: str
+
     class Note(BaseSchema):
         class Yard(ULIDSchema):
             name: str
@@ -56,6 +59,7 @@ class CompleteInform(ListedInform):
         animal: "CompleteInform.Animal"
         compatible: bool
 
+    yard_order: list[Yard]
     notes: list[Note]
     highlights: Optional[list[str]] = None
     visits: Optional[list[Visit]] = None
@@ -97,6 +101,7 @@ class EditableInform(BaseSchema):
     volunteers: list[ULID]
     date: date | datetime
     time_range: TimeRange
+    yard_order: ULID
     notes: list[Note]
     highlights: Optional[list[str]] = None
     visits: Optional[list[Visit]] = None

@@ -35,7 +35,7 @@ function handleCancelEditOrder() {
   if (!currentOrder.value) return
 
   isEditOrderMode.value = false
-  editingYardOrder.value = [...currentOrder.value]
+  editingYardOrder.value = { ...currentOrder.value }
 }
 
 async function handleSaveYardOrder() {
@@ -43,7 +43,7 @@ async function handleSaveYardOrder() {
 
   const newYardOrder = {
     date: new Date(),
-    yardOrder: editingYardOrder.value.map((item) => item.id)
+    yardOrder: editingYardOrder.value.yardOrder.map((item) => item.id)
   }
 
   try {
@@ -55,7 +55,7 @@ async function handleSaveYardOrder() {
   }
 
   await yardStore.fetchCurrentOrder()
-  editingYardOrder.value = [...currentOrder.value!]
+  editingYardOrder.value = { ...currentOrder.value! }
 
   isEditOrderMode.value = false
 }
@@ -65,7 +65,7 @@ async function handleDeleteYard(yard: YardInfo) {
     await yardStore.deleteYard(yard.id)
 
     await yardStore.fetchCurrentOrder()
-    editingYardOrder.value = [...currentOrder.value!]
+    editingYardOrder.value = { ...currentOrder.value! }
 
     showSuccessNotification('Patio eliminado correctamente')
   } catch (error) {
@@ -99,14 +99,14 @@ async function handleAddYard(closeDrawer: () => void) {
   await yardStore.fetchYards()
 
   await yardStore.fetchCurrentOrder()
-  editingYardOrder.value = [...currentOrder.value!]
+  editingYardOrder.value = { ...currentOrder.value! }
 }
 
 onBeforeMount(async () => {
   await yardStore.fetchYards()
 
   await yardStore.fetchCurrentOrder()
-  editingYardOrder.value = [...currentOrder.value!]
+  editingYardOrder.value = { ...currentOrder.value! }
 
   newYard.value = {
     name: ''
@@ -141,7 +141,7 @@ onBeforeMount(async () => {
 
     <YardList
       v-if="editingYardOrder"
-      v-model="editingYardOrder"
+      v-model="editingYardOrder.yardOrder"
       :show-delete="isAdmin"
       :edit-mode="isEditOrderMode"
       @delete="handleDeleteYard"

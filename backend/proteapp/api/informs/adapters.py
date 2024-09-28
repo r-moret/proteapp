@@ -2,13 +2,20 @@ from proteapp.api.informs.schemas import EditableInform
 from proteapp.models.nosql.inform import Inform
 from proteapp.models.sql.users import User
 from proteapp.models.sql.animals import Animal
+from proteapp.models.nosql.yard_order import YardOrder
 from proteapp.api.deps import sql_engine
+from pydantic import ValidationError
 from sqlmodel import Session
 from datetime import datetime
 
 
-def to_inform(data: EditableInform) -> Inform:
+async def to_inform(data: EditableInform) -> Inform:
     with Session(sql_engine) as session:
+        yard_order = await YardOrder.get(data.yard_order)
+
+        if not yard_order:
+            raise ValidationError("Yard order is mandatory")
+
         return Inform.model_validate(
             {
                 **data.model_dump(),
@@ -30,6 +37,7 @@ def to_inform(data: EditableInform) -> Inform:
                     else None
                     for vol in data.volunteers
                 ],
+                "yard_order": [dict(yard) for yard in yard_order.yard_order],
                 "notes": [
                     Inform.Note(
                         animal=Inform.Animal.model_validate(

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { AnimalInfo } from '@/modules/Animal/declarations'
 import type { UserInfo } from '@/modules/User/declarations'
+import { YardInfoSchema, type YardInfo } from '@/modules/Yard/declarations'
 
 export const IdSchema = z.string().ulid()
 
@@ -20,6 +21,7 @@ export const EditInformSchema = z.object({
     start: TimeSchema,
     end: TimeSchema
   }),
+  yardOrder: IdSchema,
   notes: z.array(
     z.object({
       animal: IdSchema,
@@ -86,6 +88,7 @@ export const InformInfoSchema = z.object({
 })
 
 export const InformSchema = InformInfoSchema.extend({
+  yardOrder: z.array(YardInfoSchema),
   notes: z.array(
     z.object({
       yard: z
@@ -170,6 +173,7 @@ export type EnrichedFields =
   | ['date', Date]
   | ['timeRange', TimeRange]
   | ['highlights', string[] | undefined | null]
+  | ['yardOrder', YardInfo[]]
   | ['notes', AnimaNote[] | undefined | null]
   | ['adoptions', Adoption[] | undefined | null]
   | ['testedAnimals', AnimalTest[] | undefined | null]
