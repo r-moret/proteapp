@@ -70,7 +70,7 @@ function handleAddNote({ clear } = { clear: false }) {
 <template>
   <div class="flex flex-col gap-6">
     <div class="flex justify-center overflow-x-auto">
-      <ul class="steps">
+      <ul class="steps pb-4">
         <li
           v-for="(stepYard, index) in props.yards"
           :class="[
