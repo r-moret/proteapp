@@ -59,7 +59,7 @@ function handleAddClick() {
       </button>
     </AppHeader>
 
-    <section class="min-h-0 w-full flex-grow overflow-y-auto px-4">
+    <section class="min-h-0 w-full flex-grow overflow-y-auto px-4 pb-4">
       <TabSelector
         class="mb-3"
         :model-value="tab?.label"
